@@ -1,7 +1,7 @@
 """
 Polymarket Whale Tracker — Daily Briefing Bot
-Fetcha i trade più grandi, identifica le whale, analizza con Claude AI,
-e invia il briefing giornaliero su Telegram.
+Fetcha i trade più grandi dalla blockchain Polygon, identifica le whale,
+analizza con Claude AI, e invia il briefing giornaliero su Telegram.
 """
 
 import os
@@ -11,6 +11,7 @@ import logging
 import requests
 from datetime import datetime, timezone, timedelta
 from anthropic import Anthropic
+from web3 import Web3
 
 # ─── Logging ───────────────────────────────────────────────────────────────────
 logging.basicConfig(
@@ -26,40 +27,72 @@ ANTHROPIC_API_KEY  = os.environ["ANTHROPIC_API_KEY"]
 TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
 TELEGRAM_CHAT_ID   = os.environ["TELEGRAM_CHAT_ID"]
 
-MIN_WHALE_SIZE_USDC = int(os.environ.get("MIN_WHALE_SIZE", "10000"))   # $10k default
-TOP_MARKETS         = int(os.environ.get("TOP_MARKETS", "15"))         # quanti mercati scandagliare
-LOOKBACK_HOURS      = int(os.environ.get("LOOKBACK_HOURS", "24"))      # finestra temporale
+MIN_WHALE_SIZE_USDC = int(os.environ.get("MIN_WHALE_SIZE", "10000"))
+TOP_MARKETS         = int(os.environ.get("TOP_MARKETS", "15"))
+LOOKBACK_HOURS      = int(os.environ.get("LOOKBACK_HOURS", "24"))
 
 GAMMA_API = "https://gamma-api.polymarket.com"
-CLOB_API  = "https://clob.polymarket.com"
-DATA_API  = "https://data-api.polymarket.com"
+
+# Polymarket exchange contracts su Polygon Mainnet (fonte: docs.polymarket.com)
+CTF_EXCHANGE_ADDR  = "0x4bFb41d5B3570DeFd03C39a9A4D8dE6Bd8B8982E"
+NEG_RISK_ADDR      = "0xC5d563A36AE78145C45a50134d48A1215220f80a"
+
+# RPC Polygon pubblici (nessuna API key richiesta)
+POLYGON_RPC_LIST = [
+    os.environ.get("POLYGON_RPC", ""),
+    "https://polygon.llamarpc.com",
+    "https://polygon-rpc.com",
+    "https://rpc.ankr.com/polygon",
+]
+
+# Blocchi Polygon ≈ 2.1 secondi → 1714 blocchi/ora
+BLOCKS_PER_HOUR = 1714
 
 
 # ─── Fetcher ───────────────────────────────────────────────────────────────────
 class PolymarketFetcher:
-    """Chiama le API pubbliche Polymarket e aggrega i trade."""
+    """Recupera mercati dalla Gamma API e trade dalla blockchain Polygon."""
 
-    HEADERS = {"User-Agent": "whale-tracker-bot/1.0"}
+    GAMMA_HEADERS = {"User-Agent": "whale-tracker-bot/1.0"}
 
-    def _get(self, url: str, params: dict = None, retries: int = 3) -> dict | list:
-        for attempt in range(retries):
+    def __init__(self):
+        self.w3 = self._connect_rpc()
+        # Calcola il topic hash dell'evento OrderFilled
+        self.ORDER_FILLED_TOPIC = self.w3.keccak(
+            text="OrderFilled(bytes32,address,address,uint256,uint256,uint256,uint256,uint256)"
+        ).hex()
+        if not self.ORDER_FILLED_TOPIC.startswith("0x"):
+            self.ORDER_FILLED_TOPIC = "0x" + self.ORDER_FILLED_TOPIC
+        log.info(f"Polygon RPC connesso | Blocco: {self.w3.eth.block_number:,}")
+
+    def _connect_rpc(self) -> Web3:
+        for url in POLYGON_RPC_LIST:
+            if not url:
+                continue
             try:
-                r = requests.get(url, params=params, headers=self.HEADERS, timeout=12)
+                w3 = Web3(Web3.HTTPProvider(url, request_kwargs={"timeout": 20}))
+                if w3.is_connected():
+                    log.info(f"RPC: {url}")
+                    return w3
+            except Exception as e:
+                log.debug(f"RPC {url} non disponibile: {e}")
+        raise RuntimeError("Nessun Polygon RPC disponibile")
+
+    def _gamma_get(self, url: str, params: dict = None) -> list | dict:
+        for attempt in range(3):
+            try:
+                r = requests.get(url, params=params, headers=self.GAMMA_HEADERS, timeout=12)
                 r.raise_for_status()
-                data = r.json()
-                # Log risposta vuota per diagnostica
-                if not data:
-                    log.debug(f"GET {url} params={params} → risposta vuota: {r.text[:200]}")
-                return data
+                return r.json()
             except requests.RequestException as e:
-                log.warning(f"GET {url} tentativo {attempt+1}/{retries}: {e}")
-                if attempt < retries - 1:
+                log.warning(f"GET {url} tentativo {attempt+1}/3: {e}")
+                if attempt < 2:
                     time.sleep(2 ** attempt)
         return []
 
     def fetch_top_markets(self) -> list[dict]:
         """Restituisce i mercati più attivi per volume 24h."""
-        data = self._get(f"{GAMMA_API}/markets", params={
+        data = self._gamma_get(f"{GAMMA_API}/markets", params={
             "limit": TOP_MARKETS,
             "order": "volume24hr",
             "ascending": "false",
@@ -69,58 +102,175 @@ class PolymarketFetcher:
         log.info(f"Mercati attivi recuperati: {len(markets)}")
         return markets
 
-    def _parse_trades(self, data) -> list[dict]:
-        if isinstance(data, list):
-            return data
-        if isinstance(data, dict):
-            return data.get("data", data.get("trades", data.get("results", [])))
-        return []
-
-    def fetch_trades_for_market(self, condition_id: str, limit: int = 500) -> list[dict]:
-        """Prova più endpoint pubblici per recuperare i trade di un mercato."""
-        # 1) Gamma API con conditionId
-        trades = self._parse_trades(self._get(f"{GAMMA_API}/trades", params={"conditionId": condition_id, "limit": limit}))
-        if trades:
-            log.debug(f"Trades via Gamma API (conditionId): {len(trades)}")
-            return trades
-
-        # 2) Gamma API con market (nome parametro alternativo)
-        trades = self._parse_trades(self._get(f"{GAMMA_API}/trades", params={"market": condition_id, "limit": limit}))
-        if trades:
-            log.debug(f"Trades via Gamma API (market): {len(trades)}")
-            return trades
-
-        # 3) Data API
-        trades = self._parse_trades(self._get(f"{DATA_API}/activity", params={"market": condition_id, "limit": limit}))
-        if trades:
-            log.debug(f"Trades via Data API: {len(trades)}")
-            return trades
-
-        log.debug(f"Nessun trade trovato per conditionId={condition_id[:16]}... (tutti e 3 gli endpoint vuoti)")
-        return []
-
-    def collect_all_trades(self, markets: list[dict]) -> list[dict]:
-        """Raccoglie tutti i trade dai mercati top, attaching le info del mercato."""
-        all_trades = []
+    def _build_token_map(self, markets: list[dict]) -> dict[int, dict]:
+        """
+        Costruisce una mappa token_id(uint256) → info_mercato.
+        I clobTokenIds nei mercati Polymarket sono uint256 decimali.
+        """
+        token_map: dict[int, dict] = {}
         for mkt in markets:
             question     = mkt.get("question", mkt.get("slug", "Mercato sconosciuto"))
             condition_id = mkt.get("conditionId", "")
-            if not condition_id:
-                continue
+            token_ids    = mkt.get("clobTokenIds", [])
 
-            trades = self.fetch_trades_for_market(condition_id)
-            if trades and not all_trades:
-                # Log delle chiavi del primo trade per diagnostica
-                log.debug(f"Campi trade esempio: {list(trades[0].keys())}")
-                log.debug(f"Trade esempio: {trades[0]}")
-            for t in trades:
-                t["_question"]     = question
-                t["_condition_id"] = condition_id
-            all_trades.extend(trades)
-            time.sleep(0.15)   # cortesia verso le API
+            if isinstance(token_ids, str):
+                try:
+                    token_ids = json.loads(token_ids)
+                except json.JSONDecodeError:
+                    token_ids = [token_ids]
 
-        log.info(f"Trade totali raccolti: {len(all_trades)}")
+            for i, tid in enumerate(token_ids[:2]):
+                try:
+                    token_map[int(tid)] = {
+                        "_question":     question,
+                        "_condition_id": condition_id,
+                        "_outcome":      ["YES", "NO"][i],
+                    }
+                except (ValueError, TypeError):
+                    pass
+
+        log.info(f"Token map: {len(token_map)} token ID per {len(markets)} mercati")
+        return token_map
+
+    def collect_all_trades(self, markets: list[dict]) -> list[dict]:
+        """Legge gli eventi OrderFilled dalla blockchain Polygon."""
+        token_map = self._build_token_map(markets)
+        if not token_map:
+            log.warning("Nessun clobTokenId trovato nei mercati")
+            return []
+
+        try:
+            latest = self.w3.eth.get_block("latest")
+            latest_block = int(latest.number)
+            latest_ts    = float(latest.timestamp)
+        except Exception as e:
+            log.error(f"Impossibile ottenere ultimo blocco: {e}")
+            return []
+
+        from_block = latest_block - int(LOOKBACK_HOURS * BLOCKS_PER_HOUR)
+        log.info(
+            f"Scan blockchain: blocchi {from_block:,} → {latest_block:,} "
+            f"({latest_block - from_block:,} blocchi ≈ {LOOKBACK_HOURS}h)"
+        )
+
+        all_trades: list[dict] = []
+        for addr_str in [CTF_EXCHANGE_ADDR, NEG_RISK_ADDR]:
+            addr = Web3.to_checksum_address(addr_str)
+            raw_logs = self._fetch_logs(addr, from_block, latest_block)
+            for entry in raw_logs:
+                trade = self._parse_order_filled(entry, token_map, latest_block, latest_ts)
+                if trade:
+                    all_trades.append(trade)
+
+        log.info(f"Trade totali raccolti dalla blockchain: {len(all_trades)}")
         return all_trades
+
+    def _fetch_logs(self, contract_addr: str, from_block: int, to_block: int) -> list:
+        """Scarica gli eventi OrderFilled in chunk da 5000 blocchi."""
+        CHUNK = 5000
+        all_logs = []
+        chunks = list(range(from_block, to_block + 1, CHUNK))
+        log.debug(f"getLogs {contract_addr[:10]}...: {len(chunks)} chunk")
+
+        for start in chunks:
+            end = min(start + CHUNK - 1, to_block)
+            for attempt in range(3):
+                try:
+                    chunk = self.w3.eth.get_logs({
+                        "fromBlock": start,
+                        "toBlock":   end,
+                        "address":   contract_addr,
+                        "topics":    [self.ORDER_FILLED_TOPIC],
+                    })
+                    all_logs.extend(chunk)
+                    time.sleep(0.15)
+                    break
+                except Exception as e:
+                    log.debug(f"getLogs {start}-{end} tentativo {attempt+1}: {e}")
+                    if attempt < 2:
+                        time.sleep(2 ** attempt)
+
+        log.debug(f"Log recuperati da {contract_addr[:10]}...: {len(all_logs)}")
+        return all_logs
+
+    def _parse_order_filled(
+        self,
+        entry,
+        token_map: dict[int, dict],
+        latest_block: int,
+        latest_ts: float,
+    ) -> dict | None:
+        """
+        Decodifica un evento OrderFilled raw della blockchain.
+
+        Layout topics:
+          [0] event signature hash
+          [1] orderHash  (bytes32, indexed)
+          [2] maker      (address, indexed)
+          [3] taker      (address, indexed)
+
+        Layout data (5 × uint256 = 160 bytes):
+          [0:32]   makerAssetId
+          [32:64]  takerAssetId
+          [64:96]  makerAmountFilled
+          [96:128] takerAmountFilled
+          [128:160] fee
+
+        Size USDC = min(makerAmount, takerAmount) / 1e6
+        perché i prezzi Polymarket sono sempre < $1 → il lato USDC è sempre minore.
+        """
+        try:
+            topics = entry["topics"]
+            if len(topics) < 4:
+                return None
+
+            maker = "0x" + topics[2].hex()[-40:]
+            taker = "0x" + topics[3].hex()[-40:]
+
+            raw = bytes(entry["data"])
+            if len(raw) < 160:
+                return None
+
+            maker_asset  = int.from_bytes(raw[0:32],   "big")
+            taker_asset  = int.from_bytes(raw[32:64],  "big")
+            maker_amount = int.from_bytes(raw[64:96],  "big")
+            taker_amount = int.from_bytes(raw[96:128], "big")
+
+            mkt_info = token_map.get(maker_asset) or token_map.get(taker_asset)
+            if not mkt_info:
+                return None  # trade non nei mercati monitorati
+
+            # Size USDC: il minore tra i due lati è sempre USDC (price ∈ (0,1))
+            usdc_size = min(maker_amount, taker_amount) / 1_000_000
+            shares    = max(maker_amount, taker_amount) / 1_000_000
+            price     = round(usdc_size / shares, 4) if shares > 0 else 0.0
+
+            # Direzione e trader principale
+            if token_map.get(taker_asset):
+                side, trader = "BUY",  taker   # taker riceve shares → compra
+            else:
+                side, trader = "SELL", maker   # maker riceve USDC → vende
+
+            # Stima timestamp dal numero di blocco (2.1 s/blocco su Polygon)
+            blocks_ago = latest_block - int(entry["blockNumber"])
+            ts = latest_ts - blocks_ago * 2.1
+
+            return {
+                "maker_address":   maker.lower(),
+                "taker_address":   taker.lower(),
+                "trader":          trader.lower(),
+                "usdcSize":        usdc_size,
+                "price":           price,
+                "side":            side,
+                "outcome":         mkt_info["_outcome"],
+                "timestamp":       ts,
+                "blockNumber":     int(entry["blockNumber"]),
+                "_question":       mkt_info["_question"],
+                "_condition_id":   mkt_info["_condition_id"],
+            }
+        except Exception as e:
+            log.debug(f"Errore parse log: {e}")
+            return None
 
 
 # ─── Whale Analyzer ────────────────────────────────────────────────────────────
