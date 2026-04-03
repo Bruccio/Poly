@@ -4,7 +4,7 @@ on:
   # Ogni giorno alle 8:00 ora italiana (UTC+2 estate / UTC+1 inverno)
   # Usiamo 6:00 UTC per coprire l'ora legale — aggiusta a 7:00 UTC in inverno
   schedule:
-    - cron: "*/30 * * * *"
+    - cron: "0 7,19 * * *"
 
   # Permette di lanciarlo manualmente dal tab "Actions" di GitHub
   workflow_dispatch:
@@ -25,12 +25,13 @@ jobs:
     timeout-minutes: 10
 
     env:
-      ANTHROPIC_API_KEY:  ${{ secrets.ANTHROPIC_API_KEY }}
-      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
-      TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
-      MIN_WHALE_SIZE:     ${{ github.event.inputs.min_whale_size || '50000' }}
-      BANKROLL:           ${{ github.event.inputs.bankroll || '10000' }}
-      ONLY_NOTIFY_ON_COPY: "true"
+      ANTHROPIC_API_KEY:   ${{ secrets.ANTHROPIC_API_KEY }}
+      TELEGRAM_BOT_TOKEN:  ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
+      GMAIL_APP_PASSWORD:  ${{ secrets.GMAIL_APP_PASSWORD }}
+      MIN_WHALE_SIZE:      ${{ github.event.inputs.min_whale_size || '50000' }}
+      BANKROLL:            ${{ github.event.inputs.bankroll || '10000' }}
+      ONLY_NOTIFY_ON_COPY: "false"
 
     steps:
       - name: Checkout repo
