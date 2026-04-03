@@ -19,7 +19,7 @@ TELEGRAM_USER_ID  = os.environ.get("TELEGRAM_CHAT_ID", "")
 
 # ── PARAMETRI ───────────────────────────────────────────────────────────────────
 MIN_SIZE_USDC          = int(os.environ.get("MIN_WHALE_SIZE", "50000"))
-MAX_WHALES             = int(os.environ.get("MAX_WHALES", "100"))
+MAX_WHALES             = int(os.environ.get("MAX_WHALES", "8"))
 BANKROLL               = int(os.environ.get("BANKROLL", "10000"))
 CHECK_INTERVAL_MINUTES = int(os.environ.get("CHECK_INTERVAL_MINUTES", "30"))
 ONLY_NOTIFY_ON_COPY    = os.environ.get("ONLY_NOTIFY_ON_COPY", "true").lower() != "false"
