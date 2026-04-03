@@ -111,7 +111,7 @@ class WhaleAnalyzer:
         self.min_size      = min_size
         self.cutoff_epoch  = (datetime.now(timezone.utc) - timedelta(hours=lookback_hours)).timestamp()
 
-    def _trade_size(self, trade: dict) -> float:
+def _trade_size(self, trade: dict) -> float:
     """Estrae la size in USDC: shares × price."""
     price = 0.0
     try:
