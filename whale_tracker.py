@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Polymarket Whale Tracker → Telegram
+Polymarket Whale Tracker → Telegram + Email
 Monitora i mercati con più volume su Polymarket e avvisa quando
 un grande investitore fa una mossa che vale la pena copiare.
 """
@@ -9,13 +9,19 @@ import os
 import re
 import sys
 import time
+import smtplib
 import requests
 from datetime import datetime
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 # ── CREDENZIALI ─────────────────────────────────────────────────────────────────
-ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
-TELEGRAM_TOKEN    = os.environ.get("TELEGRAM_BOT_TOKEN", "")
-TELEGRAM_USER_ID  = os.environ.get("TELEGRAM_CHAT_ID", "")
+ANTHROPIC_API_KEY  = os.environ.get("ANTHROPIC_API_KEY", "")
+TELEGRAM_TOKEN     = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_USER_ID   = os.environ.get("TELEGRAM_CHAT_ID", "")
+GMAIL_USER         = os.environ.get("GMAIL_USER", "brunoricciohsl@gmail.com")
+GMAIL_APP_PASSWORD = os.environ.get("GMAIL_APP_PASSWORD", "")
+EMAIL_TO           = "brunoricciohsl@gmail.com"
 
 # ── PARAMETRI ───────────────────────────────────────────────────────────────────
 MIN_SIZE_USDC          = int(os.environ.get("MIN_WHALE_SIZE", "50000"))
@@ -287,6 +293,79 @@ def send_telegram(message):
     return d.get("ok", False)
 
 
+# ── EMAIL ───────────────────────────────────────────────────────────────────────
+def build_email_html(results, is_demo=False):
+    ts = datetime.now().strftime("%d/%m/%Y %H:%M")
+    copy_count = sum(1 for t in results if t["verdict"] == "COPY")
+
+    rows = ""
+    for t in results:
+        is_copy = t["verdict"] == "COPY"
+        color   = "#1a7a3a" if is_copy else "#555"
+        bg      = "#f0fff4" if is_copy else "#fafafa"
+        badge   = "✅ DA VALUTARE" if is_copy else "⏭ Lascia perdere"
+        risk    = t["risk_score"]
+        risk_color = "#2a9d2a" if risk <= 3 else "#e6a817" if risk <= 6 else "#d9534f"
+
+        rows += f"""
+        <tr style="background:{bg};border-bottom:1px solid #e0e0e0;">
+          <td style="padding:16px;">
+            <span style="font-weight:bold;color:{color};">{badge}</span><br>
+            <span style="font-size:15px;font-weight:600;">{t['market'][:90]}</span><br><br>
+            {f"<b>💡 {t['vale_pena']}</b><br>" if t.get('vale_pena') else ""}
+            {f"📖 {t['spiegazione'][:200]}<br>" if t.get('spiegazione') else ""}
+            <br>
+            <span style="color:{risk_color};font-weight:bold;">Rischio: {risk}/10</span>
+            {"&nbsp;&nbsp;|&nbsp;&nbsp;💰 <b>" + t['quanto'] + "</b>" if is_copy and t.get('quanto','N/A') != 'N/A' else ""}
+            {"<br>⚠️ <i>Potrebbe essere gonfiato artificialmente</i>" if t.get('sospetto','No') not in ('No','N/A') else ""}
+          </td>
+        </tr>"""
+
+    demo_banner = '<p style="background:#fff3cd;padding:8px;border-radius:4px;">⚠️ Dati demo — nessun mercato reale trovato</p>' if is_demo else ""
+
+    return f"""
+    <html><body style="font-family:Arial,sans-serif;max-width:680px;margin:auto;color:#222;">
+      <div style="background:#0d1b2a;padding:20px;border-radius:8px 8px 0 0;">
+        <h2 style="color:#fff;margin:0;">🐋 Grandi Mosse su Polymarket</h2>
+        <p style="color:#aaa;margin:4px 0 0;">{ts}</p>
+      </div>
+      <div style="padding:16px;background:#f5f5f5;">
+        {demo_banner}
+        <p>Analizzati <b>{len(results)}</b> movimenti da >${MIN_SIZE_USDC // 1000}k USDC.
+           <b style="color:#1a7a3a;">{copy_count}</b> {'merita' if copy_count == 1 else 'meritano'} attenzione.</p>
+      </div>
+      <table width="100%" cellspacing="0" cellpadding="0">{rows}</table>
+      <div style="padding:12px;background:#0d1b2a;border-radius:0 0 8px 8px;text-align:center;">
+        <span style="color:#aaa;font-size:12px;">Polymarket Whale Tracker — Bruno</span>
+      </div>
+    </body></html>"""
+
+
+def send_email(results, is_demo=False):
+    if not GMAIL_APP_PASSWORD:
+        log("Email: GMAIL_APP_PASSWORD non impostata — salto invio email.", "WARN")
+        return False
+    try:
+        msg = MIMEMultipart("alternative")
+        ts  = datetime.now().strftime("%d/%m/%Y %H:%M")
+        copy_count = sum(1 for t in results if t["verdict"] == "COPY")
+        msg["Subject"] = f"🐋 Polymarket Whale Report {ts} — {copy_count} segnali"
+        msg["From"]    = GMAIL_USER
+        msg["To"]      = EMAIL_TO
+        msg.attach(MIMEText(build_email_html(results, is_demo), "html"))
+
+        with smtplib.SMTP("smtp.gmail.com", 587) as s:
+            s.starttls()
+            s.login(GMAIL_USER, GMAIL_APP_PASSWORD)
+            s.sendmail(GMAIL_USER, EMAIL_TO, msg.as_string())
+
+        log("Email inviata!", "OK")
+        return True
+    except Exception as e:
+        log(f"Email errore: {e}", "ERR")
+        return False
+
+
 # ── RUN SINGOLO ─────────────────────────────────────────────────────────────────
 def run():
     log("=" * 52)
@@ -331,11 +410,14 @@ def run():
         log("Invio su Telegram...")
         try:
             if send_telegram(build_message(results, is_demo)):
-                log("Report inviato!", "OK")
+                log("Telegram inviato!", "OK")
         except Exception as e:
             log(f"Telegram: {e}", "ERR")
+
+        log("Invio per email...")
+        send_email(results, is_demo)
     elif results:
-        log(f"Nessun COPY trovato — Telegram non inviato (silenzio = nessuna opportunità).")
+        log("Nessun COPY trovato — notifiche non inviate (silenzio = nessuna opportunità).")
 
     log("Run completato.")
     return results
