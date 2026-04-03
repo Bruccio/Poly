@@ -1,0 +1,2 @@
+# Poly
+Polymarket whale analyzer
