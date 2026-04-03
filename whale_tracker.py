@@ -112,15 +112,26 @@ class WhaleAnalyzer:
         self.cutoff_epoch  = (datetime.now(timezone.utc) - timedelta(hours=lookback_hours)).timestamp()
 
     def _trade_size(self, trade: dict) -> float:
-        """Estrae la size in USDC con fallback su campi diversi."""
-        for field in ("usdcSize", "size", "makerAmountFilled", "takerAmountFilled"):
-            val = trade.get(field)
-            if val:
-                try:
-                    return float(val)
-                except (ValueError, TypeError):
-                    pass
-        return 0.0
+    """Estrae la size in USDC: shares × price."""
+    price = 0.0
+    try:
+        price = float(trade.get("price", 0) or 0)
+    except (ValueError, TypeError):
+        pass
+
+    for field in ("usdcSize", "size", "makerAmountFilled", "takerAmountFilled"):
+        val = trade.get(field)
+        if val:
+            try:
+                shares = float(val)
+                # Se il campo è già in USDC (usdcSize) non moltiplicare
+                if field == "usdcSize":
+                    return shares
+                # Altrimenti è in shares → converti in USDC
+                return shares * price if price > 0 else shares
+            except (ValueError, TypeError):
+                pass
+    return 0.0
 
     def _trade_timestamp(self, trade: dict) -> float:
         for field in ("match_time", "timestamp", "created_at"):
