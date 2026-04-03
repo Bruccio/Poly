@@ -64,12 +64,14 @@ class PolymarketFetcher:
         log.info(f"Mercati attivi recuperati: {len(markets)}")
         return markets
 
-    def fetch_trades_for_token(self, token_id: str, limit: int = 500) -> list[dict]:
-        """Restituisce i trade recenti di un token (YES o NO)."""
-        data = self._get(f"{CLOB_API}/trades", params={
-            "market": token_id,
+    def fetch_trades_for_market(self, condition_id: str, limit: int = 500) -> list[dict]:
+        """Restituisce i trade recenti di un mercato tramite Gamma API (pubblica)."""
+        data = self._get(f"{GAMMA_API}/trades", params={
+            "conditionId": condition_id,
             "limit": limit,
         })
+        if isinstance(data, list):
+            return data
         if isinstance(data, dict):
             return data.get("data", [])
         return []
@@ -78,26 +80,17 @@ class PolymarketFetcher:
         """Raccoglie tutti i trade dai mercati top, attaching le info del mercato."""
         all_trades = []
         for mkt in markets:
-            question = mkt.get("question", mkt.get("slug", "Mercato sconosciuto"))
+            question     = mkt.get("question", mkt.get("slug", "Mercato sconosciuto"))
             condition_id = mkt.get("conditionId", "")
-            token_ids: list = mkt.get("clobTokenIds", [])
+            if not condition_id:
+                continue
 
-            # Alcuni mercati hanno i token come stringa JSON
-            if isinstance(token_ids, str):
-                try:
-                    token_ids = json.loads(token_ids)
-                except json.JSONDecodeError:
-                    token_ids = [token_ids]
-
-            for token_id in token_ids[:2]:   # YES e NO
-                if not token_id:
-                    continue
-                trades = self.fetch_trades_for_token(str(token_id))
-                for t in trades:
-                    t["_question"]     = question
-                    t["_condition_id"] = condition_id
-                all_trades.extend(trades)
-                time.sleep(0.15)   # cortesia verso le API
+            trades = self.fetch_trades_for_market(condition_id)
+            for t in trades:
+                t["_question"]     = question
+                t["_condition_id"] = condition_id
+            all_trades.extend(trades)
+            time.sleep(0.15)   # cortesia verso le API
 
         log.info(f"Trade totali raccolti: {len(all_trades)}")
         return all_trades
@@ -111,27 +104,27 @@ class WhaleAnalyzer:
         self.min_size      = min_size
         self.cutoff_epoch  = (datetime.now(timezone.utc) - timedelta(hours=lookback_hours)).timestamp()
 
-def _trade_size(self, trade: dict) -> float:
-    """Estrae la size in USDC: shares × price."""
-    price = 0.0
-    try:
-        price = float(trade.get("price", 0) or 0)
-    except (ValueError, TypeError):
-        pass
+    def _trade_size(self, trade: dict) -> float:
+        """Estrae la size in USDC: shares × price."""
+        price = 0.0
+        try:
+            price = float(trade.get("price", 0) or 0)
+        except (ValueError, TypeError):
+            pass
 
-    for field in ("usdcSize", "size", "makerAmountFilled", "takerAmountFilled"):
-        val = trade.get(field)
-        if val:
-            try:
-                shares = float(val)
-                # Se il campo è già in USDC (usdcSize) non moltiplicare
-                if field == "usdcSize":
-                    return shares
-                # Altrimenti è in shares → converti in USDC
-                return shares * price if price > 0 else shares
-            except (ValueError, TypeError):
-                pass
-    return 0.0
+        for field in ("usdcSize", "size", "makerAmountFilled", "takerAmountFilled"):
+            val = trade.get(field)
+            if val:
+                try:
+                    shares = float(val)
+                    # Se il campo è già in USDC (usdcSize) non moltiplicare
+                    if field == "usdcSize":
+                        return shares
+                    # Altrimenti è in shares → converti in USDC
+                    return shares * price if price > 0 else shares
+                except (ValueError, TypeError):
+                    pass
+        return 0.0
 
     def _trade_timestamp(self, trade: dict) -> float:
         for field in ("match_time", "timestamp", "created_at"):
