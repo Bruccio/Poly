@@ -17,6 +17,10 @@ on:
         description: "Finestra temporale in ore (default: 24)"
         required: false
         default: "24"
+      log_level:
+        description: "Livello log (DEBUG per diagnostica, INFO normale)"
+        required: false
+        default: "DEBUG"
 
 jobs:
   whale-briefing:
@@ -31,6 +35,7 @@ jobs:
       MIN_WHALE_SIZE:     ${{ github.event.inputs.min_whale_size || '10000' }}
       LOOKBACK_HOURS:     ${{ github.event.inputs.lookback_hours || '24' }}
       TOP_MARKETS:        "15"
+      LOG_LEVEL:          ${{ github.event.inputs.log_level || 'INFO' }}
 
     steps:
       - name: Checkout repo

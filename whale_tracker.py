@@ -14,7 +14,7 @@ from anthropic import Anthropic
 
 # ─── Logging ───────────────────────────────────────────────────────────────────
 logging.basicConfig(
-    level=logging.INFO,
+    level=getattr(logging, os.environ.get("LOG_LEVEL", "INFO").upper(), logging.INFO),
     format="%(asctime)s  %(levelname)-8s  %(message)s",
     datefmt="%H:%M:%S",
 )
@@ -86,6 +86,10 @@ class PolymarketFetcher:
                 continue
 
             trades = self.fetch_trades_for_market(condition_id)
+            if trades and not all_trades:
+                # Log delle chiavi del primo trade per diagnostica
+                log.debug(f"Campi trade esempio: {list(trades[0].keys())}")
+                log.debug(f"Trade esempio: {trades[0]}")
             for t in trades:
                 t["_question"]     = question
                 t["_condition_id"] = condition_id
@@ -112,15 +116,21 @@ class WhaleAnalyzer:
         except (ValueError, TypeError):
             pass
 
-        for field in ("usdcSize", "size", "makerAmountFilled", "takerAmountFilled"):
+        # Campi già in USDC (nessuna conversione)
+        for field in ("usdcSize", "usdcAmount", "amount", "value"):
+            val = trade.get(field)
+            if val:
+                try:
+                    return float(val)
+                except (ValueError, TypeError):
+                    pass
+
+        # Campi in shares → converti in USDC
+        for field in ("size", "makerAmountFilled", "takerAmountFilled", "shares"):
             val = trade.get(field)
             if val:
                 try:
                     shares = float(val)
-                    # Se il campo è già in USDC (usdcSize) non moltiplicare
-                    if field == "usdcSize":
-                        return shares
-                    # Altrimenti è in shares → converti in USDC
                     return shares * price if price > 0 else shares
                 except (ValueError, TypeError):
                     pass
@@ -143,22 +153,28 @@ class WhaleAnalyzer:
         """
         wallets: dict[str, dict] = {}
 
+        skipped_old = skipped_small = skipped_nomaker = 0
         for trade in trades:
             ts = self._trade_timestamp(trade)
             if ts and ts < self.cutoff_epoch:
+                skipped_old += 1
                 continue                        # trade troppo vecchio
 
             size = self._trade_size(trade)
             if size < self.min_size:
+                skipped_small += 1
                 continue                        # sotto soglia
 
             maker = (
                 trade.get("maker_address")
                 or trade.get("owner")
                 or trade.get("maker")
+                or trade.get("trader")
+                or trade.get("user")
                 or ""
             ).lower().strip()
             if not maker or maker in ("", "0x0000000000000000000000000000000000000000"):
+                skipped_nomaker += 1
                 continue
 
             if maker not in wallets:
@@ -187,6 +203,12 @@ class WhaleAnalyzer:
             result.append(w)
 
         result.sort(key=lambda x: x["total_volume"], reverse=True)
+        log.info(
+            f"Filtro trade: {len(trades)} totali | "
+            f"{skipped_old} troppo vecchi | "
+            f"{skipped_small} sotto soglia (${self.min_size:,}) | "
+            f"{skipped_nomaker} senza maker"
+        )
         log.info(f"Whale identificate (>={self.min_size:,} USDC): {len(result)}")
         return result
 
