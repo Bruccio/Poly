@@ -32,6 +32,7 @@ LOOKBACK_HOURS      = int(os.environ.get("LOOKBACK_HOURS", "24"))      # finestr
 
 GAMMA_API = "https://gamma-api.polymarket.com"
 CLOB_API  = "https://clob.polymarket.com"
+DATA_API  = "https://data-api.polymarket.com"
 
 
 # ─── Fetcher ───────────────────────────────────────────────────────────────────
@@ -45,7 +46,11 @@ class PolymarketFetcher:
             try:
                 r = requests.get(url, params=params, headers=self.HEADERS, timeout=12)
                 r.raise_for_status()
-                return r.json()
+                data = r.json()
+                # Log risposta vuota per diagnostica
+                if not data:
+                    log.debug(f"GET {url} params={params} → risposta vuota: {r.text[:200]}")
+                return data
             except requests.RequestException as e:
                 log.warning(f"GET {url} tentativo {attempt+1}/{retries}: {e}")
                 if attempt < retries - 1:
@@ -64,16 +69,34 @@ class PolymarketFetcher:
         log.info(f"Mercati attivi recuperati: {len(markets)}")
         return markets
 
-    def fetch_trades_for_market(self, condition_id: str, limit: int = 500) -> list[dict]:
-        """Restituisce i trade recenti di un mercato tramite Gamma API (pubblica)."""
-        data = self._get(f"{GAMMA_API}/trades", params={
-            "conditionId": condition_id,
-            "limit": limit,
-        })
+    def _parse_trades(self, data) -> list[dict]:
         if isinstance(data, list):
             return data
         if isinstance(data, dict):
-            return data.get("data", [])
+            return data.get("data", data.get("trades", data.get("results", [])))
+        return []
+
+    def fetch_trades_for_market(self, condition_id: str, limit: int = 500) -> list[dict]:
+        """Prova più endpoint pubblici per recuperare i trade di un mercato."""
+        # 1) Gamma API con conditionId
+        trades = self._parse_trades(self._get(f"{GAMMA_API}/trades", params={"conditionId": condition_id, "limit": limit}))
+        if trades:
+            log.debug(f"Trades via Gamma API (conditionId): {len(trades)}")
+            return trades
+
+        # 2) Gamma API con market (nome parametro alternativo)
+        trades = self._parse_trades(self._get(f"{GAMMA_API}/trades", params={"market": condition_id, "limit": limit}))
+        if trades:
+            log.debug(f"Trades via Gamma API (market): {len(trades)}")
+            return trades
+
+        # 3) Data API
+        trades = self._parse_trades(self._get(f"{DATA_API}/activity", params={"market": condition_id, "limit": limit}))
+        if trades:
+            log.debug(f"Trades via Data API: {len(trades)}")
+            return trades
+
+        log.debug(f"Nessun trade trovato per conditionId={condition_id[:16]}... (tutti e 3 gli endpoint vuoti)")
         return []
 
     def collect_all_trades(self, markets: list[dict]) -> list[dict]:
