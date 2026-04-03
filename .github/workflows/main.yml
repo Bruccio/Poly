@@ -30,7 +30,7 @@ jobs:
       TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
       MIN_WHALE_SIZE:     ${{ github.event.inputs.min_whale_size || '50000' }}
       BANKROLL:           ${{ github.event.inputs.bankroll || '10000' }}
-      ONLY_NOTIFY_ON_COPY: "true"
+      ONLY_NOTIFY_ON_COPY: "false"
 
     steps:
       - name: Checkout repo
