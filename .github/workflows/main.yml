@@ -4,23 +4,19 @@ on:
   # Ogni giorno alle 8:00 ora italiana (UTC+2 estate / UTC+1 inverno)
   # Usiamo 6:00 UTC per coprire l'ora legale — aggiusta a 7:00 UTC in inverno
   schedule:
-    - cron: "0 6 * * *"
+    - cron: "*/30 * * * *"
 
   # Permette di lanciarlo manualmente dal tab "Actions" di GitHub
   workflow_dispatch:
     inputs:
       min_whale_size:
-        description: "Soglia minima whale in USDC (default: 10000)"
+        description: "Soglia minima whale in USDC (default: 50000)"
+        required: false
+        default: "50000"
+      bankroll:
+        description: "Il tuo bankroll in USD (default: 10000)"
         required: false
         default: "10000"
-      lookback_hours:
-        description: "Finestra temporale in ore (default: 24)"
-        required: false
-        default: "24"
-      log_level:
-        description: "Livello log (DEBUG per diagnostica, INFO normale)"
-        required: false
-        default: "DEBUG"
 
 jobs:
   whale-briefing:
@@ -32,10 +28,9 @@ jobs:
       ANTHROPIC_API_KEY:  ${{ secrets.ANTHROPIC_API_KEY }}
       TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
-      MIN_WHALE_SIZE:     ${{ github.event.inputs.min_whale_size || '10000' }}
-      LOOKBACK_HOURS:     ${{ github.event.inputs.lookback_hours || '24' }}
-      TOP_MARKETS:        "15"
-      LOG_LEVEL:          ${{ github.event.inputs.log_level || 'INFO' }}
+      MIN_WHALE_SIZE:     ${{ github.event.inputs.min_whale_size || '50000' }}
+      BANKROLL:           ${{ github.event.inputs.bankroll || '10000' }}
+      ONLY_NOTIFY_ON_COPY: "true"
 
     steps:
       - name: Checkout repo

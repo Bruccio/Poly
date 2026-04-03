@@ -1,499 +1,382 @@
+#!/usr/bin/env python3
 """
-Polymarket Whale Tracker — Daily Briefing Bot
-Fetcha i trade più grandi, identifica le whale, analizza con Claude AI,
-e invia il briefing giornaliero su Telegram.
+Polymarket Whale Tracker → Telegram
+Monitora i mercati con più volume su Polymarket e avvisa quando
+un grande investitore fa una mossa che vale la pena copiare.
 """
 
 import os
-import json
+import re
+import sys
 import time
-import logging
 import requests
-from datetime import datetime, timezone, timedelta
-from anthropic import Anthropic
+from datetime import datetime
 
-# ─── Logging ───────────────────────────────────────────────────────────────────
-logging.basicConfig(
-    level=getattr(logging, os.environ.get("LOG_LEVEL", "INFO").upper(), logging.INFO),
-    format="%(asctime)s  %(levelname)-8s  %(message)s",
-    datefmt="%H:%M:%S",
-)
-log = logging.getLogger("whale-tracker")
+# ── CREDENZIALI ─────────────────────────────────────────────────────────────────
+ANTHROPIC_API_KEY = os.environ.get("ANTHROPIC_API_KEY", "")
+TELEGRAM_TOKEN    = os.environ.get("TELEGRAM_BOT_TOKEN", "")
+TELEGRAM_USER_ID  = os.environ.get("TELEGRAM_CHAT_ID", "")
 
-
-# ─── Configurazione ────────────────────────────────────────────────────────────
-ANTHROPIC_API_KEY  = os.environ["ANTHROPIC_API_KEY"]
-TELEGRAM_BOT_TOKEN = os.environ["TELEGRAM_BOT_TOKEN"]
-TELEGRAM_CHAT_ID   = os.environ["TELEGRAM_CHAT_ID"]
-
-MIN_WHALE_SIZE_USDC = int(os.environ.get("MIN_WHALE_SIZE", "10000"))   # $10k default
-TOP_MARKETS         = int(os.environ.get("TOP_MARKETS", "15"))         # quanti mercati scandagliare
-LOOKBACK_HOURS      = int(os.environ.get("LOOKBACK_HOURS", "24"))      # finestra temporale
-
-GAMMA_API = "https://gamma-api.polymarket.com"
-CLOB_API  = "https://clob.polymarket.com"
+# ── PARAMETRI ───────────────────────────────────────────────────────────────────
+MIN_SIZE_USDC          = int(os.environ.get("MIN_WHALE_SIZE", "50000"))
+MAX_WHALES             = int(os.environ.get("MAX_WHALES", "100"))
+BANKROLL               = int(os.environ.get("BANKROLL", "10000"))
+CHECK_INTERVAL_MINUTES = int(os.environ.get("CHECK_INTERVAL_MINUTES", "30"))
+ONLY_NOTIFY_ON_COPY    = os.environ.get("ONLY_NOTIFY_ON_COPY", "true").lower() != "false"
 
 
-# ─── Fetcher ───────────────────────────────────────────────────────────────────
-class PolymarketFetcher:
-    """Chiama le API pubbliche Polymarket e aggrega i trade."""
-
-    HEADERS = {"User-Agent": "whale-tracker-bot/1.0"}
-
-    def _get(self, url: str, params: dict = None, retries: int = 3) -> dict | list:
-        for attempt in range(retries):
-            try:
-                r = requests.get(url, params=params, headers=self.HEADERS, timeout=12)
-                r.raise_for_status()
-                return r.json()
-            except requests.RequestException as e:
-                log.warning(f"GET {url} tentativo {attempt+1}/{retries}: {e}")
-                if attempt < retries - 1:
-                    time.sleep(2 ** attempt)
-        return []
-
-    def fetch_top_markets(self) -> list[dict]:
-        """Restituisce i mercati più attivi per volume 24h."""
-        data = self._get(f"{GAMMA_API}/markets", params={
-            "limit": TOP_MARKETS,
-            "order": "volume24hr",
-            "ascending": "false",
-            "active": "true",
-        })
-        markets = data if isinstance(data, list) else data.get("data", [])
-        log.info(f"Mercati attivi recuperati: {len(markets)}")
-        return markets
-
-    def fetch_trades_for_market(self, condition_id: str, limit: int = 500) -> list[dict]:
-        """Restituisce i trade recenti di un mercato tramite Gamma API (pubblica)."""
-        data = self._get(f"{GAMMA_API}/trades", params={
-            "conditionId": condition_id,
-            "limit": limit,
-        })
-        if isinstance(data, list):
-            return data
-        if isinstance(data, dict):
-            return data.get("data", [])
-        return []
-
-    def collect_all_trades(self, markets: list[dict]) -> list[dict]:
-        """Raccoglie tutti i trade dai mercati top, attaching le info del mercato."""
-        all_trades = []
-        for mkt in markets:
-            question     = mkt.get("question", mkt.get("slug", "Mercato sconosciuto"))
-            condition_id = mkt.get("conditionId", "")
-            if not condition_id:
-                continue
-
-            trades = self.fetch_trades_for_market(condition_id)
-            if trades and not all_trades:
-                # Log delle chiavi del primo trade per diagnostica
-                log.debug(f"Campi trade esempio: {list(trades[0].keys())}")
-                log.debug(f"Trade esempio: {trades[0]}")
-            for t in trades:
-                t["_question"]     = question
-                t["_condition_id"] = condition_id
-            all_trades.extend(trades)
-            time.sleep(0.15)   # cortesia verso le API
-
-        log.info(f"Trade totali raccolti: {len(all_trades)}")
-        return all_trades
+# ── LOGGING ─────────────────────────────────────────────────────────────────────
+def log(msg, level="INFO"):
+    ts = datetime.now().strftime("%H:%M:%S")
+    icon = {"OK": "✓", "ERR": "✗", "WARN": "⚠"}.get(level, "·")
+    print(f"[{ts}] {icon} {msg}", flush=True)
 
 
-# ─── Whale Analyzer ────────────────────────────────────────────────────────────
-class WhaleAnalyzer:
-    """Filtra e raggruppa i trade per wallet, identificando le whale."""
-
-    def __init__(self, min_size: int = MIN_WHALE_SIZE_USDC, lookback_hours: int = LOOKBACK_HOURS):
-        self.min_size      = min_size
-        self.cutoff_epoch  = (datetime.now(timezone.utc) - timedelta(hours=lookback_hours)).timestamp()
-
-    def _trade_size(self, trade: dict) -> float:
-        """Estrae la size in USDC: shares × price."""
-        price = 0.0
+# ── POLYMARKET ──────────────────────────────────────────────────────────────────
+def _sz(t):
+    """Estrae la size in USDC dal dict trade/mercato."""
+    for k in ("usdcSize", "size", "amount", "tradeSize", "amountUSD",
+              "makerAmountFilled", "takerAmountFilled"):
         try:
-            price = float(trade.get("price", 0) or 0)
+            v = float(t.get(k) or 0)
+            if v > 0:
+                return v
         except (ValueError, TypeError):
             pass
+    return 0.0
 
-        # Campi già in USDC (nessuna conversione)
-        for field in ("usdcSize", "usdcAmount", "amount", "value"):
-            val = trade.get(field)
-            if val:
-                try:
-                    return float(val)
-                except (ValueError, TypeError):
-                    pass
 
-        # Campi in shares → converti in USDC
-        for field in ("size", "makerAmountFilled", "takerAmountFilled", "shares"):
-            val = trade.get(field)
-            if val:
-                try:
-                    shares = float(val)
-                    return shares * price if price > 0 else shares
-                except (ValueError, TypeError):
-                    pass
-        return 0.0
+def fetch_polymarket_whales(min_size):
+    """
+    Recupera i mercati/eventi Polymarket con volume >= min_size.
+    Prova più endpoint in ordine di affidabilità.
+    Restituisce (ok: bool, whales: list, total_count: int).
+    """
+    H = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
 
-    def _trade_timestamp(self, trade: dict) -> float:
-        for field in ("match_time", "timestamp", "created_at"):
-            val = trade.get(field)
-            if val:
-                try:
-                    return float(val)
-                except (ValueError, TypeError):
-                    pass
-        return 0.0
+    attempts = [
+        ("GET",
+         "https://gamma-api.polymarket.com/markets?limit=100&active=true&order=volume24hr&ascending=false",
+         None),
+        ("GET",
+         "https://gamma-api.polymarket.com/events?limit=50&active=true",
+         None),
+        ("GET",
+         "https://data-api.polymarket.com/activity?limit=200&type=TRADE",
+         None),
+        ("POST",
+         "https://gateway-arbitrum.network.thegraph.com/api/f087f7244e56a2bc2d48c10e5a3c1bd3/subgraphs/id/Bx1W4S7kDVxs9gC3s2G6DS8kdNBJx2sYUiABH4RvGN46",
+         '{"query":"{ orderFilledEvents(first:200,orderBy:matchedAmount,orderDirection:desc){matchedAmount price maker order{market{question}}} }"}'),
+    ]
 
-    def filter_and_group(self, trades: list[dict]) -> list[dict]:
-        """
-        Restituisce una lista di whale ordenate per volume decrescente.
-        Ogni whale è un dict con address, trades, total_volume, markets.
-        """
-        wallets: dict[str, dict] = {}
+    for method, url, body in attempts:
+        host = url.split("//")[1].split("/")[0]
+        try:
+            if method == "POST":
+                r = requests.post(url, data=body,
+                                  headers={**H, "Content-Type": "application/json"},
+                                  timeout=15)
+            else:
+                r = requests.get(url, headers=H, timeout=12)
 
-        skipped_old = skipped_small = skipped_nomaker = 0
-        for trade in trades:
-            ts = self._trade_timestamp(trade)
-            if ts and ts < self.cutoff_epoch:
-                skipped_old += 1
-                continue                        # trade troppo vecchio
-
-            size = self._trade_size(trade)
-            if size < self.min_size:
-                skipped_small += 1
-                continue                        # sotto soglia
-
-            maker = (
-                trade.get("maker_address")
-                or trade.get("owner")
-                or trade.get("maker")
-                or trade.get("trader")
-                or trade.get("user")
-                or ""
-            ).lower().strip()
-            if not maker or maker in ("", "0x0000000000000000000000000000000000000000"):
-                skipped_nomaker += 1
+            if r.status_code != 200:
+                log(f"{host} → HTTP {r.status_code}", "WARN")
                 continue
 
-            if maker not in wallets:
-                wallets[maker] = {
-                    "address":      maker,
-                    "trades":       [],
-                    "total_volume": 0.0,
-                    "markets":      set(),
-                    "sides":        {"BUY": 0, "SELL": 0},
-                }
+            raw = r.json()
 
-            wallets[maker]["trades"].append(trade)
-            wallets[maker]["total_volume"] += size
+            if "thegraph" in url or "gateway-arbitrum" in url:
+                events = raw.get("data", {}).get("orderFilledEvents", [])
+                items = [{
+                    "usdcSize":    str(float(e.get("matchedAmount", 0)) / 1e6),
+                    "price":       e.get("price", "0"),
+                    "side":        "YES",
+                    "title":       e.get("order", {}).get("market", {}).get("question", "Mercato"),
+                    "userAddress": e.get("maker", "0x???"),
+                } for e in events]
 
-            question = trade.get("_question", trade.get("_condition_id", "?"))
-            wallets[maker]["markets"].add(question)
+            elif "markets" in url:
+                mlist = raw if isinstance(raw, list) else raw.get("data", [])
+                items = [{
+                    "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
+                    "price":       str(m.get("bestAsk") or m.get("lastTradePrice") or 0.5),
+                    "side":        "YES",
+                    "title":       m.get("question") or m.get("title") or "Mercato",
+                    "userAddress": "0xpool",
+                } for m in mlist
+                  if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size]
 
-            side = str(trade.get("side", "")).upper()
-            if side in wallets[maker]["sides"]:
-                wallets[maker]["sides"][side] += 1
+            elif "events" in url:
+                elist = raw if isinstance(raw, list) else raw.get("data", [])
+                items = []
+                for ev in elist:
+                    vol = float(ev.get("volume") or ev.get("volumeNum") or 0)
+                    if vol >= min_size:
+                        items.append({
+                            "usdcSize":    str(vol),
+                            "price":       "0.5",
+                            "side":        "YES",
+                            "title":       ev.get("title") or ev.get("question") or "Evento",
+                            "userAddress": "0xpool",
+                        })
 
-        # Converti set in lista per serializzazione
-        result = []
-        for w in wallets.values():
-            w["markets"] = list(w["markets"])
-            result.append(w)
+            else:
+                items = raw if isinstance(raw, list) else raw.get("data", raw.get("activities", []))
 
-        result.sort(key=lambda x: x["total_volume"], reverse=True)
-        log.info(
-            f"Filtro trade: {len(trades)} totali | "
-            f"{skipped_old} troppo vecchi | "
-            f"{skipped_small} sotto soglia (${self.min_size:,}) | "
-            f"{skipped_nomaker} senza maker"
-        )
-        log.info(f"Whale identificate (>={self.min_size:,} USDC): {len(result)}")
-        return result
+            if not items:
+                log(f"{host} → 0 elementi utili", "WARN")
+                continue
 
-    def build_summary_text(self, whales: list[dict]) -> str:
-        """Costruisce il testo da inviare a Claude per l'analisi."""
-        now = datetime.now().strftime("%d/%m/%Y %H:%M")
-        lines = [
-            f"POLYMARKET WHALE ACTIVITY — {now}",
-            f"Finestra: ultime {LOOKBACK_HOURS}h | Soglia: ≥${self.min_size:,} USDC\n",
-        ]
+            whales = [t for t in items if _sz(t) >= min_size]
+            whales.sort(key=_sz, reverse=True)
+            log(f"Polymarket OK ({host}): {len(items)} elementi, {len(whales)} whale ≥${min_size:,}", "OK")
+            return True, whales, len(items)
 
-        for i, w in enumerate(whales[:6], 1):   # analizza top 6
-            addr = w["address"]
-            short = f"{addr[:6]}...{addr[-4:]}"
-            buy_count  = w["sides"].get("BUY", 0)
-            sell_count = w["sides"].get("SELL", 0)
-            bias = "prevalentemente long (BUY)" if buy_count > sell_count else "prevalentemente short (SELL)" if sell_count > buy_count else "bilanciato"
+        except Exception as e:
+            log(f"{host} → {str(e)[:90]}", "WARN")
 
-            lines += [
-                f"\n--- WHALE #{i} ---",
-                f"Wallet: {short}",
-                f"Volume totale 24h: ${w['total_volume']:,.0f} USDC",
-                f"Mercati attivi: {len(w['markets'])}",
-                f"Bias direzionale: {bias} ({buy_count} BUY / {sell_count} SELL)",
-                f"Trade count: {len(w['trades'])}",
-                "Trade rilevanti:",
-            ]
-
-            seen_markets = set()
-            for t in sorted(w["trades"], key=lambda x: self._trade_size(x), reverse=True)[:4]:
-                mkt = t.get("_question", t.get("_condition_id", "Sconosciuto"))[:60]
-                if mkt in seen_markets:
-                    continue
-                seen_markets.add(mkt)
-
-                size     = self._trade_size(t)
-                price    = t.get("price", "?")
-                side     = t.get("side", "?")
-                outcome  = t.get("outcome", "?")
-                lines.append(f"  · {mkt}")
-                lines.append(f"    {side} {outcome} @ {price} — ${size:,.0f} USDC")
-
-        return "\n".join(lines)
+    return False, [], 0
 
 
-# ─── Claude Analyzer ───────────────────────────────────────────────────────────
-CLAUDE_SYSTEM_PROMPT = """Sei un analista quantitativo specializzato in prediction markets (Polymarket).
-Analizza i dati whale forniti e produci un DAILY BRIEFING strutturato.
+# ── CLAUDE ──────────────────────────────────────────────────────────────────────
+MODELS = [
+    "claude-haiku-4-5-20251001",
+    "claude-3-5-haiku-20241022",
+    "claude-3-haiku-20240307",
+]
 
-Applica questi criteri:
-- TIER A: volume >$100k o accumulo frazionato sofisticato, trade early, mercati illiquidi/contrarian
-- TIER B: $25k-$100k, istituzionale, limit orders, buona diversificazione  
-- TIER C: $10k-$25k, reattivo a news pubbliche, edge basso
-- COPY se: OI in aumento, timing early, mercato liquido, whale tier A/B, risk_score ≤ 5
-- SKIP se: prezzo già mosso >5%, OI in calo, wash trading, timing tardivo
-- WATCH se: segnale interessante ma da confermare
-- Kelly frazionario Quarter-Kelly: f* = 0.25 × (p - q) / (1 - q), tetto 10%
-- Segnala wash trading se vedi pattern simmetrici BUY/SELL dallo stesso wallet
-
-Rispondi SOLO con JSON valido (nessun testo prima/dopo, nessun markdown):
-{
-  "summary": {
-    "whales_tracked": <int>,
-    "copy_signals": <int>,
-    "skip_signals": <int>,
-    "watch_signals": <int>,
-    "risk_level": "basso|medio|alto",
-    "market_sentiment": "<frase breve 5-8 parole>"
-  },
-  "whales": [
-    {
-      "address": "<0x...abbreviato>",
-      "tier": "A|B|C",
-      "style": "Early Narrative Bettor|Momentum Follower|Macro Institutional|Contrarian Alpha|Casual Bettor|Wash Trader",
-      "volume_24h": "<es. $87,000>",
-      "best_markets": "<categorie>",
-      "note": "<insight chiave 1 riga>",
-      "copy_worthy": true|false
-    }
-  ],
-  "trades": [
-    {
-      "market": "<nome mercato>",
-      "direction": "YES|NO",
-      "entry_price": "<es. 0.34>",
-      "whale_tier": "A|B|C",
-      "decision": "COPY|SKIP|WATCH",
-      "risk_score": <1-10>,
-      "edge": "basso|medio|alto",
-      "kelly_fraction": "<es. 4%>",
-      "entry_window": "<es. valido se prezzo <0.40>",
-      "reason": "<motivazione 2 righe>"
-    }
-  ],
-  "risk_alerts": ["<alert 1>", "<alert 2>"],
-  "daily_insight": "<osservazione macro 1-2 frasi sul sentiment generale del mercato oggi>"
-}"""
+SYSTEM_PROMPT = (
+    "Sei un consulente finanziario che spiega le cose in modo semplice a un utente non esperto.\n"
+    "Stai analizzando un grosso movimento di denaro su Polymarket (mercato predittivo) "
+    "fatto da un grande investitore.\n"
+    "Il tuo compito: capire se vale la pena copiarlo, e spiegarlo in italiano chiaro e diretto.\n\n"
+    "Regole:\n"
+    "- Se il trade sembra rischioso, speculativo o poco chiaro → SKIP\n"
+    "- Se il trade sembra solido e con buone basi → COPY\n"
+    "- Se COPY, suggerisci quanto investire (massimo 10% del bankroll, mai più)\n\n"
+    "Rispondi SOLO in questo formato, in italiano semplice, zero tecnicismi:\n"
+    "COPY\n"
+    "Rischio: X/10\n"
+    "Vale la pena?: [1 frase, es. 'Sì, un grande investitore scommette su X con alta fiducia']\n"
+    "Cosa sta succedendo: [2 righe max, spiega il mercato come a un amico]\n"
+    "Quanto investire: [es. 'Puoi mettere fino a $500, non di più']\n"
+    "Sospetto?: No/Forse/Sì"
+)
 
 
-class ClaudeAnalyzer:
-    def __init__(self):
-        self.client = Anthropic(api_key=ANTHROPIC_API_KEY)
-
-    def analyze(self, whale_text: str) -> dict:
-        log.info("Invio dati a Claude per analisi...")
-        response = self.client.messages.create(
-            model="claude-opus-4-5",
-            max_tokens=2000,
-            system=CLAUDE_SYSTEM_PROMPT,
-            messages=[{"role": "user", "content": whale_text}],
-        )
-        raw = response.content[0].text.strip()
-
-        # Rimuovi eventuali backtick markdown
-        if raw.startswith("```"):
-            raw = raw.split("```")[1]
-            if raw.startswith("json"):
-                raw = raw[4:]
-        raw = raw.strip().rstrip("`").strip()
-
-        briefing = json.loads(raw)
-        log.info("Analisi Claude completata")
-        return briefing
+def _classify(size):
+    if size >= 100_000: return "Alpha/Insider (>$100k)"
+    if size >= 50_000:  return "Institutional ($50k–$100k)"
+    return "Opportunistic (<$50k)"
 
 
-# ─── Telegram Sender ───────────────────────────────────────────────────────────
-class TelegramSender:
-    BASE = "https://api.telegram.org/bot"
+def analyze_with_claude(trade):
+    size   = _sz(trade)
+    price  = float(trade.get("price") or trade.get("outcomePrice") or 0.5)
+    side   = trade.get("side") or "YES"
+    market = trade.get("title") or trade.get("question") or "Mercato"
+    wallet = (trade.get("maker") or trade.get("userAddress") or "0x???")[:14] + "..."
+    tier   = _classify(size)
 
-    def __init__(self):
-        self.token   = TELEGRAM_BOT_TOKEN
-        self.chat_id = TELEGRAM_CHAT_ID
+    text = (
+        f"Mercato: {market}\n"
+        f"Direzione: {side}\n"
+        f"Prezzo attuale: {price:.3f}\n"
+        f"Volume/Size: ${size:,.0f} USDC\n"
+        f"Tier: {tier}\n"
+        f"Wallet: {wallet}\n"
+        f"Bankroll utente: ${BANKROLL:,}"
+    )
 
-    def send(self, text: str, parse_mode: str = "Markdown") -> bool:
-        """Invia un messaggio Telegram. Spezza i messaggi >4096 char."""
-        chunks = [text[i:i+4000] for i in range(0, len(text), 4000)]
-        for chunk in chunks:
+    last_err = None
+    for model in MODELS:
+        try:
             r = requests.post(
-                f"{self.BASE}{self.token}/sendMessage",
-                json={"chat_id": self.chat_id, "text": chunk, "parse_mode": parse_mode},
-                timeout=15,
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "Content-Type": "application/json",
+                    "x-api-key": ANTHROPIC_API_KEY,
+                    "anthropic-version": "2023-06-01",
+                },
+                json={
+                    "model": model,
+                    "max_tokens": 300,
+                    "system": SYSTEM_PROMPT,
+                    "messages": [{"role": "user", "content": f"Analizza:\n\n{text}"}],
+                },
+                timeout=30,
             )
-            if not r.ok:
-                log.error(f"Telegram error: {r.status_code} — {r.text}")
-                return False
-            time.sleep(0.3)
-        return True
+            if r.status_code == 200:
+                raw = "".join(b.get("text", "") for b in r.json().get("content", []))
+                log(f"Claude OK ({model})", "OK")
+                return _parse_claude(raw, market, side, price, size, wallet, tier)
 
-    def format_briefing(self, briefing: dict) -> str:
-        """Trasforma il dict JSON del briefing in un messaggio Telegram leggibile."""
-        s       = briefing.get("summary", {})
-        whales  = briefing.get("whales", [])
-        trades  = briefing.get("trades", [])
-        alerts  = briefing.get("risk_alerts", [])
-        insight = briefing.get("daily_insight", "")
+            err = r.json().get("error", {}).get("message", r.text[:100])
+            log(f"Claude {r.status_code} ({model}): {err}", "WARN")
+            last_err = err
 
-        risk_emoji = {"basso": "🟢", "medio": "🟡", "alto": "🔴"}.get(s.get("risk_level", ""), "⚪")
-        date_str   = datetime.now().strftime("%d/%m/%Y")
+        except Exception as e:
+            log(f"Claude eccezione ({model}): {e}", "WARN")
+            last_err = str(e)
 
-        lines = [
-            f"🐋 *WHALE BRIEFING — {date_str}*",
-            "",
-            f"📊 *Panoramica mercato*",
-            f"Whale tracciate: *{s.get('whales_tracked', 0)}*  |  "
-            f"✅ COPY: *{s.get('copy_signals', 0)}*  |  "
-            f"❌ SKIP: *{s.get('skip_signals', 0)}*  |  "
-            f"👁 WATCH: *{s.get('watch_signals', 0)}*",
-            f"Rischio globale: {risk_emoji} *{s.get('risk_level', '—').upper()}*",
-            f"Sentiment: _{s.get('market_sentiment', '—')}_",
-        ]
-
-        if insight:
-            lines += ["", f"💡 _{insight}_"]
-
-        # Whale da seguire
-        top_whales = [w for w in whales if w.get("copy_worthy")] or whales[:3]
-        if top_whales:
-            lines += ["", "─" * 28, "🐋 *Whale da seguire oggi*"]
-            for w in top_whales[:4]:
-                tier_badge = {"A": "🟢 A", "B": "🟡 B", "C": "⚪ C"}.get(w.get("tier", ""), "❓")
-                lines.append(
-                    f"{tier_badge}  `{w.get('address', '—')}`"
-                    f"  —  {w.get('volume_24h', '')}  —  {w.get('style', '')}"
-                )
-                if w.get("note"):
-                    lines.append(f"   _{w['note']}_")
-
-        # Raccomandazioni trade
-        if trades:
-            lines += ["", "─" * 28, "📈 *Trade raccomandati*"]
-            for t in trades:
-                dec       = t.get("decision", "")
-                dec_emoji = {"COPY": "✅", "SKIP": "❌", "WATCH": "👁"}.get(dec, "❓")
-                risk_val  = t.get("risk_score", "?")
-                lines.append(
-                    f"\n{dec_emoji} *{t.get('market', '—')}*"
-                )
-                lines.append(
-                    f"   {t.get('direction', '')} @ {t.get('entry_price', '?')}  "
-                    f"|  Risk {risk_val}/10  |  Kelly {t.get('kelly_fraction', '—')}  "
-                    f"|  Tier {t.get('whale_tier', '?')}"
-                )
-                if t.get("entry_window"):
-                    lines.append(f"   🪟 Finestra: _{t['entry_window']}_")
-                if t.get("reason"):
-                    lines.append(f"   _{t['reason'][:140]}_")
-
-        # Alert
-        if alerts:
-            lines += ["", "─" * 28, "⚠️ *Alert*"]
-            for a in alerts:
-                lines.append(f"• {a}")
-
-        lines += [
-            "",
-            f"─" * 28,
-            f"_Generato {datetime.now().strftime('%H:%M')} · Polymarket Whale Bot_",
-        ]
-
-        return "\n".join(lines)
+    raise RuntimeError(last_err)
 
 
-# ─── Main ──────────────────────────────────────────────────────────────────────
-def main():
-    log.info("=" * 50)
-    log.info("POLYMARKET WHALE TRACKER — avvio")
-    log.info(f"Soglia: ≥${MIN_WHALE_SIZE_USDC:,} USDC | Finestra: {LOOKBACK_HOURS}h | Mercati: {TOP_MARKETS}")
-    log.info("=" * 50)
+def _parse_claude(raw, market, side, price, size, wallet, tier):
+    def g(pat, flags=re.I):
+        m = re.search(pat, raw, flags)
+        return m.group(1).strip() if m else None
 
-    telegram = TelegramSender()
+    return {
+        "market":      market,
+        "side":        side,
+        "price":       price,
+        "size":        size,
+        "wallet":      wallet,
+        "tier":        tier,
+        "verdict":     "COPY" if re.search(r"^COPY", raw, re.M) else "SKIP",
+        "risk_score":  int(g(r"Rischio[:\s]+(\d+)") or 5),
+        "vale_pena":   g(r"Vale la pena\?[:\s]*(.+?)(?:\n|$)") or "",
+        "spiegazione": (g(r"Cosa sta succedendo[:\s]*(.+?)(?:\nQuanto|\nSosp|$)",
+                          re.I | re.S) or raw[:200])[:250],
+        "quanto":      g(r"Quanto investire[:\s]*(.+?)(?:\n|$)") or "N/A",
+        "sospetto":    g(r"Sospetto\?[:\s]*(.+?)(?:\n|$)") or "No",
+    }
 
-    try:
-        # 1. Fetch mercati
-        fetcher = PolymarketFetcher()
-        markets = fetcher.fetch_top_markets()
-        if not markets:
-            raise RuntimeError("Nessun mercato recuperato dall'API Polymarket")
 
-        # 2. Raccolta trade
-        all_trades = fetcher.collect_all_trades(markets)
+# ── TELEGRAM ────────────────────────────────────────────────────────────────────
+def build_message(results, is_demo=False):
+    ts  = datetime.now().strftime("%d/%m/%Y %H:%M")
+    msg = f"🐋 *Grandi Mosse su Polymarket*{' _(DEMO)_' if is_demo else ''}\n_{ts}_\n\n"
 
-        # 3. Identificazione whale
-        analyzer = WhaleAnalyzer()
-        whales   = analyzer.filter_and_group(all_trades)
+    copy_count = sum(1 for t in results if t["verdict"] == "COPY")
+    msg += f"Analizzati {len(results)} movimenti da >\\${MIN_SIZE_USDC // 1000}k.\n"
+    msg += f"*{copy_count}* {'merita' if copy_count == 1 else 'meritano'} attenzione.\n\n"
 
-        if not whales:
-            msg = (
-                f"🐋 *Whale Briefing — {datetime.now().strftime('%d/%m/%Y')}*\n\n"
-                f"Nessuna whale rilevata nelle ultime {LOOKBACK_HOURS}h "
-                f"con size ≥${MIN_WHALE_SIZE_USDC:,} USDC.\n"
-                f"Mercati relativamente calmi — nessuna raccomandazione trade oggi."
-            )
-            telegram.send(msg)
-            log.info("Nessuna whale trovata — notifica inviata")
-            return
-
-        # 4. Analisi AI
-        whale_text = analyzer.build_summary_text(whales)
-        log.debug(f"Testo inviato a Claude:\n{whale_text[:500]}...")
-
-        claude   = ClaudeAnalyzer()
-        briefing = claude.analyze(whale_text)
-
-        # 5. Formattazione e invio Telegram
-        message = telegram.format_briefing(briefing)
-        ok      = telegram.send(message)
-        if ok:
-            log.info("✅ Briefing inviato su Telegram con successo")
+    for t in results:
+        m = t["market"][:70] + ("..." if len(t["market"]) > 70 else "")
+        msg += "✅ *DA VALUTARE*\n" if t["verdict"] == "COPY" else "⏭ *LASCIA PERDERE*\n"
+        msg += f"📌 _{m}_\n"
+        if t.get("vale_pena"):
+            msg += f"💡 {t['vale_pena']}\n"
+        if t.get("spiegazione"):
+            msg += f"📖 {t['spiegazione'][:200]}\n"
+        risk = t["risk_score"]
+        icon = "🟢" if risk <= 3 else "🟡" if risk <= 6 else "🔴"
+        msg += f"{icon} Rischio: {risk}/10"
+        if t["verdict"] == "COPY" and t.get("quanto", "N/A") != "N/A":
+            msg += f"  |  💰 {t['quanto']}\n"
         else:
-            log.error("❌ Invio Telegram fallito")
+            msg += "\n"
+        if t.get("sospetto", "No") not in ("No", "N/A"):
+            msg += "⚠️ Potrebbe essere gonfiato artificialmente\n"
+        msg += "\n"
 
-        # 6. Log locale
-        log_entry = {
-            "timestamp": datetime.now().isoformat(),
-            "whales_found": len(whales),
-            "briefing": briefing,
-        }
-        with open("whale_log.jsonl", "a") as f:
-            f.write(json.dumps(log_entry, ensure_ascii=False) + "\n")
-
-    except Exception as e:
-        log.exception(f"Errore fatale: {e}")
-        telegram.send(f"⚠️ *Whale Tracker Error*\n`{type(e).__name__}: {str(e)[:200]}`")
-        raise
+    return msg + "_Polymarket Whale Tracker — Bruno_"
 
 
+def send_telegram(message):
+    r = requests.post(
+        f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
+        json={"chat_id": TELEGRAM_USER_ID, "text": message, "parse_mode": "Markdown"},
+        timeout=15,
+    )
+    d = r.json()
+    if not d.get("ok"):
+        log(f"Telegram: {d.get('description', 'errore')}", "ERR")
+    return d.get("ok", False)
+
+
+# ── RUN SINGOLO ─────────────────────────────────────────────────────────────────
+def run():
+    log("=" * 52)
+    log(f"Soglia: >${MIN_SIZE_USDC:,} | Max: {MAX_WHALES} | Bankroll: ${BANKROLL:,}")
+    log("=" * 52)
+
+    ok, whales, total = fetch_polymarket_whales(MIN_SIZE_USDC)
+    is_demo = not ok or not whales
+    if is_demo:
+        log("Nessun dato reale — uso dati demo.", "WARN")
+        whales = [
+            {"usdcSize": "85000",  "price": "0.33", "side": "YES",
+             "title": "Will the Fed cut rates in May 2026?",         "userAddress": "0xdemo1"},
+            {"usdcSize": "65000",  "price": "0.67", "side": "NO",
+             "title": "Will BTC reach $120k before June 2026?",      "userAddress": "0xdemo2"},
+            {"usdcSize": "120000", "price": "0.24", "side": "YES",
+             "title": "Will Trump impose 50%+ tariffs on EU?",       "userAddress": "0xdemo3"},
+        ]
+
+    results = []
+    for i, trade in enumerate(whales[:MAX_WHALES]):
+        name = trade.get("title") or trade.get("question") or "Mercato"
+        log(f"Analisi [{i+1}/{min(MAX_WHALES, len(whales))}]: {name[:50]}...")
+        try:
+            result = analyze_with_claude(trade)
+            results.append(result)
+            log(f"→ {result['verdict']} | Rischio {result['risk_score']}/10 | Sospetto: {result.get('sospetto','No')}", "OK")
+        except Exception as e:
+            log(f"Errore: {e}", "ERR")
+            results.append({
+                "market": name, "side": "N/D", "price": 0, "size": 0,
+                "wallet": "—", "tier": "—", "verdict": "SKIP", "risk_score": 5,
+                "vale_pena": "", "spiegazione": f"Errore durante l'analisi: {str(e)[:100]}",
+                "quanto": "N/A", "sospetto": "No",
+            })
+        if i < MAX_WHALES - 1:
+            time.sleep(1)
+
+    has_copy = any(r["verdict"] == "COPY" for r in results)
+
+    if results and (not ONLY_NOTIFY_ON_COPY or has_copy):
+        log("Invio su Telegram...")
+        try:
+            if send_telegram(build_message(results, is_demo)):
+                log("Report inviato!", "OK")
+        except Exception as e:
+            log(f"Telegram: {e}", "ERR")
+    elif results:
+        log(f"Nessun COPY trovato — Telegram non inviato (silenzio = nessuna opportunità).")
+
+    log("Run completato.")
+    return results
+
+
+# ── LOOP CONTINUO ────────────────────────────────────────────────────────────────
+def run_continuum():
+    log("=" * 52)
+    log("Modalità CONTINUUM attivata")
+    log(f"Controllo ogni {CHECK_INTERVAL_MINUTES} minuti")
+    log(f"Telegram solo su COPY: {ONLY_NOTIFY_ON_COPY}")
+    log("Premi Ctrl+C per fermare")
+    log("=" * 52)
+
+    run_count = 0
+    while True:
+        run_count += 1
+        log(f"─── Run #{run_count} ───────────────────────────────")
+        try:
+            results = run()
+            copy_count = sum(1 for r in results if r.get("verdict") == "COPY")
+            if copy_count:
+                log(f"✓ {copy_count} COPY trovati — notifica inviata.", "OK")
+            else:
+                log(f"Nessun COPY — silenzio. Prossimo check tra {CHECK_INTERVAL_MINUTES} min.")
+        except KeyboardInterrupt:
+            raise
+        except Exception as e:
+            log(f"Errore nel run: {e}", "ERR")
+
+        log(f"In attesa {CHECK_INTERVAL_MINUTES} min... (Ctrl+C per fermare)")
+        try:
+            time.sleep(CHECK_INTERVAL_MINUTES * 60)
+        except KeyboardInterrupt:
+            log("Fermato dall'utente.")
+            break
+
+
+# ── ENTRY POINT ─────────────────────────────────────────────────────────────────
 if __name__ == "__main__":
-    main()
+    if "--continuum" in sys.argv or "-c" in sys.argv:
+        run_continuum()
+    else:
+        run()
