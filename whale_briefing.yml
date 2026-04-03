@@ -1,0 +1,58 @@
+name: 🐋 Whale Briefing Giornaliero
+
+on:
+  # Ogni giorno alle 8:00 ora italiana (UTC+2 estate / UTC+1 inverno)
+  # Usiamo 6:00 UTC per coprire l'ora legale — aggiusta a 7:00 UTC in inverno
+  schedule:
+    - cron: "0 6 * * *"
+
+  # Permette di lanciarlo manualmente dal tab "Actions" di GitHub
+  workflow_dispatch:
+    inputs:
+      min_whale_size:
+        description: "Soglia minima whale in USDC (default: 10000)"
+        required: false
+        default: "10000"
+      lookback_hours:
+        description: "Finestra temporale in ore (default: 24)"
+        required: false
+        default: "24"
+
+jobs:
+  whale-briefing:
+    name: Genera e invia briefing
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    env:
+      ANTHROPIC_API_KEY:  ${{ secrets.ANTHROPIC_API_KEY }}
+      TELEGRAM_BOT_TOKEN: ${{ secrets.TELEGRAM_BOT_TOKEN }}
+      TELEGRAM_CHAT_ID:   ${{ secrets.TELEGRAM_CHAT_ID }}
+      MIN_WHALE_SIZE:     ${{ github.event.inputs.min_whale_size || '10000' }}
+      LOOKBACK_HOURS:     ${{ github.event.inputs.lookback_hours || '24' }}
+      TOP_MARKETS:        "15"
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: "pip"
+
+      - name: Installa dipendenze
+        run: pip install -r requirements.txt
+
+      - name: Esegui Whale Tracker
+        run: python whale_tracker.py
+
+      - name: Salva log come artifact
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: whale-log-${{ github.run_id }}
+          path: whale_log.jsonl
+          retention-days: 30
+          if-no-files-found: ignore
