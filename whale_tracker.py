@@ -25,10 +25,29 @@ EMAIL_TO           = "brunoricciohsl@gmail.com"
 
 # ── PARAMETRI ───────────────────────────────────────────────────────────────────
 MIN_SIZE_USDC          = int(os.environ.get("MIN_WHALE_SIZE", "50000"))
-MAX_WHALES             = int(os.environ.get("MAX_WHALES", "8"))
+MAX_WHALES             = int(os.environ.get("MAX_WHALES", "10"))
 BANKROLL               = int(os.environ.get("BANKROLL", "10000"))
 CHECK_INTERVAL_MINUTES = int(os.environ.get("CHECK_INTERVAL_MINUTES", "30"))
 ONLY_NOTIFY_ON_COPY    = os.environ.get("ONLY_NOTIFY_ON_COPY", "true").lower() != "false"
+
+# ── FILTRO SPORT ─────────────────────────────────────────────────────────────────
+SPORT_KEYWORDS = [
+    " vs ", " vs. ", " v ", " @ ",
+    "NBA", "NFL", "NHL", "MLB", "MLS", "WNBA", "NCAA",
+    "Premier League", "Serie A", "La Liga", "Bundesliga", "Ligue 1",
+    "Champions League", "Europa League", "World Cup", "Copa",
+    "Super Bowl", "playoffs", "playoff",
+    "UFC", "boxing", "MMA", "fight",
+    "F1", "NASCAR", "Grand Prix",
+    "tennis", "Open:", "ATP", "WTA", "Wimbledon",
+    "golf", "PGA", "Masters",
+    "Olympics", "Olimpiadi",
+    "Oscar", "Grammy", "Emmy", "Eurovision",
+]
+
+def _is_sport(title: str) -> bool:
+    t = title.lower()
+    return any(kw.lower() in t for kw in SPORT_KEYWORDS)
 
 
 # ── LOGGING ─────────────────────────────────────────────────────────────────────
@@ -133,9 +152,30 @@ def fetch_polymarket_whales(min_size):
                 log(f"{host} → 0 elementi utili", "WARN")
                 continue
 
-            whales = [t for t in items if _sz(t) >= min_size]
-            whales.sort(key=_sz, reverse=True)
-            log(f"Polymarket OK ({host}): {len(items)} elementi, {len(whales)} whale ≥${min_size:,}", "OK")
+            # Filtra sport e mercati sotto soglia
+            filtered = [
+                t for t in items
+                if _sz(t) >= min_size and not _is_sport(t.get("title") or t.get("question") or "")
+            ]
+            filtered.sort(key=_sz, reverse=True)
+
+            # Diversità: prende i top 30 e seleziona 10 con titoli diversi
+            seen_words: set[str] = set()
+            diverse: list = []
+            for t in filtered[:30]:
+                title = (t.get("title") or t.get("question") or "").lower()
+                # Usa le prime 2 parole significative come "firma" del mercato
+                words = [w for w in title.split() if len(w) > 3][:2]
+                key = " ".join(words)
+                if key not in seen_words:
+                    seen_words.add(key)
+                    diverse.append(t)
+                if len(diverse) >= MAX_WHALES:
+                    break
+
+            whales = diverse or filtered[:MAX_WHALES]
+            log(f"Polymarket OK ({host}): {len(items)} totali → "
+                f"{len(filtered)} non-sport ≥${min_size:,} → {len(whales)} selezionati", "OK")
             return True, whales, len(items)
 
         except Exception as e:
@@ -157,6 +197,7 @@ SYSTEM_PROMPT = (
     "fatto da un grande investitore.\n"
     "Il tuo compito: capire se vale la pena copiarlo, e spiegarlo in italiano chiaro e diretto.\n\n"
     "Regole:\n"
+    "- Escludi qualsiasi mercato sportivo (calcio, basket, tennis, F1, ecc.) → sempre SKIP\n"
     "- Se il trade sembra rischioso, speculativo o poco chiaro → SKIP\n"
     "- Se il trade sembra solido e con buone basi → COPY\n"
     "- Se COPY, suggerisci quanto investire (massimo 10% del bankroll, mai più)\n\n"
@@ -251,17 +292,29 @@ def _parse_claude(raw, market, side, price, size, wallet, tier):
 
 
 # ── TELEGRAM ────────────────────────────────────────────────────────────────────
-def build_message(results, is_demo=False):
+def build_message(results, is_demo=False, best_skip=None):
     ts  = datetime.now().strftime("%d/%m/%Y %H:%M")
     msg = f"🐋 *Grandi Mosse su Polymarket*{' _(DEMO)_' if is_demo else ''}\n_{ts}_\n\n"
 
     copy_count = sum(1 for t in results if t["verdict"] == "COPY")
-    msg += f"Analizzati {len(results)} movimenti da >\\${MIN_SIZE_USDC // 1000}k.\n"
-    msg += f"*{copy_count}* {'merita' if copy_count == 1 else 'meritano'} attenzione.\n\n"
+    msg += f"Analizzati {len(results)} mercati non\\-sportivi da >\\${MIN_SIZE_USDC // 1000}k.\n"
 
-    for t in results:
+    if copy_count:
+        msg += f"*{copy_count}* {'merita' if copy_count == 1 else 'meritano'} attenzione. 👇\n\n"
+    else:
+        msg += "Nessun COPY oggi — ecco il *meno peggio* tra quelli analizzati. 👇\n\n"
+
+    # Mostra prima i COPY, poi solo il best_skip se non ci sono COPY
+    to_show = [t for t in results if t["verdict"] == "COPY"]
+    if not to_show and best_skip:
+        to_show = [best_skip]
+    if not to_show:
+        to_show = results[:3]
+
+    for t in to_show:
         m = t["market"][:70] + ("..." if len(t["market"]) > 70 else "")
-        msg += "✅ *DA VALUTARE*\n" if t["verdict"] == "COPY" else "⏭ *LASCIA PERDERE*\n"
+        is_copy = t["verdict"] == "COPY"
+        msg += "✅ *DA VALUTARE*\n" if is_copy else "⭐ *IL MENO PEGGIO DI OGGI*\n"
         msg += f"📌 _{m}_\n"
         if t.get("vale_pena"):
             msg += f"💡 {t['vale_pena']}\n"
@@ -270,7 +323,7 @@ def build_message(results, is_demo=False):
         risk = t["risk_score"]
         icon = "🟢" if risk <= 3 else "🟡" if risk <= 6 else "🔴"
         msg += f"{icon} Rischio: {risk}/10"
-        if t["verdict"] == "COPY" and t.get("quanto", "N/A") != "N/A":
+        if is_copy and t.get("quanto", "N/A") != "N/A":
             msg += f"  |  💰 {t['quanto']}\n"
         else:
             msg += "\n"
@@ -294,16 +347,19 @@ def send_telegram(message):
 
 
 # ── EMAIL ───────────────────────────────────────────────────────────────────────
-def build_email_html(results, is_demo=False):
+def build_email_html(results, is_demo=False, best_skip=None):
     ts = datetime.now().strftime("%d/%m/%Y %H:%M")
     copy_count = sum(1 for t in results if t["verdict"] == "COPY")
 
+    copy_results = [t for t in results if t["verdict"] == "COPY"]
+    to_show = copy_results or ([best_skip] if best_skip else results[:3])
+
     rows = ""
-    for t in results:
+    for t in to_show:
         is_copy = t["verdict"] == "COPY"
         color   = "#1a7a3a" if is_copy else "#555"
         bg      = "#f0fff4" if is_copy else "#fafafa"
-        badge   = "✅ DA VALUTARE" if is_copy else "⏭ Lascia perdere"
+        badge   = "✅ DA VALUTARE" if is_copy else "⭐ Il meno peggio di oggi"
         risk    = t["risk_score"]
         risk_color = "#2a9d2a" if risk <= 3 else "#e6a817" if risk <= 6 else "#d9534f"
 
@@ -341,7 +397,7 @@ def build_email_html(results, is_demo=False):
     </body></html>"""
 
 
-def send_email(results, is_demo=False):
+def send_email(results, is_demo=False, best_skip=None):
     if not GMAIL_APP_PASSWORD:
         log("Email: GMAIL_APP_PASSWORD non impostata — salto invio email.", "WARN")
         return False
@@ -352,7 +408,7 @@ def send_email(results, is_demo=False):
         msg["Subject"] = f"🐋 Polymarket Whale Report {ts} — {copy_count} segnali"
         msg["From"]    = GMAIL_USER
         msg["To"]      = EMAIL_TO
-        msg.attach(MIMEText(build_email_html(results, is_demo), "html"))
+        msg.attach(MIMEText(build_email_html(results, is_demo, best_skip), "html"))
 
         with smtplib.SMTP("smtp.gmail.com", 587) as s:
             s.starttls()
@@ -406,18 +462,20 @@ def run():
 
     has_copy = any(r["verdict"] == "COPY" for r in results)
 
-    if results and (not ONLY_NOTIFY_ON_COPY or has_copy):
+    # Trova il "meno peggio" tra i SKIP (rischio più basso)
+    skips = [r for r in results if r["verdict"] == "SKIP"]
+    best_skip = min(skips, key=lambda r: r["risk_score"]) if skips else None
+
+    if results:
         log("Invio su Telegram...")
         try:
-            if send_telegram(build_message(results, is_demo)):
+            if send_telegram(build_message(results, is_demo, best_skip)):
                 log("Telegram inviato!", "OK")
         except Exception as e:
             log(f"Telegram: {e}", "ERR")
 
         log("Invio per email...")
-        send_email(results, is_demo)
-    elif results:
-        log("Nessun COPY trovato — notifiche non inviate (silenzio = nessuna opportunità).")
+        send_email(results, is_demo, best_skip)
 
     log("Run completato.")
     return results
