@@ -1,0 +1,16 @@
+{
+  "leaderboard": {},
+  "watched_markets": {},
+  "algo_stats": {
+    "total_copy_signals": 0,
+    "resolved_copies": 0,
+    "correct_copies": 0,
+    "accuracy_pct": null,
+    "last_updated": null
+  },
+  "reddit_cache": {
+    "last_checked": null,
+    "top_strategies": []
+  },
+  "run_count": 1
+}
