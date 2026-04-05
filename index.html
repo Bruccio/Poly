@@ -3,251 +3,375 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🐋 Polymarket Whale Tracker — Dashboard</title>
+  <title>🐋 Polymarket Whale Tracker</title>
   <style>
+    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&display=swap');
     :root {
-      --bg: #0d1b2a;
-      --card: #1a2e44;
-      --accent: #00c896;
-      --accent2: #4a90d9;
-      --warn: #f5a623;
-      --danger: #e74c3c;
-      --text: #e8edf2;
-      --muted: #8899aa;
-      --border: #243b55;
+      --bg: #000000;
+      --card: rgba(0, 15, 0, 0.88);
+      --accent: #00ff41;
+      --accent2: #00cc33;
+      --accent-dim: #008f11;
+      --warn: #ffb400;
+      --danger: #ff3333;
+      --text: #00ff41;
+      --muted: #006b1a;
+      --border: #003300;
+      --glow: 0 0 10px rgba(0,255,65,0.3);
     }
     * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
-      background: var(--bg);
+      background: #000;
       color: var(--text);
-      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      font-family: 'Fira Code', 'Courier New', monospace;
       min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    /* MATRIX RAIN CANVAS */
+    #matrix-bg {
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: 0.12;
+    }
+
+    /* SCANLINES */
+    #scanlines {
+      position: fixed;
+      inset: 0;
+      z-index: 3;
+      pointer-events: none;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,255,65,0.015) 2px,
+        rgba(0,255,65,0.015) 4px
+      );
+    }
+
+    /* MAIN APP */
+    #app {
+      position: relative;
+      z-index: 1;
     }
 
     /* HEADER */
     header {
-      background: linear-gradient(135deg, #0d1b2a 0%, #1a2e44 100%);
-      border-bottom: 2px solid var(--accent);
-      padding: 20px 24px;
+      background: linear-gradient(180deg, rgba(0,30,0,0.95) 0%, rgba(0,10,0,0.9) 100%);
+      border-bottom: 1px solid var(--accent-dim);
+      padding: 18px 24px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
       gap: 12px;
+      box-shadow: 0 2px 20px rgba(0,255,65,0.1);
     }
-    header h1 { font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
-    #last-update { font-size: 0.8rem; color: var(--muted); }
+    header h1 {
+      font-size: 1.3rem;
+      font-weight: 700;
+      text-shadow: var(--glow);
+      letter-spacing: 0.05em;
+    }
+    header h1 span { color: var(--accent-dim); font-weight: 400; }
+    #last-update { font-size: 0.7rem; color: var(--muted); }
     #status-dot {
-      width: 10px; height: 10px; border-radius: 50%;
+      width: 8px; height: 8px; border-radius: 50%;
       background: var(--muted); display: inline-block; margin-right: 6px;
     }
-    #status-dot.ok { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
-    #status-dot.err { background: var(--danger); }
+    #status-dot.ok {
+      background: var(--accent);
+      box-shadow: 0 0 8px var(--accent), 0 0 20px rgba(0,255,65,0.4);
+      animation: pulse 2s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    /* TERMINAL INTRO */
+    #terminal-intro {
+      background: var(--card);
+      border: 1px solid var(--border);
+      margin: 16px;
+      padding: 14px 18px;
+      border-radius: 4px;
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+    #terminal-intro .prompt { color: var(--accent); }
+    #terminal-intro .cmd { color: #00ff41; }
+    .cursor {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: var(--accent);
+      animation: blink 1s step-end infinite;
+      vertical-align: middle;
+      margin-left: 2px;
+    }
+    @keyframes blink { 50% { opacity: 0; } }
 
     /* MAIN LAYOUT */
-    main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+    main { max-width: 1100px; margin: 0 auto; padding: 8px 16px 24px; }
 
     /* STATS ROW */
     .stats-row {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-      gap: 16px;
-      margin-bottom: 28px;
+      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+      gap: 12px;
+      margin-bottom: 24px;
     }
     .stat-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px;
+      border-radius: 4px;
+      padding: 16px;
       text-align: center;
+      transition: border-color 0.3s;
     }
-    .stat-card .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
-    .stat-card .value { font-size: 2rem; font-weight: 700; }
-    .stat-card .value.green { color: var(--accent); }
-    .stat-card .value.blue  { color: var(--accent2); }
-    .stat-card .value.warn  { color: var(--warn); }
+    .stat-card:hover { border-color: var(--accent-dim); box-shadow: var(--glow); }
+    .stat-card .label {
+      font-size: 0.62rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 6px;
+    }
+    .stat-card .value {
+      font-size: 1.8rem;
+      font-weight: 700;
+      text-shadow: var(--glow);
+    }
 
     /* SECTION */
-    .section { margin-bottom: 32px; }
+    .section { margin-bottom: 28px; }
     .section h2 {
-      font-size: 1.1rem;
-      color: var(--muted);
+      font-size: 0.82rem;
+      color: var(--accent-dim);
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      margin-bottom: 14px;
-      padding-bottom: 8px;
+      letter-spacing: 0.15em;
+      margin-bottom: 12px;
+      padding-bottom: 6px;
       border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 8px;
     }
+    .section h2::before { content: '> '; color: var(--accent); }
 
-    /* LEADERBOARD */
-    .lb-table { width: 100%; border-collapse: collapse; }
+    /* LEADERBOARD TABLE */
+    .lb-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
     .lb-table th {
       text-align: left;
-      font-size: 0.72rem;
+      font-size: 0.62rem;
       color: var(--muted);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      padding: 8px 12px;
+      letter-spacing: 0.1em;
+      padding: 6px 10px;
       border-bottom: 1px solid var(--border);
     }
-    .lb-table td { padding: 12px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
-    .lb-table tr:hover td { background: rgba(255,255,255,0.03); }
-    .rank { color: var(--muted); font-weight: 700; width: 36px; }
-    .whale-name { font-weight: 600; }
+    .lb-table td {
+      padding: 10px 10px;
+      border-bottom: 1px solid rgba(0,255,65,0.05);
+    }
+    .lb-table tr:hover td {
+      background: rgba(0,255,65,0.03);
+    }
+    .rank { color: var(--muted); font-weight: 700; width: 30px; }
+    .whale-name { font-weight: 600; color: var(--accent); }
     .profit { color: var(--accent); font-weight: 700; }
-    .trust-bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .trust-bar-wrap { display: flex; align-items: center; gap: 6px; }
     .trust-bar {
-      height: 6px; border-radius: 3px; background: var(--border);
-      flex: 1; max-width: 80px;
-      position: relative; overflow: hidden;
+      height: 4px; border-radius: 2px; background: var(--border);
+      flex: 1; max-width: 70px;
+      overflow: hidden;
     }
-    .trust-bar-fill {
-      height: 100%; border-radius: 3px;
-      background: linear-gradient(90deg, var(--accent2), var(--accent));
-    }
-    .trust-val { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+    .trust-bar-fill { height: 100%; border-radius: 2px; }
+    .trust-val { font-size: 0.68rem; color: var(--muted); }
 
-    /* COPY SIGNALS */
+    /* SIGNAL CARDS */
     .signal-grid {
       display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 16px;
+      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+      gap: 12px;
     }
     .signal-card {
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 18px;
-      position: relative;
-      overflow: hidden;
+      border-radius: 4px;
+      padding: 16px;
+      transition: border-color 0.3s, box-shadow 0.3s;
     }
-    .signal-card.copy { border-left: 4px solid var(--accent); }
-    .signal-card.skip { border-left: 4px solid var(--border); }
-    .signal-card.watching { border-left: 4px solid var(--warn); }
+    .signal-card:hover { border-color: var(--accent-dim); box-shadow: var(--glow); }
+    .signal-card.copy { border-left: 3px solid var(--accent); }
+    .signal-card.watch { border-left: 3px solid var(--warn); }
+    .signal-card.skip { border-left: 3px solid var(--border); }
+    .signal-card.resolved-ok { border-left: 3px solid var(--accent); }
+    .signal-card.resolved-ko { border-left: 3px solid var(--danger); }
     .signal-badge {
       display: inline-block;
-      font-size: 0.7rem;
+      font-size: 0.6rem;
       font-weight: 700;
       text-transform: uppercase;
-      letter-spacing: 0.08em;
-      padding: 3px 8px;
-      border-radius: 4px;
-      margin-bottom: 10px;
+      letter-spacing: 0.1em;
+      padding: 2px 6px;
+      border-radius: 2px;
+      margin-bottom: 8px;
     }
-    .badge-copy { background: rgba(0,200,150,0.15); color: var(--accent); }
-    .badge-watching { background: rgba(245,166,35,0.15); color: var(--warn); }
-    .badge-resolved-ok { background: rgba(0,200,150,0.15); color: var(--accent); }
-    .badge-resolved-ko { background: rgba(231,76,60,0.15); color: var(--danger); }
-    .signal-title { font-size: 0.95rem; font-weight: 600; line-height: 1.4; margin-bottom: 10px; }
-    .signal-meta { font-size: 0.78rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px; }
-    .signal-meta span { background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 4px; }
+    .badge-copy { background: rgba(0,255,65,0.12); color: var(--accent); }
+    .badge-watch { background: rgba(255,180,0,0.12); color: var(--warn); }
+    .badge-ok { background: rgba(0,255,65,0.12); color: var(--accent); }
+    .badge-ko { background: rgba(255,51,51,0.12); color: var(--danger); }
+    .signal-title {
+      font-size: 0.82rem;
+      font-weight: 600;
+      line-height: 1.4;
+      margin-bottom: 8px;
+      color: var(--text);
+    }
+    .signal-meta {
+      font-size: 0.68rem;
+      color: var(--muted);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+    .signal-meta span {
+      background: rgba(0,255,65,0.05);
+      padding: 2px 6px;
+      border-radius: 2px;
+      border: 1px solid var(--border);
+    }
 
-    /* ACCURACY CHART */
+    /* ACCURACY */
     .acc-row {
       display: flex;
       align-items: center;
       gap: 16px;
       background: var(--card);
       border: 1px solid var(--border);
-      border-radius: 12px;
-      padding: 20px 24px;
+      border-radius: 4px;
+      padding: 18px 20px;
     }
     .acc-circle {
-      width: 80px; height: 80px;
+      width: 70px; height: 70px;
       border-radius: 50%;
       display: flex; align-items: center; justify-content: center;
-      font-size: 1.4rem; font-weight: 700;
+      font-size: 1.2rem; font-weight: 700;
       flex-shrink: 0;
+      text-shadow: var(--glow);
     }
-    .acc-info h3 { font-size: 1rem; margin-bottom: 4px; }
-    .acc-info p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+    .acc-info h3 { font-size: 0.85rem; margin-bottom: 4px; }
+    .acc-info p { font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
 
-    /* EMPTY STATE */
+    /* EMPTY */
     .empty {
       text-align: center;
       color: var(--muted);
-      padding: 40px;
-      font-size: 0.9rem;
+      padding: 30px;
+      font-size: 0.78rem;
+      font-style: italic;
     }
 
     /* LOADING */
     #loading {
       position: fixed; inset: 0;
-      background: var(--bg);
+      background: #000;
       display: flex; align-items: center; justify-content: center;
       flex-direction: column; gap: 16px;
-      font-size: 1.1rem; color: var(--muted);
       z-index: 100;
     }
-    .spinner {
-      width: 40px; height: 40px;
-      border: 3px solid var(--border);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
+    .spinner-text {
+      font-size: 0.9rem;
+      color: var(--accent);
+      text-shadow: var(--glow);
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    .spinner-bar {
+      width: 200px; height: 3px;
+      background: var(--border);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .spinner-fill {
+      width: 40%;
+      height: 100%;
+      background: var(--accent);
+      box-shadow: var(--glow);
+      animation: load 1.2s ease-in-out infinite;
+    }
+    @keyframes load {
+      0% { transform: translateX(-100%); }
+      100% { transform: translateX(350%); }
+    }
 
     /* FOOTER */
     footer {
       text-align: center;
-      padding: 24px;
+      padding: 20px;
       color: var(--muted);
-      font-size: 0.78rem;
+      font-size: 0.65rem;
       border-top: 1px solid var(--border);
-      margin-top: 20px;
+      margin-top: 16px;
     }
+    footer a { color: var(--accent-dim); text-decoration: none; }
+    footer a:hover { color: var(--accent); text-shadow: var(--glow); }
 
     @media (max-width: 600px) {
       .stats-row { grid-template-columns: repeat(2, 1fr); }
       .signal-grid { grid-template-columns: 1fr; }
       .acc-row { flex-direction: column; text-align: center; }
+      header h1 { font-size: 1rem; }
     }
   </style>
 </head>
 <body>
 
+<canvas id="matrix-bg"></canvas>
+<div id="scanlines"></div>
+
 <div id="loading">
-  <div class="spinner"></div>
-  <span>Caricamento dati whale...</span>
+  <div class="spinner-text">> Connessione alla blockchain...</div>
+  <div class="spinner-bar"><div class="spinner-fill"></div></div>
 </div>
 
+<div id="app" style="display:none">
+
 <header>
-  <h1>🐋 Polymarket Whale Tracker</h1>
+  <h1>🐋 WHALE_TRACKER <span>v3</span></h1>
   <div>
     <span id="status-dot"></span>
     <span id="last-update">—</span>
   </div>
 </header>
 
-<main>
+<div id="terminal-intro">
+  <span class="prompt">whale@tracker:~$</span> <span class="cmd">./monitor --mode=alpha --threshold=100k</span><br>
+  <span class="prompt">[SYSTEM]</span> Leaderboard caricata. Filtro wash trading attivo. Self-improving ON.<span class="cursor"></span>
+</div>
 
-  <!-- STATS -->
+<main>
   <div class="stats-row">
     <div class="stat-card">
       <div class="label">Run totali</div>
-      <div class="value blue" id="stat-runs">—</div>
+      <div class="value" id="stat-runs">—</div>
     </div>
     <div class="stat-card">
       <div class="label">Whale tracciate</div>
-      <div class="value blue" id="stat-whales">—</div>
+      <div class="value" id="stat-whales">—</div>
     </div>
     <div class="stat-card">
-      <div class="label">COPY segnalati</div>
-      <div class="value warn" id="stat-copies">—</div>
+      <div class="label">Segnali COPY</div>
+      <div class="value" id="stat-copies">—</div>
     </div>
     <div class="stat-card">
-      <div class="label">Accuracy storica</div>
-      <div class="value green" id="stat-accuracy">—</div>
+      <div class="label">Accuracy</div>
+      <div class="value" id="stat-accuracy">—</div>
     </div>
   </div>
 
-  <!-- ACCURACY TRACK RECORD -->
   <div class="section" id="section-accuracy" style="display:none">
-    <h2>📊 Track Record</h2>
+    <h2>Track Record</h2>
     <div class="acc-row">
       <div class="acc-circle" id="acc-circle">—</div>
       <div class="acc-info">
@@ -257,228 +381,220 @@
     </div>
   </div>
 
-  <!-- LEADERBOARD -->
   <div class="section">
-    <h2>🏆 Whale Leaderboard</h2>
+    <h2>Whale Leaderboard</h2>
     <div id="leaderboard-container">
-      <div class="empty">Nessuna whale nella leaderboard ancora. I dati si accumulano ad ogni run.</div>
+      <div class="empty">// leaderboard vuota — si popola dopo il primo run</div>
     </div>
   </div>
 
-  <!-- COPY SIGNALS MONITORATI -->
   <div class="section">
-    <h2>👁️ Mercati Monitorati (COPY)</h2>
+    <h2>Mercati Monitorati</h2>
     <div class="signal-grid" id="watched-container">
-      <div class="empty">Nessun mercato COPY tracciato ancora.</div>
+      <div class="empty">// nessun segnale COPY/WATCH ancora</div>
     </div>
   </div>
 
-  <!-- REDDIT INSIGHTS -->
   <div class="section" id="section-reddit" style="display:none">
-    <h2>💬 Ultimi Insight da Reddit</h2>
+    <h2>Reddit Insights</h2>
     <div id="reddit-container"></div>
   </div>
-
 </main>
 
 <footer>
-  Polymarket Whale Tracker v2 — Bruno &nbsp;|&nbsp;
-  Aggiornato automaticamente ogni 12 ore da GitHub Actions &nbsp;|&nbsp;
-  <a href="https://polymarket.com/breaking" target="_blank" style="color:var(--accent2)">polymarket.com/breaking</a>
+  POLYMARKET WHALE TRACKER v3 — Bruno &nbsp;|&nbsp;
+  Auto-update ogni 12h via GitHub Actions &nbsp;|&nbsp;
+  <a href="https://polymarket.com" target="_blank">polymarket.com</a>
 </footer>
 
-<script>
-// Fetch whale_state.json dallo stesso repo (raw)
-// Modifica REPO_PATH se il repo ha un nome diverso
-const STATE_URL = "whale_state.json";
-// Fallback: usa il raw GitHub se non funziona in locale
-const RAW_URL   = "https://raw.githubusercontent.com/bruccio/Poly/main/whale_state.json";
+</div>
 
-async function loadState() {
-  let data;
-  try {
-    // Prima prova URL relativo (GitHub Pages stesso dominio)
-    let res = await fetch(STATE_URL + "?t=" + Date.now());
-    if (!res.ok) throw new Error("local fail");
-    data = await res.json();
-  } catch {
-    try {
-      let res = await fetch(RAW_URL + "?t=" + Date.now());
-      if (!res.ok) throw new Error("remote fail");
-      data = await res.json();
-    } catch(e) {
-      document.getElementById("loading").innerHTML =
-        '<div style="color:#e74c3c;font-size:1rem;">⚠️ Impossibile caricare whale_state.json<br>' +
-        '<small style="color:#8899aa;">Assicurati che GitHub Pages sia attivo e che il bot abbia già eseguito almeno un run.</small></div>';
-      return null;
-    }
-  }
-  return data;
+<script>
+// ── MATRIX RAIN ──────────────────────────────────────────────────────
+const canvas = document.getElementById('matrix-bg');
+const ctx = canvas.getContext('2d');
+let W, H, columns, drops;
+const CHARS = 'PolymarketWHALE01アイウエオカキクケコサシスセソ$¥€₿⟁◊≡∞∴∵';
+const FONT_SIZE = 14;
+
+function initMatrix() {
+  W = canvas.width = window.innerWidth;
+  H = canvas.height = window.innerHeight;
+  columns = Math.floor(W / FONT_SIZE);
+  drops = Array(columns).fill(1);
 }
 
-function fmtMoney(n) {
+function drawMatrix() {
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+  ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#00ff41';
+  ctx.font = FONT_SIZE + 'px monospace';
+  for (let i = 0; i < drops.length; i++) {
+    const ch = CHARS[Math.floor(Math.random() * CHARS.length)];
+    ctx.fillText(ch, i * FONT_SIZE, drops[i] * FONT_SIZE);
+    if (drops[i] * FONT_SIZE > H && Math.random() > 0.975) drops[i] = 0;
+    drops[i]++;
+  }
+}
+
+initMatrix();
+window.addEventListener('resize', initMatrix);
+setInterval(drawMatrix, 50);
+
+// ── DATA LOADING ─────────────────────────────────────────────────────
+const STATE_URL = "whale_state.json";
+const RAW_URL = "https://raw.githubusercontent.com/bruccio/Poly/main/whale_state.json";
+
+async function loadState() {
+  for (const url of [STATE_URL + "?t=" + Date.now(), RAW_URL + "?t=" + Date.now()]) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return await res.json();
+    } catch {}
+  }
+  document.getElementById("loading").innerHTML =
+    '<div style="color:#ff3333;font-size:0.85rem;font-family:monospace;">' +
+    '> ERROR: whale_state.json non trovato<br>' +
+    '<span style="color:#006b1a;">Il bot deve eseguire almeno un run prima.</span></div>';
+  return null;
+}
+
+function fmt$(n) {
   if (!n && n !== 0) return "—";
   n = parseFloat(n);
-  if (n >= 1_000_000) return "+$" + (n/1_000_000).toFixed(2) + "M";
-  if (n >= 1_000)     return "+$" + Math.round(n).toLocaleString("it-IT");
+  if (n >= 1e6) return "+$" + (n/1e6).toFixed(1) + "M";
+  if (n >= 1e3) return "+$" + Math.round(n).toLocaleString("it-IT");
   return "+$" + n.toFixed(0);
 }
 
 function trustColor(t) {
-  if (t >= 70) return "#00c896";
-  if (t >= 50) return "#4a90d9";
-  return "#f5a623";
+  if (t >= 70) return "#00ff41";
+  if (t >= 50) return "#ffb400";
+  return "#ff3333";
+}
+
+function fmtDate(iso) {
+  if (!iso) return "—";
+  try { return new Date(iso).toLocaleDateString("it-IT", {day:"2-digit",month:"short",year:"numeric"}); }
+  catch { return "—"; }
+}
+
+function esc(s) {
+  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
 }
 
 function render(state) {
   document.getElementById("loading").style.display = "none";
-  const dot = document.getElementById("status-dot");
-  dot.classList.add("ok");
+  document.getElementById("app").style.display = "";
+  document.getElementById("status-dot").classList.add("ok");
 
-  // Last update
   const stats = state.algo_stats || {};
-  const lastUpd = stats.last_updated
-    ? new Date(stats.last_updated).toLocaleString("it-IT")
-    : "—";
-  document.getElementById("last-update").textContent = "Ultimo aggiornamento: " + lastUpd;
+  const lastUpd = stats.last_updated ? new Date(stats.last_updated).toLocaleString("it-IT") : "—";
+  document.getElementById("last-update").textContent = "LAST_UPDATE: " + lastUpd;
 
-  // Stats bar
   document.getElementById("stat-runs").textContent = state.run_count ?? "—";
-  const lbCount = Object.keys(state.leaderboard || {}).length;
-  document.getElementById("stat-whales").textContent = lbCount || "—";
+  document.getElementById("stat-whales").textContent = Object.keys(state.leaderboard||{}).length || "—";
   document.getElementById("stat-copies").textContent = stats.total_copy_signals ?? "—";
 
   const acc = stats.accuracy_pct;
   const accEl = document.getElementById("stat-accuracy");
-  if (acc !== null && acc !== undefined) {
+  if (acc != null) {
     accEl.textContent = acc + "%";
-    accEl.style.color = acc >= 60 ? "#00c896" : acc >= 40 ? "#f5a623" : "#e74c3c";
+    accEl.style.color = acc >= 60 ? "#00ff41" : acc >= 40 ? "#ffb400" : "#ff3333";
   } else {
     accEl.textContent = "N/D";
-    accEl.style.color = "#8899aa";
+    accEl.style.color = "#006b1a";
   }
 
-  // Track record section
+  // Track record
   if (stats.resolved_copies > 0) {
     document.getElementById("section-accuracy").style.display = "";
     const circle = document.getElementById("acc-circle");
-    circle.textContent = (acc ?? "—") + (acc !== null ? "%" : "");
-    const bg = acc >= 60 ? "rgba(0,200,150,0.15)" : acc >= 40 ? "rgba(245,166,35,0.15)" : "rgba(231,76,60,0.15)";
-    const fg = acc >= 60 ? "#00c896" : acc >= 40 ? "#f5a623" : "#e74c3c";
-    circle.style.background = bg;
+    circle.textContent = (acc ?? "—") + (acc != null ? "%" : "");
+    const fg = acc >= 60 ? "#00ff41" : acc >= 40 ? "#ffb400" : "#ff3333";
+    circle.style.border = `2px solid ${fg}`;
     circle.style.color = fg;
-    circle.style.border = `3px solid ${fg}`;
+    circle.style.background = "rgba(0,255,65,0.05)";
+    circle.style.textShadow = `0 0 10px ${fg}40`;
     document.getElementById("acc-title").textContent =
-      `${stats.correct_copies ?? 0} COPY corretti su ${stats.resolved_copies} risolti`;
+      `${stats.correct_copies??0} corretti / ${stats.resolved_copies} risolti`;
     document.getElementById("acc-desc").textContent =
-      `Il sistema ha segnalato ${stats.total_copy_signals ?? 0} opportunità COPY in totale. ` +
-      `Di quelle risolte, ${acc}% erano previsioni corrette. ` +
-      `Il track record migliora ad ogni run man mano che i mercati si risolvono.`;
+      `${stats.total_copy_signals??0} segnali totali. Accuracy: ${acc}%. Il sistema migliora ad ogni run.`;
   }
 
   // Leaderboard
   const lb = state.leaderboard || {};
-  const lbEntries = Object.entries(lb)
-    .map(([addr, d]) => ({ addr, ...d }))
-    .sort((a, b) => (b.total_profit_usd || 0) - (a.total_profit_usd || 0))
-    .slice(0, 20);
+  const lbArr = Object.entries(lb)
+    .map(([a,d]) => ({addr:a,...d}))
+    .sort((a,b) => (b.total_profit_usd||0) - (a.total_profit_usd||0))
+    .slice(0,20);
 
-  const lbContainer = document.getElementById("leaderboard-container");
-  if (lbEntries.length === 0) {
-    lbContainer.innerHTML = '<div class="empty">La leaderboard si popola dopo il primo run del bot.</div>';
+  const lbC = document.getElementById("leaderboard-container");
+  if (!lbArr.length) {
+    lbC.innerHTML = '<div class="empty">// leaderboard vuota — primo run pendente</div>';
   } else {
-    const rows = lbEntries.map((w, i) => {
-      const trust = w.trust_score ?? 40;
-      const pct = trust + "%";
+    const rows = lbArr.map((w,i) => {
+      const t = w.trust_score ?? 40;
+      const tc = trustColor(t);
       return `<tr>
-        <td class="rank">${i + 1}</td>
-        <td class="whale-name">${escHtml(w.username || w.addr?.slice(0,12) + "...")}</td>
-        <td class="profit">${fmtMoney(w.total_profit_usd)}</td>
-        <td>
-          <div class="trust-bar-wrap">
-            <div class="trust-bar">
-              <div class="trust-bar-fill" style="width:${pct};background:${trustColor(trust)}"></div>
-            </div>
-            <span class="trust-val" style="color:${trustColor(trust)}">${trust}/100</span>
-          </div>
-        </td>
-        <td style="color:#8899aa;font-size:0.78rem;">${fmtTime(w.last_seen)}</td>
+        <td class="rank">${i+1}</td>
+        <td class="whale-name">${esc(w.username||w.addr?.slice(0,12))}</td>
+        <td class="profit">${fmt$(w.total_profit_usd)}</td>
+        <td><div class="trust-bar-wrap">
+          <div class="trust-bar"><div class="trust-bar-fill" style="width:${t}%;background:${tc}"></div></div>
+          <span class="trust-val" style="color:${tc}">${t}</span>
+        </div></td>
+        <td style="color:#006b1a;font-size:0.68rem;">${fmtDate(w.last_seen)}</td>
       </tr>`;
     }).join("");
-
-    lbContainer.innerHTML = `
-      <table class="lb-table">
-        <thead>
-          <tr>
-            <th>#</th>
-            <th>Whale</th>
-            <th>Profitto</th>
-            <th>Trust Score</th>
-            <th>Ultimo avvistamento</th>
-          </tr>
-        </thead>
-        <tbody>${rows}</tbody>
-      </table>`;
+    lbC.innerHTML = `<table class="lb-table">
+      <thead><tr><th>#</th><th>Whale</th><th>Profitto</th><th>Trust</th><th>Ultimo</th></tr></thead>
+      <tbody>${rows}</tbody></table>`;
   }
 
-  // Watched markets (COPY signals)
-  const watched = state.watched_markets || {};
-  const watchedList = Object.values(watched)
-    .sort((a, b) => (b.date_flagged || "").localeCompare(a.date_flagged || ""));
-
-  const wContainer = document.getElementById("watched-container");
-  if (watchedList.length === 0) {
-    wContainer.innerHTML = '<div class="empty">Nessun segnale COPY ancora. I mercati compaiono qui dopo il primo run.</div>';
+  // Watched markets
+  const watched = Object.values(state.watched_markets || {})
+    .sort((a,b) => (b.date_flagged||"").localeCompare(a.date_flagged||""));
+  const wC = document.getElementById("watched-container");
+  if (!watched.length) {
+    wC.innerHTML = '<div class="empty">// nessun segnale tracciato — primo run pendente</div>';
   } else {
-    wContainer.innerHTML = watchedList.map(m => {
-      let badgeClass, badgeText;
+    wC.innerHTML = watched.map(m => {
+      let cls, badgeCls, badgeTxt;
       if (m.resolved) {
-        badgeClass = m.correct ? "badge-resolved-ok" : "badge-resolved-ko";
-        badgeText  = m.correct ? "✅ Corretto" : "❌ Sbagliato";
+        cls = m.correct ? "resolved-ok" : "resolved-ko";
+        badgeCls = m.correct ? "badge-ok" : "badge-ko";
+        badgeTxt = m.correct ? "RESOLVED_OK" : "RESOLVED_FAIL";
       } else {
-        badgeClass = "badge-watching";
-        badgeText  = "👁️ In osservazione";
+        const v = m.our_verdict || "COPY";
+        cls = v === "COPY" ? "copy" : "watch";
+        badgeCls = v === "COPY" ? "badge-copy" : "badge-watch";
+        badgeTxt = v === "COPY" ? "TRACKING_COPY" : "TRACKING_WATCH";
       }
-      const price = m.entry_price ? (parseFloat(m.entry_price) * 100).toFixed(0) + "%" : "—";
-      return `
-        <div class="signal-card ${m.resolved ? (m.correct ? 'copy' : 'skip') : 'watching'}">
-          <span class="signal-badge ${badgeClass}">${badgeText}</span>
-          <div class="signal-title">${escHtml(m.question || "Mercato sconosciuto")}</div>
-          <div class="signal-meta">
-            <span>📅 ${m.date_flagged || "—"}</span>
-            <span>📌 ${m.side || "YES"} @ ${price}</span>
-            ${m.resolution ? `<span>🏁 Esito: ${m.resolution}</span>` : ""}
-          </div>
-        </div>`;
+      const pr = m.entry_price ? (parseFloat(m.entry_price)*100).toFixed(0)+"%" : "—";
+      return `<div class="signal-card ${cls}">
+        <span class="signal-badge ${badgeCls}">${badgeTxt}</span>
+        <div class="signal-title">${esc(m.question||"???")}</div>
+        <div class="signal-meta">
+          <span>${m.date_flagged||"—"}</span>
+          <span>${m.side||"YES"} @ ${pr}</span>
+          ${m.resolution ? `<span>EXIT: ${m.resolution}</span>` : ""}
+        </div>
+      </div>`;
     }).join("");
   }
 
   // Reddit
-  const reddit = state.reddit_cache || {};
-  const strategies = reddit.top_strategies || [];
-  if (strategies.length > 0) {
+  const strategies = (state.reddit_cache||{}).top_strategies || [];
+  if (strategies.length) {
     document.getElementById("section-reddit").style.display = "";
-    document.getElementById("reddit-container").innerHTML =
-      strategies.map(s => `<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;font-size:0.88rem;color:var(--muted);">${escHtml(s)}</div>`).join("");
+    document.getElementById("reddit-container").innerHTML = strategies.map(s =>
+      `<div style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:8px;font-size:0.75rem;color:var(--muted);">${esc(s)}</div>`
+    ).join("");
   }
 }
 
-function escHtml(s) {
-  return String(s)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;");
-}
-
-function fmtTime(iso) {
-  if (!iso) return "—";
-  try {
-    return new Date(iso).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" });
-  } catch { return "—"; }
-}
-
-loadState().then(data => { if (data) render(data); });
+loadState().then(d => { if (d) setTimeout(() => render(d), 800); });
 </script>
 </body>
 </html>
