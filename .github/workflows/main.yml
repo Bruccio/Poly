@@ -40,6 +40,10 @@ jobs:
       - name: Installa dipendenze
         run: pip install -r requirements.txt
 
+      - name: Testa funzioni critiche
+        run: python -m pytest tests/ -q --tb=short
+        continue-on-error: true
+
       - name: Esegui Whale Tracker
         run: python whale_tracker.py
 

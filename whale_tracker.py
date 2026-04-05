@@ -137,6 +137,56 @@ def log(msg, level="INFO"):
     print(f"[{ts}] {icon} {msg}", flush=True)
 
 
+# ── HTTP HELPER con RETRY + BACKOFF ─────────────────────────────────────────────
+_H = {"Accept": "application/json", "User-Agent": "WhaleTracker/3.0"}
+
+def _http_get(url: str, timeout: int = 12, retries: int = 3):
+    """
+    Wrapper per requests.get con retry esponenziale (2s/4s/8s).
+    Gestisce 429 (rate limit), timeout e errori di rete.
+    Restituisce requests.Response oppure None senza lanciare eccezioni.
+    """
+    for attempt in range(retries):
+        try:
+            r = requests.get(url, headers=_H, timeout=timeout)
+            if r.status_code == 429:
+                wait = 2 ** (attempt + 1)
+                log(f"Rate limit (429), attendo {wait}s... [{url[:55]}]", "WARN")
+                time.sleep(wait)
+                continue
+            return r
+        except requests.exceptions.Timeout:
+            log(f"Timeout tentativo {attempt+1}: {url[:60]}", "WARN")
+        except requests.exceptions.RequestException as e:
+            log(f"Errore rete tentativo {attempt+1}: {str(e)[:80]}", "WARN")
+        if attempt < retries - 1:
+            time.sleep(2 ** attempt)
+    log(f"Tutti i tentativi falliti: {url[:60]}", "ERR")
+    return None
+
+
+# ── CACHE IN-RUN PER ACTIVITY WALLET ────────────────────────────────────────────
+_ACTIVITY_CACHE: dict = {}  # svuotato all'inizio di ogni run()
+
+def _cached_activity(wallet: str, limit: int = 100) -> list:
+    """
+    Scarica (e memorizza per il run corrente) l'attività di trading di un wallet.
+    Evita di chiamare lo stesso endpoint 2-3 volte per run.
+    """
+    url = (f"https://data-api.polymarket.com/activity"
+           f"?user={wallet}&limit={limit}&type=TRADE")
+    if url in _ACTIVITY_CACHE:
+        return _ACTIVITY_CACHE[url]
+    r = _http_get(url, timeout=10)
+    if not r or r.status_code != 200:
+        _ACTIVITY_CACHE[url] = []
+        return []
+    data = r.json()
+    result = data if isinstance(data, list) else data.get("data", [])
+    _ACTIVITY_CACHE[url] = result
+    return result
+
+
 # ── LEADERBOARD POLYMARKET ──────────────────────────────────────────────────────
 def fetch_breaking_leaderboard(state: dict):
     """
@@ -150,8 +200,8 @@ def fetch_breaking_leaderboard(state: dict):
     ]
     for url in urls:
         try:
-            r = requests.get(url, headers=H, timeout=12)
-            if r.status_code != 200:
+            r = _http_get(url)
+            if not r or r.status_code != 200:
                 continue
             data = r.json()
             entries = data if isinstance(data, list) else data.get("data", data.get("leaderboard", []))
@@ -196,7 +246,6 @@ def fetch_whale_trades(state: dict) -> list:
     Non usa soglie manuali — le whale sono già identificate per profitto storico.
     Restituisce lista di trade pronti per analisi Claude.
     """
-    H = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
     leaderboard = state.get("leaderboard", {})
     if not leaderboard:
         log("fetch_whale_trades: leaderboard vuota, skip", "WARN")
@@ -221,13 +270,7 @@ def fetch_whale_trades(state: dict) -> list:
         trust_score = lb_entry.get("trust_score", 50)
         log(f"  Scarico trade da wallet {username} (trust {trust_score})...")
         try:
-            url = (f"https://data-api.polymarket.com/activity"
-                   f"?user={wallet}&limit=20&type=TRADE")
-            r = requests.get(url, headers=H, timeout=10)
-            if r.status_code != 200:
-                continue
-            raw = r.json()
-            trades = raw if isinstance(raw, list) else raw.get("data", [])
+            trades = _cached_activity(wallet, limit=20)
             added = 0
             wallet_bets: list = []  # per recent_bets di questo wallet
             for t in trades:
@@ -290,15 +333,8 @@ def is_wash_trader(wallet: str) -> bool:
     """
     if not wallet or wallet.startswith("0xpool") or wallet.startswith("0xdemo"):
         return False
-    H = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
     try:
-        url = f"https://data-api.polymarket.com/activity?user={wallet}&limit=100&type=TRADE"
-        r = requests.get(url, headers=H, timeout=10)
-        if r.status_code != 200:
-            return False
-        trades = r.json()
-        if not isinstance(trades, list):
-            trades = trades.get("data", [])
+        trades = _cached_activity(wallet, limit=100)
         if len(trades) < 10:
             return False
         market_sides: dict = {}
@@ -335,11 +371,12 @@ def fetch_reddit_insights(state: dict) -> str:
     if run_count % 10 != 1 and cache.get("top_strategies"):
         return cache["top_strategies"][0] if cache["top_strategies"] else ""
     try:
-        H = {"Accept": "application/json",
-             "User-Agent": "WhaleTracker/2.0 (by /u/polymarket_bot)"}
-        r = requests.get("https://www.reddit.com/r/Polymarket/hot.json?limit=10",
-                         headers=H, timeout=12)
-        if r.status_code != 200:
+        r = requests.get(
+            "https://www.reddit.com/r/Polymarket/hot.json?limit=10",
+            headers={"Accept": "application/json",
+                     "User-Agent": "WhaleTracker/3.0 (by /u/polymarket_bot)"},
+            timeout=12)
+        if not r or r.status_code != 200:
             return ""
         posts = r.json().get("data", {}).get("children", [])
         KEYS = ["underpriced", "strategy", "alpha", "edge", "opportunity",
@@ -369,7 +406,6 @@ def check_resolutions(state: dict):
     watched = state.get("watched_markets", {})
     if not watched:
         return
-    H = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
     newly_resolved = 0
     for key, market in list(watched.items()):
         if market.get("resolved"):
@@ -379,10 +415,8 @@ def check_resolutions(state: dict):
             continue
         try:
             q = requests.utils.quote(question[:50])
-            r = requests.get(
-                f"https://gamma-api.polymarket.com/markets?search={q}&limit=5",
-                headers=H, timeout=10)
-            if r.status_code != 200:
+            r = _http_get(f"https://gamma-api.polymarket.com/markets?search={q}&limit=5")
+            if not r or r.status_code != 200:
                 continue
             markets = r.json()
             if not isinstance(markets, list):
@@ -454,15 +488,14 @@ def profile_whale(wallet: str, state: dict) -> dict:
     if cached.get("profiled"):
         return cached
 
-    H = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
     total_volume = 0.0
     markets_seen = set()
     try:
-        for offset in [0, 500]:  # max 2 pagine = 1000 trade
+        for page_offset in [0, 500]:  # max 2 pagine = 1000 trade
             url = (f"https://data-api.polymarket.com/activity"
-                   f"?user={wallet}&limit=500&offset={offset}&type=TRADE")
-            r = requests.get(url, headers=H, timeout=12)
-            if r.status_code != 200:
+                   f"?user={wallet}&limit=500&offset={page_offset}&type=TRADE")
+            r = _http_get(url, timeout=12)
+            if not r or r.status_code != 200:
                 break
             trades = r.json()
             if not isinstance(trades, list):
@@ -541,7 +574,6 @@ def fetch_polymarket_whales(min_size, state: dict = None):
     Multi-source crawling: aggrega dati da TUTTI gli endpoint Polymarket disponibili.
     Non si ferma al primo — prende tutto e deduplica.
     """
-    H = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
     all_items: list = []
     seen_titles: set = set()
 
@@ -559,10 +591,8 @@ def fetch_polymarket_whales(min_size, state: dict = None):
 
     # ── Source 1: Gamma API Markets (volume 24h) ──
     try:
-        r = requests.get(
-            "https://gamma-api.polymarket.com/markets?limit=100&active=true&order=volume24hr&ascending=false",
-            headers=H, timeout=12)
-        if r.status_code == 200:
+        r = _http_get("https://gamma-api.polymarket.com/markets?limit=100&active=true&order=volume24hr&ascending=false")
+        if r and r.status_code == 200:
             mlist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
             _add_items([{
                 "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
@@ -579,10 +609,8 @@ def fetch_polymarket_whales(min_size, state: dict = None):
 
     # ── Source 2: Gamma API Events (volume totale) ──
     try:
-        r = requests.get(
-            "https://gamma-api.polymarket.com/events?limit=80&active=true&order=volume&ascending=false",
-            headers=H, timeout=12)
-        if r.status_code == 200:
+        r = _http_get("https://gamma-api.polymarket.com/events?limit=80&active=true&order=volume&ascending=false")
+        if r and r.status_code == 200:
             elist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
             _add_items([{
                 "usdcSize":    str(float(ev.get("volume") or ev.get("volumeNum") or 0)),
@@ -599,10 +627,8 @@ def fetch_polymarket_whales(min_size, state: dict = None):
     # ── Source 3: Gamma API Trending/Popular markets ──
     for tag in ["trending", "popular"]:
         try:
-            r = requests.get(
-                f"https://gamma-api.polymarket.com/markets?limit=50&active=true&tag={tag}",
-                headers=H, timeout=10)
-            if r.status_code == 200:
+            r = _http_get(f"https://gamma-api.polymarket.com/markets?limit=50&active=true&tag={tag}")
+            if r and r.status_code == 200:
                 mlist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
                 _add_items([{
                     "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
@@ -618,10 +644,8 @@ def fetch_polymarket_whales(min_size, state: dict = None):
 
     # ── Source 4: Data API Activity (trade reali con wallet) ──
     try:
-        r = requests.get(
-            "https://data-api.polymarket.com/activity?limit=200&type=TRADE",
-            headers=H, timeout=12)
-        if r.status_code == 200:
+        r = _http_get("https://data-api.polymarket.com/activity?limit=200&type=TRADE")
+        if r and r.status_code == 200:
             trades = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
             _add_items([{
                 "usdcSize":    str(float(t.get("usdcSize") or t.get("amount") or 0)),
@@ -665,10 +689,8 @@ def fetch_polymarket_whales(min_size, state: dict = None):
         if wallet_addr.startswith("0xpool") or wallet_addr.startswith("0xdemo"):
             continue
         try:
-            r = requests.get(
-                f"https://data-api.polymarket.com/activity?user={wallet_addr}&limit=20&type=TRADE",
-                headers=H, timeout=10)
-            if r.status_code == 200:
+            r = _http_get(f"https://data-api.polymarket.com/activity?user={wallet_addr}&limit=20&type=TRADE", timeout=10)
+            if r and r.status_code == 200:
                 trades = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
                 _add_items([{
                     "usdcSize":    str(float(t.get("usdcSize") or t.get("amount") or 0)),
@@ -1077,6 +1099,7 @@ def send_email(results, state: dict = None, is_demo=False, best_skip=None):
 
 # ── RUN SINGOLO ─────────────────────────────────────────────────────────────────
 def run():
+    _ACTIVITY_CACHE.clear()  # azzera cache per questo run
     state = load_state()
     state["run_count"] = state.get("run_count", 0) + 1
     run_n = state["run_count"]
