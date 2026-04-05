@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🐋 Polymarket Whale Tracker — Dashboard</title>
+  <style>
+    :root {
+      --bg: #0d1b2a;
+      --card: #1a2e44;
+      --accent: #00c896;
+      --accent2: #4a90d9;
+      --warn: #f5a623;
+      --danger: #e74c3c;
+      --text: #e8edf2;
+      --muted: #8899aa;
+      --border: #243b55;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      min-height: 100vh;
+    }
+
+    /* HEADER */
+    header {
+      background: linear-gradient(135deg, #0d1b2a 0%, #1a2e44 100%);
+      border-bottom: 2px solid var(--accent);
+      padding: 20px 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+    header h1 { font-size: 1.5rem; display: flex; align-items: center; gap: 10px; }
+    #last-update { font-size: 0.8rem; color: var(--muted); }
+    #status-dot {
+      width: 10px; height: 10px; border-radius: 50%;
+      background: var(--muted); display: inline-block; margin-right: 6px;
+    }
+    #status-dot.ok { background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+    #status-dot.err { background: var(--danger); }
+
+    /* MAIN LAYOUT */
+    main { max-width: 1100px; margin: 0 auto; padding: 24px 16px; }
+
+    /* STATS ROW */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+    .stat-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px;
+      text-align: center;
+    }
+    .stat-card .label { font-size: 0.75rem; color: var(--muted); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 8px; }
+    .stat-card .value { font-size: 2rem; font-weight: 700; }
+    .stat-card .value.green { color: var(--accent); }
+    .stat-card .value.blue  { color: var(--accent2); }
+    .stat-card .value.warn  { color: var(--warn); }
+
+    /* SECTION */
+    .section { margin-bottom: 32px; }
+    .section h2 {
+      font-size: 1.1rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      margin-bottom: 14px;
+      padding-bottom: 8px;
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    /* LEADERBOARD */
+    .lb-table { width: 100%; border-collapse: collapse; }
+    .lb-table th {
+      text-align: left;
+      font-size: 0.72rem;
+      color: var(--muted);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 8px 12px;
+      border-bottom: 1px solid var(--border);
+    }
+    .lb-table td { padding: 12px 12px; border-bottom: 1px solid rgba(255,255,255,0.04); }
+    .lb-table tr:hover td { background: rgba(255,255,255,0.03); }
+    .rank { color: var(--muted); font-weight: 700; width: 36px; }
+    .whale-name { font-weight: 600; }
+    .profit { color: var(--accent); font-weight: 700; }
+    .trust-bar-wrap { display: flex; align-items: center; gap: 8px; }
+    .trust-bar {
+      height: 6px; border-radius: 3px; background: var(--border);
+      flex: 1; max-width: 80px;
+      position: relative; overflow: hidden;
+    }
+    .trust-bar-fill {
+      height: 100%; border-radius: 3px;
+      background: linear-gradient(90deg, var(--accent2), var(--accent));
+    }
+    .trust-val { font-size: 0.8rem; color: var(--muted); white-space: nowrap; }
+
+    /* COPY SIGNALS */
+    .signal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 16px;
+    }
+    .signal-card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 18px;
+      position: relative;
+      overflow: hidden;
+    }
+    .signal-card.copy { border-left: 4px solid var(--accent); }
+    .signal-card.skip { border-left: 4px solid var(--border); }
+    .signal-card.watching { border-left: 4px solid var(--warn); }
+    .signal-badge {
+      display: inline-block;
+      font-size: 0.7rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-bottom: 10px;
+    }
+    .badge-copy { background: rgba(0,200,150,0.15); color: var(--accent); }
+    .badge-watching { background: rgba(245,166,35,0.15); color: var(--warn); }
+    .badge-resolved-ok { background: rgba(0,200,150,0.15); color: var(--accent); }
+    .badge-resolved-ko { background: rgba(231,76,60,0.15); color: var(--danger); }
+    .signal-title { font-size: 0.95rem; font-weight: 600; line-height: 1.4; margin-bottom: 10px; }
+    .signal-meta { font-size: 0.78rem; color: var(--muted); display: flex; flex-wrap: wrap; gap: 8px; }
+    .signal-meta span { background: rgba(255,255,255,0.06); padding: 2px 7px; border-radius: 4px; }
+
+    /* ACCURACY CHART */
+    .acc-row {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 20px 24px;
+    }
+    .acc-circle {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem; font-weight: 700;
+      flex-shrink: 0;
+    }
+    .acc-info h3 { font-size: 1rem; margin-bottom: 4px; }
+    .acc-info p { font-size: 0.82rem; color: var(--muted); line-height: 1.5; }
+
+    /* EMPTY STATE */
+    .empty {
+      text-align: center;
+      color: var(--muted);
+      padding: 40px;
+      font-size: 0.9rem;
+    }
+
+    /* LOADING */
+    #loading {
+      position: fixed; inset: 0;
+      background: var(--bg);
+      display: flex; align-items: center; justify-content: center;
+      flex-direction: column; gap: 16px;
+      font-size: 1.1rem; color: var(--muted);
+      z-index: 100;
+    }
+    .spinner {
+      width: 40px; height: 40px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* FOOTER */
+    footer {
+      text-align: center;
+      padding: 24px;
+      color: var(--muted);
+      font-size: 0.78rem;
+      border-top: 1px solid var(--border);
+      margin-top: 20px;
+    }
+
+    @media (max-width: 600px) {
+      .stats-row { grid-template-columns: repeat(2, 1fr); }
+      .signal-grid { grid-template-columns: 1fr; }
+      .acc-row { flex-direction: column; text-align: center; }
+    }
+  </style>
+</head>
+<body>
+
+<div id="loading">
+  <div class="spinner"></div>
+  <span>Caricamento dati whale...</span>
+</div>
+
+<header>
+  <h1>🐋 Polymarket Whale Tracker</h1>
+  <div>
+    <span id="status-dot"></span>
+    <span id="last-update">—</span>
+  </div>
+</header>
+
+<main>
+
+  <!-- STATS -->
+  <div class="stats-row">
+    <div class="stat-card">
+      <div class="label">Run totali</div>
+      <div class="value blue" id="stat-runs">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Whale tracciate</div>
+      <div class="value blue" id="stat-whales">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">COPY segnalati</div>
+      <div class="value warn" id="stat-copies">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Accuracy storica</div>
+      <div class="value green" id="stat-accuracy">—</div>
+    </div>
+  </div>
+
+  <!-- ACCURACY TRACK RECORD -->
+  <div class="section" id="section-accuracy" style="display:none">
+    <h2>📊 Track Record</h2>
+    <div class="acc-row">
+      <div class="acc-circle" id="acc-circle">—</div>
+      <div class="acc-info">
+        <h3 id="acc-title">—</h3>
+        <p id="acc-desc">—</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div class="section">
+    <h2>🏆 Whale Leaderboard</h2>
+    <div id="leaderboard-container">
+      <div class="empty">Nessuna whale nella leaderboard ancora. I dati si accumulano ad ogni run.</div>
+    </div>
+  </div>
+
+  <!-- COPY SIGNALS MONITORATI -->
+  <div class="section">
+    <h2>👁️ Mercati Monitorati (COPY)</h2>
+    <div class="signal-grid" id="watched-container">
+      <div class="empty">Nessun mercato COPY tracciato ancora.</div>
+    </div>
+  </div>
+
+  <!-- REDDIT INSIGHTS -->
+  <div class="section" id="section-reddit" style="display:none">
+    <h2>💬 Ultimi Insight da Reddit</h2>
+    <div id="reddit-container"></div>
+  </div>
+
+</main>
+
+<footer>
+  Polymarket Whale Tracker v2 — Bruno &nbsp;|&nbsp;
+  Aggiornato automaticamente ogni 12 ore da GitHub Actions &nbsp;|&nbsp;
+  <a href="https://polymarket.com/breaking" target="_blank" style="color:var(--accent2)">polymarket.com/breaking</a>
+</footer>
+
+<script>
+// Fetch whale_state.json dallo stesso repo (raw)
+// Modifica REPO_PATH se il repo ha un nome diverso
+const STATE_URL = "whale_state.json";
+// Fallback: usa il raw GitHub se non funziona in locale
+const RAW_URL   = "https://raw.githubusercontent.com/bruccio/Poly/main/whale_state.json";
+
+async function loadState() {
+  let data;
+  try {
+    // Prima prova URL relativo (GitHub Pages stesso dominio)
+    let res = await fetch(STATE_URL + "?t=" + Date.now());
+    if (!res.ok) throw new Error("local fail");
+    data = await res.json();
+  } catch {
+    try {
+      let res = await fetch(RAW_URL + "?t=" + Date.now());
+      if (!res.ok) throw new Error("remote fail");
+      data = await res.json();
+    } catch(e) {
+      document.getElementById("loading").innerHTML =
+        '<div style="color:#e74c3c;font-size:1rem;">⚠️ Impossibile caricare whale_state.json<br>' +
+        '<small style="color:#8899aa;">Assicurati che GitHub Pages sia attivo e che il bot abbia già eseguito almeno un run.</small></div>';
+      return null;
+    }
+  }
+  return data;
+}
+
+function fmtMoney(n) {
+  if (!n && n !== 0) return "—";
+  n = parseFloat(n);
+  if (n >= 1_000_000) return "+$" + (n/1_000_000).toFixed(2) + "M";
+  if (n >= 1_000)     return "+$" + Math.round(n).toLocaleString("it-IT");
+  return "+$" + n.toFixed(0);
+}
+
+function trustColor(t) {
+  if (t >= 70) return "#00c896";
+  if (t >= 50) return "#4a90d9";
+  return "#f5a623";
+}
+
+function render(state) {
+  document.getElementById("loading").style.display = "none";
+  const dot = document.getElementById("status-dot");
+  dot.classList.add("ok");
+
+  // Last update
+  const stats = state.algo_stats || {};
+  const lastUpd = stats.last_updated
+    ? new Date(stats.last_updated).toLocaleString("it-IT")
+    : "—";
+  document.getElementById("last-update").textContent = "Ultimo aggiornamento: " + lastUpd;
+
+  // Stats bar
+  document.getElementById("stat-runs").textContent = state.run_count ?? "—";
+  const lbCount = Object.keys(state.leaderboard || {}).length;
+  document.getElementById("stat-whales").textContent = lbCount || "—";
+  document.getElementById("stat-copies").textContent = stats.total_copy_signals ?? "—";
+
+  const acc = stats.accuracy_pct;
+  const accEl = document.getElementById("stat-accuracy");
+  if (acc !== null && acc !== undefined) {
+    accEl.textContent = acc + "%";
+    accEl.style.color = acc >= 60 ? "#00c896" : acc >= 40 ? "#f5a623" : "#e74c3c";
+  } else {
+    accEl.textContent = "N/D";
+    accEl.style.color = "#8899aa";
+  }
+
+  // Track record section
+  if (stats.resolved_copies > 0) {
+    document.getElementById("section-accuracy").style.display = "";
+    const circle = document.getElementById("acc-circle");
+    circle.textContent = (acc ?? "—") + (acc !== null ? "%" : "");
+    const bg = acc >= 60 ? "rgba(0,200,150,0.15)" : acc >= 40 ? "rgba(245,166,35,0.15)" : "rgba(231,76,60,0.15)";
+    const fg = acc >= 60 ? "#00c896" : acc >= 40 ? "#f5a623" : "#e74c3c";
+    circle.style.background = bg;
+    circle.style.color = fg;
+    circle.style.border = `3px solid ${fg}`;
+    document.getElementById("acc-title").textContent =
+      `${stats.correct_copies ?? 0} COPY corretti su ${stats.resolved_copies} risolti`;
+    document.getElementById("acc-desc").textContent =
+      `Il sistema ha segnalato ${stats.total_copy_signals ?? 0} opportunità COPY in totale. ` +
+      `Di quelle risolte, ${acc}% erano previsioni corrette. ` +
+      `Il track record migliora ad ogni run man mano che i mercati si risolvono.`;
+  }
+
+  // Leaderboard
+  const lb = state.leaderboard || {};
+  const lbEntries = Object.entries(lb)
+    .map(([addr, d]) => ({ addr, ...d }))
+    .sort((a, b) => (b.total_profit_usd || 0) - (a.total_profit_usd || 0))
+    .slice(0, 20);
+
+  const lbContainer = document.getElementById("leaderboard-container");
+  if (lbEntries.length === 0) {
+    lbContainer.innerHTML = '<div class="empty">La leaderboard si popola dopo il primo run del bot.</div>';
+  } else {
+    const rows = lbEntries.map((w, i) => {
+      const trust = w.trust_score ?? 40;
+      const pct = trust + "%";
+      return `<tr>
+        <td class="rank">${i + 1}</td>
+        <td class="whale-name">${escHtml(w.username || w.addr?.slice(0,12) + "...")}</td>
+        <td class="profit">${fmtMoney(w.total_profit_usd)}</td>
+        <td>
+          <div class="trust-bar-wrap">
+            <div class="trust-bar">
+              <div class="trust-bar-fill" style="width:${pct};background:${trustColor(trust)}"></div>
+            </div>
+            <span class="trust-val" style="color:${trustColor(trust)}">${trust}/100</span>
+          </div>
+        </td>
+        <td style="color:#8899aa;font-size:0.78rem;">${fmtTime(w.last_seen)}</td>
+      </tr>`;
+    }).join("");
+
+    lbContainer.innerHTML = `
+      <table class="lb-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Whale</th>
+            <th>Profitto</th>
+            <th>Trust Score</th>
+            <th>Ultimo avvistamento</th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>`;
+  }
+
+  // Watched markets (COPY signals)
+  const watched = state.watched_markets || {};
+  const watchedList = Object.values(watched)
+    .sort((a, b) => (b.date_flagged || "").localeCompare(a.date_flagged || ""));
+
+  const wContainer = document.getElementById("watched-container");
+  if (watchedList.length === 0) {
+    wContainer.innerHTML = '<div class="empty">Nessun segnale COPY ancora. I mercati compaiono qui dopo il primo run.</div>';
+  } else {
+    wContainer.innerHTML = watchedList.map(m => {
+      let badgeClass, badgeText;
+      if (m.resolved) {
+        badgeClass = m.correct ? "badge-resolved-ok" : "badge-resolved-ko";
+        badgeText  = m.correct ? "✅ Corretto" : "❌ Sbagliato";
+      } else {
+        badgeClass = "badge-watching";
+        badgeText  = "👁️ In osservazione";
+      }
+      const price = m.entry_price ? (parseFloat(m.entry_price) * 100).toFixed(0) + "%" : "—";
+      return `
+        <div class="signal-card ${m.resolved ? (m.correct ? 'copy' : 'skip') : 'watching'}">
+          <span class="signal-badge ${badgeClass}">${badgeText}</span>
+          <div class="signal-title">${escHtml(m.question || "Mercato sconosciuto")}</div>
+          <div class="signal-meta">
+            <span>📅 ${m.date_flagged || "—"}</span>
+            <span>📌 ${m.side || "YES"} @ ${price}</span>
+            ${m.resolution ? `<span>🏁 Esito: ${m.resolution}</span>` : ""}
+          </div>
+        </div>`;
+    }).join("");
+  }
+
+  // Reddit
+  const reddit = state.reddit_cache || {};
+  const strategies = reddit.top_strategies || [];
+  if (strategies.length > 0) {
+    document.getElementById("section-reddit").style.display = "";
+    document.getElementById("reddit-container").innerHTML =
+      strategies.map(s => `<div style="background:var(--card);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:10px;font-size:0.88rem;color:var(--muted);">${escHtml(s)}</div>`).join("");
+  }
+}
+
+function escHtml(s) {
+  return String(s)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
+function fmtTime(iso) {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleDateString("it-IT", { day: "2-digit", month: "short", year: "numeric" });
+  } catch { return "—"; }
+}
+
+loadState().then(data => { if (data) render(data); });
+</script>
+</body>
+</html>
