@@ -229,23 +229,34 @@ def fetch_whale_trades(state: dict) -> list:
             raw = r.json()
             trades = raw if isinstance(raw, list) else raw.get("data", [])
             added = 0
+            wallet_bets: list = []  # per recent_bets di questo wallet
             for t in trades:
                 title = (t.get("title") or t.get("question") or
                          t.get("market") or "").strip()
                 if not title:
                     continue
+                size = float(t.get("usdcSize") or t.get("size") or
+                             t.get("amount") or 0)
+                price = float(t.get("price") or t.get("outcomePrice") or 0.5)
+                side = t.get("side") or t.get("type") or "YES"
+                # Salva nelle recenti del wallet (max 3, include anche sport per trasparenza)
+                if len(wallet_bets) < 3:
+                    wallet_bets.append({
+                        "title": title,
+                        "side":  side,
+                        "size":  size,
+                        "price": price,
+                    })
                 title_key = title.lower()
                 if title_key in seen_titles:
                     continue
                 if _is_sport(title):
                     continue
                 seen_titles.add(title_key)
-                size = float(t.get("usdcSize") or t.get("size") or
-                             t.get("amount") or 0)
                 all_trades.append({
                     "usdcSize":         str(size),
-                    "price":            str(t.get("price") or t.get("outcomePrice") or 0.5),
-                    "side":             t.get("side") or t.get("type") or "YES",
+                    "price":            str(price),
+                    "side":             side,
                     "title":            title,
                     "userAddress":      wallet,
                     "whale_trust_score": trust_score,
@@ -253,6 +264,9 @@ def fetch_whale_trades(state: dict) -> list:
                     "_source":          "whale-first",
                 })
                 added += 1
+            # Aggiorna recent_bets nel leaderboard per la dashboard
+            if wallet_bets:
+                state["leaderboard"][wallet_key]["recent_bets"] = wallet_bets
             if added:
                 log(f"    → {added} trade da {username}", "OK")
             time.sleep(0.5)  # rate limit cortesia
