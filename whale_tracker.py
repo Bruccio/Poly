@@ -189,6 +189,85 @@ def fetch_breaking_leaderboard(state: dict):
     log("Leaderboard: impossibile scaricare (continuo senza)", "WARN")
 
 
+# ── WHALE-FIRST AUTO DETECTION ───────────────────────────────────────────────────
+def fetch_whale_trades(state: dict) -> list:
+    """
+    Whale-first approach: scarica i trade recenti dei top wallet dalla leaderboard.
+    Non usa soglie manuali — le whale sono già identificate per profitto storico.
+    Restituisce lista di trade pronti per analisi Claude.
+    """
+    H = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
+    leaderboard = state.get("leaderboard", {})
+    if not leaderboard:
+        log("fetch_whale_trades: leaderboard vuota, skip", "WARN")
+        return []
+
+    # Prendi top 20 wallet ordinati per trust_score
+    sorted_wallets = sorted(
+        leaderboard.items(),
+        key=lambda kv: kv[1].get("trust_score", 0),
+        reverse=True,
+    )[:20]
+
+    all_trades: list = []
+    seen_titles: set = set()
+
+    for wallet_key, lb_entry in sorted_wallets:
+        wallet = lb_entry.get("wallet") or wallet_key
+        # Salta wallet demo/pool
+        if wallet.startswith("0x") and len(wallet) < 15:
+            continue
+        username = lb_entry.get("username", wallet[:10])
+        trust_score = lb_entry.get("trust_score", 50)
+        log(f"  Scarico trade da wallet {username} (trust {trust_score})...")
+        try:
+            url = (f"https://data-api.polymarket.com/activity"
+                   f"?user={wallet}&limit=20&type=TRADE")
+            r = requests.get(url, headers=H, timeout=10)
+            if r.status_code != 200:
+                continue
+            raw = r.json()
+            trades = raw if isinstance(raw, list) else raw.get("data", [])
+            added = 0
+            for t in trades:
+                title = (t.get("title") or t.get("question") or
+                         t.get("market") or "").strip()
+                if not title:
+                    continue
+                title_key = title.lower()
+                if title_key in seen_titles:
+                    continue
+                if _is_sport(title):
+                    continue
+                seen_titles.add(title_key)
+                size = float(t.get("usdcSize") or t.get("size") or
+                             t.get("amount") or 0)
+                all_trades.append({
+                    "usdcSize":         str(size),
+                    "price":            str(t.get("price") or t.get("outcomePrice") or 0.5),
+                    "side":             t.get("side") or t.get("type") or "YES",
+                    "title":            title,
+                    "userAddress":      wallet,
+                    "whale_trust_score": trust_score,
+                    "whale_username":   username,
+                    "_source":          "whale-first",
+                })
+                added += 1
+            if added:
+                log(f"    → {added} trade da {username}", "OK")
+            time.sleep(0.5)  # rate limit cortesia
+        except Exception as e:
+            log(f"  fetch_whale_trades {username}: {str(e)[:80]}", "WARN")
+
+    # Ordina per trust_score × size (trade più significativi prima)
+    all_trades.sort(
+        key=lambda x: x["whale_trust_score"] * float(x.get("usdcSize") or 0),
+        reverse=True,
+    )
+    log(f"fetch_whale_trades: {len(all_trades)} trade da {len(sorted_wallets)} wallet", "OK")
+    return all_trades
+
+
 # ── WASH TRADING DETECTION ──────────────────────────────────────────────────────
 def is_wash_trader(wallet: str) -> bool:
     """
@@ -989,21 +1068,30 @@ def run():
     run_n = state["run_count"]
 
     log("=" * 60)
-    log(f"Run #{run_n} | Soglia: >${MIN_SIZE_USDC:,} | Max: {MAX_WHALES}")
+    log(f"Run #{run_n} | Whale-first auto detection | Max: {MAX_WHALES}")
     log("=" * 60)
 
     # 1. Controlla resolution dei mercati passati (self-improving)
     check_resolutions(state)
 
-    # 2. Aggiorna leaderboard da Polymarket
+    # 2. Aggiorna leaderboard da Polymarket (chi sono le whale?)
     fetch_breaking_leaderboard(state)
 
     # 3. Reddit insights (ogni 10 run)
     reddit_context = fetch_reddit_insights(state)
 
-    # 4. Fetch mercati whale
-    ok, whales, total = fetch_polymarket_whales(MIN_SIZE_USDC, state)
-    is_demo = not ok or not whales
+    # 4. Whale-first: prendi i trade recenti dei top wallet
+    log("Scarico trade recenti delle top whale...")
+    whales = fetch_whale_trades(state)
+
+    # 4b. Fallback: se nessun trade da wallet, usa mercati per volume
+    if not whales:
+        log("Nessun trade da wallet — fallback su volume mercati", "WARN")
+        ok, whales, total = fetch_polymarket_whales(MIN_SIZE_USDC, state)
+    else:
+        ok = True
+
+    is_demo = not whales
     if is_demo:
         log("Nessun dato reale — uso dati demo.", "WARN")
         whales = [
