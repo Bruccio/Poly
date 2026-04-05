@@ -111,9 +111,22 @@ SPORT_KEYWORDS = [
     "season opener", "regular season", "division title",
 ]
 
+# Pattern regex per catturare sport che sfuggono alle keyword
+SPORT_PATTERNS = [
+    r"will .+ win on \d{4}-\d{2}-\d{2}",       # "Will X win on 2026-04-05?" = partita
+    r"will .+ win .+\b(season|series|cup|tournament|league|championship|title)\b",
+    r"will .+ beat ",
+    r"\b(home|away)\s+(win|team|game)\b",
+    r"\b\d+\s+(goals?|points?|runs?|sets?|games?|touchdowns?)\b",
+    r"\b(fc|cf|ac|as|sc|rc|afc|ssc)\s+\w+",    # nomi club: FC Barcelona, AC Milan
+    r"\b(united|city|rovers|wanderers|athletic)\b.*\b(win|lose|draw|score)\b",
+]
+
 def _is_sport(title: str) -> bool:
     t = title.lower()
-    return any(kw.lower() in t for kw in SPORT_KEYWORDS)
+    if any(kw.lower() in t for kw in SPORT_KEYWORDS):
+        return True
+    return any(re.search(p, t) for p in SPORT_PATTERNS)
 
 
 # ── LOGGING ─────────────────────────────────────────────────────────────────────
@@ -316,15 +329,15 @@ def check_resolutions(state: dict):
 
 # ── AGGIORNA WATCHED MARKETS ─────────────────────────────────────────────────────
 def update_watched_markets(state: dict, results: list):
-    """Salva in watched_markets i mercati con verdict COPY."""
+    """Salva in watched_markets i mercati con verdict COPY o WATCH."""
     for res in results:
-        if res.get("verdict") != "COPY":
+        if res.get("verdict") not in ("COPY", "WATCH"):
             continue
         key = hashlib.md5(res["market"].encode()).hexdigest()[:12]
         if key not in state["watched_markets"]:
             state["watched_markets"][key] = {
                 "question": res["market"],
-                "our_verdict": "COPY",
+                "our_verdict": res.get("verdict", "COPY"),
                 "whale_wallet": res.get("wallet", ""),
                 "entry_price": res.get("price", 0),
                 "side": res.get("side", "YES"),
@@ -333,6 +346,87 @@ def update_watched_markets(state: dict, results: list):
                 "resolution": None,
                 "correct": None,
             }
+
+
+# ── WHALE PROFILING (ispirato da collectmarkets2) ────────────────────────────────
+def profile_whale(wallet: str, state: dict) -> dict:
+    """
+    Scarica le transazioni del wallet e calcola volume storico.
+    Risultato cachato in state["leaderboard"] per evitare chiamate ripetute.
+    """
+    if not wallet or wallet.startswith("0xpool") or wallet.startswith("0xdemo"):
+        return {"total_volume_usd": 0, "n_markets": 0, "profiled": False}
+
+    cached = state.get("leaderboard", {}).get(wallet, {})
+    if cached.get("profiled"):
+        return cached
+
+    H = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
+    total_volume = 0.0
+    markets_seen = set()
+    try:
+        for offset in [0, 500]:  # max 2 pagine = 1000 trade
+            url = (f"https://data-api.polymarket.com/activity"
+                   f"?user={wallet}&limit=500&offset={offset}&type=TRADE")
+            r = requests.get(url, headers=H, timeout=12)
+            if r.status_code != 200:
+                break
+            trades = r.json()
+            if not isinstance(trades, list):
+                trades = trades.get("data", [])
+            if not trades:
+                break
+            for t in trades:
+                amt = float(t.get("usdcSize") or t.get("amount") or t.get("size") or 0)
+                total_volume += amt
+                mid = t.get("market") or t.get("conditionId") or ""
+                if mid:
+                    markets_seen.add(mid)
+            time.sleep(0.5)  # rate limit
+    except Exception as e:
+        log(f"Profile whale {wallet[:14]}: {e}", "WARN")
+
+    profile = {
+        **cached,
+        "total_volume_usd": max(total_volume, cached.get("total_volume_usd", 0)),
+        "n_markets": len(markets_seen),
+        "profiled": True,
+        "last_seen": datetime.now(timezone.utc).isoformat(),
+    }
+    state.setdefault("leaderboard", {})[wallet] = profile
+    return profile
+
+
+def _classify(size, total_volume=0):
+    vol = max(size, total_volume)
+    if vol >= 1_000_000: return "Top Whale (>$1M)"
+    if vol >= 500_000:   return "Big Whale (>$500k)"
+    if vol >= 100_000:   return "Whale (>$100k)"
+    return "Small Fish"
+
+
+def compute_confidence(trade: dict, state: dict) -> int:
+    """Punteggio di fiducia 0-100 calcolato prima di Claude."""
+    score = 50
+    size = _sz(trade)
+    if size >= 500_000:   score += 15
+    elif size >= 200_000: score += 10
+    elif size >= 100_000: score += 5
+
+    ts = trade.get("whale_trust_score", 40)
+    if ts >= 80:   score += 15
+    elif ts >= 60: score += 8
+
+    price = float(trade.get("price", 0.5))
+    if price < 0.15 or price > 0.85:
+        score += 10  # strong conviction bet
+
+    wallet = (trade.get("userAddress") or "").lower()
+    profile = state.get("leaderboard", {}).get(wallet, {})
+    if profile.get("total_volume_usd", 0) >= 1_000_000:
+        score += 10
+
+    return min(100, score)
 
 
 # ── POLYMARKET ──────────────────────────────────────────────────────────────────
@@ -351,130 +445,197 @@ def _sz(t):
 
 def fetch_polymarket_whales(min_size, state: dict = None):
     """
-    Recupera mercati Polymarket con volume >= min_size.
-    Applica filtro wash trading e arricchisce con trust_score dalla leaderboard.
+    Multi-source crawling: aggrega dati da TUTTI gli endpoint Polymarket disponibili.
+    Non si ferma al primo — prende tutto e deduplica.
     """
     H = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
+    all_items: list = []
+    seen_titles: set = set()
 
-    attempts = [
-        ("GET",
-         "https://gamma-api.polymarket.com/markets?limit=100&active=true&order=volume24hr&ascending=false",
-         None),
-        ("GET",
-         "https://gamma-api.polymarket.com/events?limit=50&active=true",
-         None),
-        ("GET",
-         "https://data-api.polymarket.com/activity?limit=200&type=TRADE",
-         None),
-        ("POST",
-         "https://gateway-arbitrum.network.thegraph.com/api/f087f7244e56a2bc2d48c10e5a3c1bd3/subgraphs/id/Bx1W4S7kDVxs9gC3s2G6DS8kdNBJx2sYUiABH4RvGN46",
-         '{"query":"{ orderFilledEvents(first:200,orderBy:matchedAmount,orderDirection:desc){matchedAmount price maker order{market{question}}} }"}'),
-    ]
+    def _add_items(items: list, source: str):
+        added = 0
+        for item in items:
+            title = (item.get("title") or item.get("question") or "").strip().lower()
+            if title and title not in seen_titles:
+                seen_titles.add(title)
+                item["_source"] = source
+                all_items.append(item)
+                added += 1
+        if added:
+            log(f"  {source}: +{added} mercati", "OK")
 
-    for method, url, body in attempts:
-        host = url.split("//")[1].split("/")[0]
+    # ── Source 1: Gamma API Markets (volume 24h) ──
+    try:
+        r = requests.get(
+            "https://gamma-api.polymarket.com/markets?limit=100&active=true&order=volume24hr&ascending=false",
+            headers=H, timeout=12)
+        if r.status_code == 200:
+            mlist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            _add_items([{
+                "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
+                "price":       str(m.get("bestAsk") or m.get("lastTradePrice") or 0.5),
+                "side":        "YES",
+                "title":       m.get("question") or m.get("title") or "Mercato",
+                "userAddress": "0xpool",
+                "conditionId": m.get("conditionId") or "",
+            } for m in mlist
+              if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size],
+            "gamma-markets")
+    except Exception as e:
+        log(f"  gamma-markets: {str(e)[:80]}", "WARN")
+
+    # ── Source 2: Gamma API Events (volume totale) ──
+    try:
+        r = requests.get(
+            "https://gamma-api.polymarket.com/events?limit=80&active=true&order=volume&ascending=false",
+            headers=H, timeout=12)
+        if r.status_code == 200:
+            elist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            _add_items([{
+                "usdcSize":    str(float(ev.get("volume") or ev.get("volumeNum") or 0)),
+                "price":       "0.5",
+                "side":        "YES",
+                "title":       ev.get("title") or ev.get("question") or "Evento",
+                "userAddress": "0xpool",
+            } for ev in elist
+              if float(ev.get("volume") or ev.get("volumeNum") or 0) >= min_size],
+            "gamma-events")
+    except Exception as e:
+        log(f"  gamma-events: {str(e)[:80]}", "WARN")
+
+    # ── Source 3: Gamma API Trending/Popular markets ──
+    for tag in ["trending", "popular"]:
         try:
-            if method == "POST":
-                r = requests.post(url, data=body,
-                                  headers={**H, "Content-Type": "application/json"},
-                                  timeout=15)
-            else:
-                r = requests.get(url, headers=H, timeout=12)
-
-            if r.status_code != 200:
-                log(f"{host} → HTTP {r.status_code}", "WARN")
-                continue
-
-            raw = r.json()
-
-            if "thegraph" in url or "gateway-arbitrum" in url:
-                events = raw.get("data", {}).get("orderFilledEvents", [])
-                items = [{
-                    "usdcSize":    str(float(e.get("matchedAmount", 0)) / 1e6),
-                    "price":       e.get("price", "0"),
-                    "side":        "YES",
-                    "title":       e.get("order", {}).get("market", {}).get("question", "Mercato"),
-                    "userAddress": e.get("maker", "0x???"),
-                } for e in events]
-
-            elif "markets" in url:
-                mlist = raw if isinstance(raw, list) else raw.get("data", [])
-                items = [{
+            r = requests.get(
+                f"https://gamma-api.polymarket.com/markets?limit=50&active=true&tag={tag}",
+                headers=H, timeout=10)
+            if r.status_code == 200:
+                mlist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+                _add_items([{
                     "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
                     "price":       str(m.get("bestAsk") or m.get("lastTradePrice") or 0.5),
                     "side":        "YES",
                     "title":       m.get("question") or m.get("title") or "Mercato",
                     "userAddress": "0xpool",
                 } for m in mlist
-                  if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size]
-
-            elif "events" in url:
-                elist = raw if isinstance(raw, list) else raw.get("data", [])
-                items = []
-                for ev in elist:
-                    vol = float(ev.get("volume") or ev.get("volumeNum") or 0)
-                    if vol >= min_size:
-                        items.append({
-                            "usdcSize":    str(vol),
-                            "price":       "0.5",
-                            "side":        "YES",
-                            "title":       ev.get("title") or ev.get("question") or "Evento",
-                            "userAddress": "0xpool",
-                        })
-
-            else:
-                items = raw if isinstance(raw, list) else raw.get("data", raw.get("activities", []))
-
-            if not items:
-                log(f"{host} → 0 elementi utili", "WARN")
-                continue
-
-            # Filtra sport e mercati sotto soglia
-            filtered = [
-                t for t in items
-                if _sz(t) >= min_size
-                and not _is_sport(t.get("title") or t.get("question") or "")
-            ]
-
-            # Arricchisci con trust_score e filtra wash trader
-            leaderboard = (state or {}).get("leaderboard", {})
-            enriched = []
-            for t in filtered:
-                wallet = (t.get("userAddress") or t.get("maker") or "0xpool").lower()
-                lb_entry = leaderboard.get(wallet, {})
-                t["whale_trust_score"] = lb_entry.get("trust_score", 40)
-                t["whale_username"] = lb_entry.get("username", wallet[:10])
-                if not wallet.startswith("0xpool") and is_wash_trader(wallet):
-                    log(f"Escluso wash trader: {wallet[:14]}...", "WARN")
-                    continue
-                enriched.append(t)
-
-            # Ordina per trust_score × size
-            enriched.sort(key=lambda x: x["whale_trust_score"] * _sz(x), reverse=True)
-
-            # Diversità: seleziona MAX_WHALES con titoli diversi
-            seen_words: set[str] = set()
-            diverse: list = []
-            for t in enriched[:30]:
-                title = (t.get("title") or t.get("question") or "").lower()
-                words = [w for w in title.split() if len(w) > 3][:2]
-                key = " ".join(words)
-                if key not in seen_words:
-                    seen_words.add(key)
-                    diverse.append(t)
-                if len(diverse) >= MAX_WHALES:
-                    break
-
-            whales = diverse or enriched[:MAX_WHALES]
-            log(f"Polymarket OK ({host}): {len(items)} totali → "
-                f"{len(filtered)} non-sport ≥${min_size:,} → "
-                f"{len(enriched)} post-wash → {len(whales)} selezionati", "OK")
-            return True, whales, len(items)
-
+                  if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size],
+                f"gamma-{tag}")
         except Exception as e:
-            log(f"{host} → {str(e)[:90]}", "WARN")
+            log(f"  gamma-{tag}: {str(e)[:80]}", "WARN")
 
-    return False, [], 0
+    # ── Source 4: Data API Activity (trade reali con wallet) ──
+    try:
+        r = requests.get(
+            "https://data-api.polymarket.com/activity?limit=200&type=TRADE",
+            headers=H, timeout=12)
+        if r.status_code == 200:
+            trades = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            _add_items([{
+                "usdcSize":    str(float(t.get("usdcSize") or t.get("amount") or 0)),
+                "price":       str(t.get("price") or 0.5),
+                "side":        t.get("side") or "YES",
+                "title":       t.get("title") or t.get("question") or "Trade",
+                "userAddress": t.get("user") or t.get("proxyWallet") or "0x???",
+            } for t in trades
+              if float(t.get("usdcSize") or t.get("amount") or 0) >= min_size],
+            "data-api-activity")
+    except Exception as e:
+        log(f"  data-api-activity: {str(e)[:80]}", "WARN")
+
+    # ── Source 5: TheGraph on-chain (grandi ordini) ──
+    try:
+        r = requests.post(
+            "https://gateway-arbitrum.network.thegraph.com/api/f087f7244e56a2bc2d48c10e5a3c1bd3/"
+            "subgraphs/id/Bx1W4S7kDVxs9gC3s2G6DS8kdNBJx2sYUiABH4RvGN46",
+            data='{"query":"{ orderFilledEvents(first:200,orderBy:matchedAmount,orderDirection:desc)'
+                 '{matchedAmount price maker order{market{question}}} }"}',
+            headers={**H, "Content-Type": "application/json"},
+            timeout=15)
+        if r.status_code == 200:
+            events = r.json().get("data", {}).get("orderFilledEvents", [])
+            _add_items([{
+                "usdcSize":    str(float(e.get("matchedAmount", 0)) / 1e6),
+                "price":       e.get("price", "0"),
+                "side":        "YES",
+                "title":       e.get("order", {}).get("market", {}).get("question", "Mercato"),
+                "userAddress": e.get("maker", "0x???"),
+            } for e in events
+              if float(e.get("matchedAmount", 0)) / 1e6 >= min_size],
+            "thegraph-onchain")
+    except Exception as e:
+        log(f"  thegraph: {str(e)[:80]}", "WARN")
+
+    # ── Source 6: Top whale dalla leaderboard — i loro mercati attivi ──
+    lb = (state or {}).get("leaderboard", {})
+    top_wallets = sorted(lb.items(), key=lambda x: x[1].get("total_profit_usd", 0), reverse=True)[:5]
+    for wallet_addr, wdata in top_wallets:
+        if wallet_addr.startswith("0xpool") or wallet_addr.startswith("0xdemo"):
+            continue
+        try:
+            r = requests.get(
+                f"https://data-api.polymarket.com/activity?user={wallet_addr}&limit=20&type=TRADE",
+                headers=H, timeout=10)
+            if r.status_code == 200:
+                trades = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+                _add_items([{
+                    "usdcSize":    str(float(t.get("usdcSize") or t.get("amount") or 0)),
+                    "price":       str(t.get("price") or 0.5),
+                    "side":        t.get("side") or "YES",
+                    "title":       t.get("title") or t.get("question") or "Trade",
+                    "userAddress": wallet_addr,
+                } for t in trades
+                  if float(t.get("usdcSize") or t.get("amount") or 0) >= min_size * 0.5],
+                f"whale-{wdata.get('username', wallet_addr[:8])}")
+            time.sleep(0.3)
+        except Exception as e:
+            log(f"  whale-{wallet_addr[:8]}: {str(e)[:60]}", "WARN")
+
+    if not all_items:
+        return False, [], 0
+
+    log(f"Multi-source totale: {len(all_items)} mercati unici raccolti", "OK")
+
+    # ── Filtra sport e sotto soglia ──
+    filtered = [
+        t for t in all_items
+        if _sz(t) >= min_size * 0.5  # più permissivo per whale top
+        and not _is_sport(t.get("title") or t.get("question") or "")
+    ]
+
+    # ── Arricchisci con trust_score e filtra wash trader ──
+    leaderboard = (state or {}).get("leaderboard", {})
+    enriched = []
+    for t in filtered:
+        wallet = (t.get("userAddress") or t.get("maker") or "0xpool").lower()
+        lb_entry = leaderboard.get(wallet, {})
+        t["whale_trust_score"] = lb_entry.get("trust_score", 40)
+        t["whale_username"] = lb_entry.get("username", wallet[:10])
+        if not wallet.startswith("0xpool") and not wallet.startswith("0xdemo"):
+            if is_wash_trader(wallet):
+                log(f"Escluso wash trader: {wallet[:14]}...", "WARN")
+                continue
+        enriched.append(t)
+
+    # ── Ordina per trust_score × size ──
+    enriched.sort(key=lambda x: x["whale_trust_score"] * _sz(x), reverse=True)
+
+    # ── Diversità: seleziona MAX_WHALES con titoli diversi ──
+    seen_words: set[str] = set()
+    diverse: list = []
+    for t in enriched[:40]:
+        title = (t.get("title") or t.get("question") or "").lower()
+        words = [w for w in title.split() if len(w) > 3][:2]
+        key = " ".join(words)
+        if key not in seen_words:
+            seen_words.add(key)
+            diverse.append(t)
+        if len(diverse) >= MAX_WHALES:
+            break
+
+    whales = diverse or enriched[:MAX_WHALES]
+    log(f"Pipeline: {len(all_items)} raw → {len(filtered)} non-sport → "
+        f"{len(enriched)} post-wash → {len(whales)} selezionati", "OK")
+    return True, whales, len(all_items)
 
 
 # ── CLAUDE ──────────────────────────────────────────────────────────────────────
@@ -485,29 +646,31 @@ MODELS = [
 ]
 
 SYSTEM_PROMPT = (
-    "Sei un analista finanziario esperto di mercati predittivi.\n"
-    "Stai analizzando un mercato Polymarket con alto volume (>$100k USDC).\n\n"
-    "OBIETTIVO: Valuta se questo mercato rappresenta una vera opportunità di copy-trading.\n\n"
-    "Considera:\n"
-    "- Il prezzo attuale rispecchia davvero la probabilità reale dell'evento?\n"
-    "- Ci sono segnali di insider o informazioni privilegiate?\n"
-    "- Il mercato è genuino o potrebbe essere manipolato?\n"
-    "- Escudi SEMPRE: sport, calcio, basket, tennis, F1, Oscar, Grammy, ecc. → SKIP\n\n"
-    "Se il mercato sembra genuinamente sottoprezzato o c'è un segnale forte → COPY\n"
-    "Se è rischioso, speculativo, manipolato, o poco chiaro → SKIP\n\n"
-    "Rispondi SOLO in questo formato, in italiano semplice:\n"
-    "COPY\n"
+    "Sei un analista finanziario esperto di mercati predittivi (Polymarket).\n"
+    "Stai valutando un mercato con alto volume dove una whale (grande investitore) ha piazzato >$100k.\n\n"
+    "Il tuo compito: decidere se vale la pena seguire questa whale.\n\n"
+    "REGOLE ASSOLUTE:\n"
+    "- Qualsiasi scommessa sportiva (calcio, basket, tennis, F1, partite, match) → SKIP\n"
+    "- Qualsiasi evento entertainment (Oscar, Grammy, Eurovision) → SKIP\n\n"
+    "CRITERI DI VALUTAZIONE:\n"
+    "- Il prezzo è diverso dalla probabilità reale? (>10% gap = interessante)\n"
+    "- La whale ha trust score alto? (>70 = affidabile)\n"
+    "- Il mercato è su un evento verificabile con deadline chiara?\n"
+    "- C'è un catalizzatore imminente (elezione, decisione Fed, deadline legale, ecc.)?\n\n"
+    "VERDETTI (3 opzioni):\n"
+    "- COPY = Forte opportunità, prezzo chiaramente sbagliato o segnale forte dalla whale\n"
+    "- WATCH = Interessante, da tenere d'occhio, potrebbe diventare COPY\n"
+    "- SKIP = Non interessante, troppo rischioso, o è sport/entertainment\n\n"
+    "IMPORTANTE: Non essere troppo conservativo! Se una whale da milioni punta $200k+ "
+    "su un mercato politico/economico con prezzo basso, probabilmente sa qualcosa. "
+    "Almeno 2-3 mercati su 10 dovrebbero essere COPY o WATCH.\n\n"
+    "Rispondi SOLO in questo formato, in italiano:\n"
+    "COPY (o WATCH o SKIP)\n"
     "Rischio: X/10\n"
     "Vale la pena?: [1 frase chiara]\n"
-    "Cosa sta succedendo: [2 righe max, spiega il mercato come a un amico]\n"
+    "Cosa sta succedendo: [2-3 righe, spiega il mercato come a un amico]\n"
     "Sospetto?: No/Forse/Sì"
 )
-
-
-def _classify(size):
-    if size >= 100_000: return "Alpha/Insider (>$100k)"
-    if size >= 50_000:  return "Institutional ($50k–$100k)"
-    return "Opportunistic (<$50k)"
 
 
 def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):
@@ -515,12 +678,21 @@ def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):
     price       = float(trade.get("price") or trade.get("outcomePrice") or 0.5)
     side        = trade.get("side") or "YES"
     market      = trade.get("title") or trade.get("question") or "Mercato"
-    wallet      = (trade.get("maker") or trade.get("userAddress") or "0x???")[:14] + "..."
-    tier        = _classify(size)
+    wallet_full = (trade.get("maker") or trade.get("userAddress") or "0x???").lower()
+    wallet      = wallet_full[:14] + "..."
     trust_score = trade.get("whale_trust_score", 40)
     whale_name  = trade.get("whale_username", wallet)
 
-    algo_stats = (state or {}).get("algo_stats", {})
+    # Profila whale con volume storico
+    state = state or {}
+    profile = profile_whale(wallet_full, state)
+    total_vol = profile.get("total_volume_usd", 0)
+    tier = _classify(size, total_vol)
+
+    # Confidence score pre-Claude
+    confidence = compute_confidence(trade, state)
+
+    algo_stats = state.get("algo_stats", {})
     accuracy   = algo_stats.get("accuracy_pct")
     acc_str    = (f"Track record sistema: {accuracy}% di COPY corretti"
                   if accuracy is not None else "Track record sistema: in raccolta dati")
@@ -529,9 +701,11 @@ def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):
         f"Mercato: {market}\n"
         f"Direzione: {side}\n"
         f"Prezzo attuale: {price:.3f} (probabilità implicita {price*100:.0f}%)\n"
-        f"Volume/Size: ${size:,.0f} USDC\n"
+        f"Volume/Size singola: ${size:,.0f} USDC\n"
+        f"Volume storico wallet: ${total_vol:,.0f} USDC\n"
         f"Tier: {tier}\n"
         f"Whale: {whale_name} (trust score: {trust_score}/100)\n"
+        f"Confidence pre-analisi: {confidence}/100\n"
         f"{acc_str}"
     )
     if reddit_context:
@@ -549,7 +723,7 @@ def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):
                 },
                 json={
                     "model": model,
-                    "max_tokens": 300,
+                    "max_tokens": 500,
                     "system": SYSTEM_PROMPT,
                     "messages": [{"role": "user", "content": f"Analizza:\n\n{text}"}],
                 },
@@ -559,7 +733,7 @@ def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):
                 raw = "".join(b.get("text", "") for b in r.json().get("content", []))
                 log(f"Claude OK ({model})", "OK")
                 return _parse_claude(raw, market, side, price, size, wallet, tier,
-                                     trust_score, whale_name)
+                                     trust_score, whale_name, confidence)
             err = r.json().get("error", {}).get("message", r.text[:100])
             log(f"Claude {r.status_code} ({model}): {err}", "WARN")
             last_err = err
@@ -571,26 +745,44 @@ def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):
 
 
 def _parse_claude(raw, market, side, price, size, wallet, tier,
-                  trust_score=40, whale_name=""):
+                  trust_score=40, whale_name="", confidence=50):
     def g(pat, flags=re.I):
         m = re.search(pat, raw, flags)
         return m.group(1).strip() if m else None
 
+    # 3 verdetti: COPY, WATCH, SKIP
+    if re.search(r"^COPY", raw, re.M):
+        verdict = "COPY"
+    elif re.search(r"^WATCH", raw, re.M):
+        verdict = "WATCH"
+    else:
+        verdict = "SKIP"
+
+    # Se Claude menziona sport nella risposta, forza SKIP + flag
+    sport_in_response = bool(re.search(
+        r"\b(sport|calcio|basket|partita|football|soccer|tennis|match)\b",
+        raw, re.I
+    ))
+    if sport_in_response:
+        verdict = "SKIP"
+
     return {
-        "market":      market,
-        "side":        side,
-        "price":       price,
-        "size":        size,
-        "wallet":      wallet,
-        "whale_name":  whale_name,
-        "tier":        tier,
-        "trust_score": trust_score,
-        "verdict":     "COPY" if re.search(r"^COPY", raw, re.M) else "SKIP",
-        "risk_score":  int(g(r"Rischio[:\s]+(\d+)") or 5),
-        "vale_pena":   g(r"Vale la pena\?[:\s]*(.+?)(?:\n|$)") or "",
-        "spiegazione": (g(r"Cosa sta succedendo[:\s]*(.+?)(?:\nSosp|$)",
-                          re.I | re.S) or raw[:200])[:250],
-        "sospetto":    g(r"Sospetto\?[:\s]*(.+?)(?:\n|$)") or "No",
+        "market":           market,
+        "side":             side,
+        "price":            price,
+        "size":             size,
+        "wallet":           wallet,
+        "whale_name":       whale_name,
+        "tier":             tier,
+        "trust_score":      trust_score,
+        "confidence":       confidence,
+        "verdict":          verdict,
+        "is_sport_flagged": sport_in_response,
+        "risk_score":       int(g(r"Rischio[:\s]+(\d+)") or 5),
+        "vale_pena":        g(r"Vale la pena\?[:\s]*(.+?)(?:\n|$)") or "",
+        "spiegazione":      (g(r"Cosa sta succedendo[:\s]*(.+?)(?:\n(?:Sospetto))",
+                               re.I | re.S) or raw[:300])[:400],
+        "sospetto":         g(r"Sospetto\?[:\s]*(.+?)(?:\n|$)") or "No",
     }
 
 
@@ -600,6 +792,7 @@ def build_message(results, state: dict = None, is_demo=False, best_skip=None):
     msg = f"🐋 *Grandi Mosse su Polymarket*{' _(DEMO)_' if is_demo else ''}\n_{ts}_\n\n"
 
     copy_count = sum(1 for t in results if t["verdict"] == "COPY")
+    watch_count = sum(1 for t in results if t["verdict"] == "WATCH")
     msg += f"Analizzati {len(results)} mercati non\\-sportivi da >\\${MIN_SIZE_USDC // 1000}k.\n"
 
     # Track record accuracy
@@ -609,12 +802,19 @@ def build_message(results, state: dict = None, is_demo=False, best_skip=None):
     if acc is not None:
         msg += f"📊 Track record: *{acc}%* accuracy \\({resolved} segnali risolti\\)\n"
 
-    if copy_count:
-        msg += f"*{copy_count}* {'merita' if copy_count == 1 else 'meritano'} attenzione. 👇\n\n"
+    if copy_count or watch_count:
+        parts = []
+        if copy_count:
+            parts.append(f"*{copy_count}* COPY")
+        if watch_count:
+            parts.append(f"*{watch_count}* WATCH")
+        msg += f"{', '.join(parts)} — da seguire. 👇\n\n"
     else:
-        msg += "Nessun COPY oggi — ecco il *meno peggio* tra quelli analizzati. 👇\n\n"
+        msg += "Nessun COPY/WATCH oggi — ecco il *meno peggio*. 👇\n\n"
 
+    # Mostra COPY, poi WATCH, poi meno peggio (mai sport)
     to_show = [t for t in results if t["verdict"] == "COPY"]
+    to_show += [t for t in results if t["verdict"] == "WATCH"]
     if not to_show and best_skip:
         to_show = [best_skip]
     if not to_show:
@@ -622,18 +822,26 @@ def build_message(results, state: dict = None, is_demo=False, best_skip=None):
 
     for t in to_show:
         m = t["market"][:70] + ("..." if len(t["market"]) > 70 else "")
-        is_copy = t["verdict"] == "COPY"
-        msg += "✅ *DA VALUTARE*\n" if is_copy else "⭐ *IL MENO PEGGIO DI OGGI*\n"
+        v = t["verdict"]
+        if v == "COPY":
+            msg += "✅ *COPY — DA VALUTARE*\n"
+        elif v == "WATCH":
+            msg += "👁️ *WATCH — TIENI D'OCCHIO*\n"
+        else:
+            msg += "⭐ *IL MENO PEGGIO DI OGGI*\n"
         msg += f"📌 _{m}_\n"
+        # Whale info + tier
         wname = t.get("whale_name", "")
         ts_val = t.get("trust_score", 40)
+        conf = t.get("confidence", 50)
         if wname and "0xpool" not in wname and "0xdemo" not in wname:
             trust_icon = "🟢" if ts_val >= 70 else "🟡" if ts_val >= 50 else "🔴"
-            msg += f"🐋 {wname} {trust_icon} Trust: {ts_val}/100\n"
+            msg += f"🐋 {wname} {trust_icon} Trust: {ts_val}/100 | {t.get('tier','')}\n"
+        msg += f"🎯 Confidence: {conf}/100\n"
         if t.get("vale_pena"):
             msg += f"💡 {t['vale_pena']}\n"
         if t.get("spiegazione"):
-            msg += f"📖 {t['spiegazione'][:200]}\n"
+            msg += f"📖 {t['spiegazione'][:300]}\n"
         risk = t["risk_score"]
         icon = "🟢" if risk <= 3 else "🟡" if risk <= 6 else "🔴"
         msg += f"{icon} Rischio: {risk}/10\n"
@@ -654,7 +862,7 @@ def build_message(results, state: dict = None, is_demo=False, best_skip=None):
             msg += f"{i}\\. {name} \\+\\${profit:,.0f} \\(trust {ts_val}\\)\n"
         msg += "\n"
 
-    return msg + "_Polymarket Whale Tracker v2 — Bruno_"
+    return msg + "_Polymarket Whale Tracker v3 — Bruno_"
 
 
 def send_telegram(message):
@@ -673,7 +881,8 @@ def send_telegram(message):
 def build_email_html(results, state: dict = None, is_demo=False, best_skip=None):
     ts = datetime.now().strftime("%d/%m/%Y %H:%M")
     copy_count = sum(1 for t in results if t["verdict"] == "COPY")
-    to_show = [t for t in results if t["verdict"] == "COPY"] or \
+    watch_count = sum(1 for t in results if t["verdict"] == "WATCH")
+    to_show = [t for t in results if t["verdict"] in ("COPY", "WATCH")] or \
               ([best_skip] if best_skip else results[:3])
 
     algo_stats = (state or {}).get("algo_stats", {})
@@ -685,10 +894,11 @@ def build_email_html(results, state: dict = None, is_demo=False, best_skip=None)
 
     rows = ""
     for t in to_show:
-        is_copy = t["verdict"] == "COPY"
-        color   = "#1a7a3a" if is_copy else "#555"
-        bg      = "#f0fff4" if is_copy else "#fafafa"
-        badge   = "✅ DA VALUTARE" if is_copy else "⭐ Il meno peggio di oggi"
+        v = t["verdict"]
+        color   = "#1a7a3a" if v == "COPY" else "#2a6dd9" if v == "WATCH" else "#555"
+        bg      = "#f0fff4" if v == "COPY" else "#f0f4ff" if v == "WATCH" else "#fafafa"
+        badge   = "✅ COPY — DA VALUTARE" if v == "COPY" else \
+                  "👁️ WATCH — DA SEGUIRE" if v == "WATCH" else "⭐ Il meno peggio di oggi"
         risk    = t["risk_score"]
         risk_color = "#2a9d2a" if risk <= 3 else "#e6a817" if risk <= 6 else "#d9534f"
         wname = t.get("whale_name", "")
@@ -744,7 +954,7 @@ def build_email_html(results, state: dict = None, is_demo=False, best_skip=None)
       <table width="100%" cellspacing="0" cellpadding="0">{rows}</table>
       {lb_html}
       <div style="padding:12px;background:#0d1b2a;border-radius:0 0 8px 8px;text-align:center;">
-        <span style="color:#aaa;font-size:12px;">Polymarket Whale Tracker v2 — Bruno</span>
+        <span style="color:#aaa;font-size:12px;">Polymarket Whale Tracker v3 — Bruno</span>
       </div>
     </body></html>"""
 
@@ -836,8 +1046,11 @@ def run():
     # 7. Salva stato persistente
     save_state(state)
 
-    # 8. Notifiche
-    skips = [r for r in results if r["verdict"] == "SKIP"]
+    # 8. Notifiche — best_skip esclude sport-flagged e sport nel titolo
+    skips = [r for r in results
+             if r["verdict"] == "SKIP"
+             and not r.get("is_sport_flagged")
+             and not _is_sport(r.get("market", ""))]
     best_skip = min(skips, key=lambda r: r["risk_score"]) if skips else None
 
     if results:
