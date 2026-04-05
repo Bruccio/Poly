@@ -1,41 +1,41 @@
-name: 🐋 Whale Briefing Giornaliero
+name: 🐋 Whale Tracker v2
 
 on:
-  # Ogni giorno alle 8:00 ora italiana (UTC+2 estate / UTC+1 inverno)
-  # Usiamo 6:00 UTC per coprire l'ora legale — aggiusta a 7:00 UTC in inverno
+  # 09:00 e 21:00 ora italiana (UTC+2 estate)
+  # 07:00 e 19:00 UTC in estate | 08:00 e 20:00 UTC in inverno
   schedule:
     - cron: "0 7,19 * * *"
 
-  # Permette di lanciarlo manualmente dal tab "Actions" di GitHub
+  # Lancio manuale dal tab "Actions"
   workflow_dispatch:
     inputs:
       min_whale_size:
-        description: "Soglia minima whale in USDC (default: 50000)"
+        description: "Soglia minima whale in USDC (default: 100000)"
         required: false
-        default: "50000"
-      bankroll:
-        description: "Il tuo bankroll in USD (default: 10000)"
-        required: false
-        default: "10000"
+        default: "100000"
+
+permissions:
+  contents: write
 
 jobs:
   whale-briefing:
-    name: Genera e invia briefing
+    name: Analisi whale e invio report
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 12
 
     env:
       ANTHROPIC_API_KEY:   ${{ secrets.ANTHROPIC_API_KEY }}
       TELEGRAM_BOT_TOKEN:  ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
       GMAIL_APP_PASSWORD:  ${{ secrets.GMAIL_APP_PASSWORD }}
-      MIN_WHALE_SIZE:      ${{ github.event.inputs.min_whale_size || '50000' }}
-      BANKROLL:            ${{ github.event.inputs.bankroll || '10000' }}
+      MIN_WHALE_SIZE:      ${{ github.event.inputs.min_whale_size || '100000' }}
       ONLY_NOTIFY_ON_COPY: "false"
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Setup Python 3.12
         uses: actions/setup-python@v5
@@ -48,6 +48,15 @@ jobs:
 
       - name: Esegui Whale Tracker
         run: python whale_tracker.py
+
+      - name: Salva stato whale nel repo
+        if: always()
+        run: |
+          git config user.name "Whale Tracker Bot"
+          git config user.email "whale-bot@github-actions.local"
+          git add whale_state.json || true
+          git diff --cached --quiet || git commit -m "chore: aggiorna whale_state run #$(date +%Y%m%d-%H%M) [skip ci]"
+          git push || echo "Push fallito (nessuna modifica?)"
 
       - name: Salva log come artifact
         if: always()
