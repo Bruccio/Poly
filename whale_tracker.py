@@ -17,6 +17,7 @@ import math
 import hashlib
 import smtplib
 import requests
+import urllib.parse
 from datetime import datetime, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -454,6 +455,66 @@ def check_resolutions(state: dict):
             f"accuracy: {state['algo_stats']['accuracy_pct']}%", "OK")
 
 
+# ── SPORT TAG FILTER (Gamma API) ─────────────────────────────────────────────────
+_SPORT_TAGS = {
+    "soccer", "football", "basketball", "nba", "nfl", "mlb", "nhl", "tennis",
+    "formula-1", "f1", "mma", "ufc", "boxing", "rugby", "cricket", "golf",
+    "sports", "sport", "esports", "olympics", "volleyball", "baseball",
+    "hockey", "cycling", "atletica", "nuoto", "swimming", "wrestling",
+}
+
+def _has_sport_tag(market_obj: dict) -> bool:
+    """Controlla se un market Gamma ha tag o categoria sportiva."""
+    tags = market_obj.get("tags") or []
+    for tag in tags:
+        slug = (tag.get("slug") or tag.get("id") or tag if isinstance(tag, str) else "").lower()
+        label = (tag.get("label") or tag.get("name") or "").lower()
+        if slug in _SPORT_TAGS or label in _SPORT_TAGS:
+            return True
+    cat = (market_obj.get("category") or market_obj.get("groupItemTitle") or "").lower()
+    return any(s in cat for s in _SPORT_TAGS)
+
+
+# ── NEWS CONTEXT (Google News RSS) ───────────────────────────────────────────────
+def fetch_market_context(title: str) -> str:
+    """
+    Cerca le ultime 3 notizie correlate al mercato via Google News RSS.
+    Restituisce stringa con i titoli separati da ' | '.
+    Gratis, nessuna API key, usato per dare a Claude contesto reale.
+    """
+    # Keyword principali (ignora stop words e punteggiatura)
+    stop = {
+        "will", "the", "a", "an", "in", "on", "at", "to", "for", "of",
+        "is", "be", "are", "was", "has", "have", "by", "from", "with",
+        "that", "this", "or", "and", "its", "their"
+    }
+    words = [
+        w.strip("?.,!") for w in title.split()
+        if w.lower().strip("?.,!") not in stop and len(w) > 2
+    ][:6]
+    query = urllib.parse.quote(" ".join(words))
+    url = f"https://news.google.com/rss/search?q={query}&hl=en&gl=US&ceid=US:en"
+    try:
+        r = _http_get(url, timeout=8, retries=2)
+        if not r or r.status_code != 200:
+            return ""
+        # Estrai titoli da RSS XML — CDATA o testo semplice
+        items = re.findall(
+            r'<item>.*?<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</title>',
+            r.text, re.S
+        )
+        headlines = []
+        for raw_title in items[:4]:
+            clean = raw_title.strip()
+            # Rimuovi " - NomeTestate" alla fine
+            clean = re.sub(r'\s*[-–]\s*[^-–]+$', '', clean).strip()
+            if clean and len(clean) > 15:
+                headlines.append(clean)
+        return " | ".join(headlines[:3])
+    except Exception:
+        return ""
+
+
 # ── AGGIORNA WATCHED MARKETS ─────────────────────────────────────────────────────
 def update_watched_markets(state: dict, results: list):
     """Salva in watched_markets i mercati con verdict COPY o WATCH."""
@@ -602,7 +663,8 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                 "userAddress": "0xpool",
                 "conditionId": m.get("conditionId") or "",
             } for m in mlist
-              if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size],
+              if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size
+              and not _has_sport_tag(m)],
             "gamma-markets")
     except Exception as e:
         log(f"  gamma-markets: {str(e)[:80]}", "WARN")
@@ -619,7 +681,8 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                 "title":       ev.get("title") or ev.get("question") or "Evento",
                 "userAddress": "0xpool",
             } for ev in elist
-              if float(ev.get("volume") or ev.get("volumeNum") or 0) >= min_size],
+              if float(ev.get("volume") or ev.get("volumeNum") or 0) >= min_size
+              and not _has_sport_tag(ev)],
             "gamma-events")
     except Exception as e:
         log(f"  gamma-events: {str(e)[:80]}", "WARN")
@@ -637,7 +700,8 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                     "title":       m.get("question") or m.get("title") or "Mercato",
                     "userAddress": "0xpool",
                 } for m in mlist
-                  if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size],
+                  if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size
+                  and not _has_sport_tag(m)],
                 f"gamma-{tag}")
         except Exception as e:
             log(f"  gamma-{tag}: {str(e)[:80]}", "WARN")
@@ -761,29 +825,32 @@ MODELS = [
 ]
 
 SYSTEM_PROMPT = (
-    "Sei un analista finanziario esperto di mercati predittivi (Polymarket).\n"
-    "Stai valutando un mercato con alto volume dove una whale (grande investitore) ha piazzato >$100k.\n\n"
-    "Il tuo compito: decidere se vale la pena seguire questa whale.\n\n"
-    "REGOLE ASSOLUTE:\n"
-    "- Qualsiasi scommessa sportiva (calcio, basket, tennis, F1, partite, match) → SKIP\n"
-    "- Qualsiasi evento entertainment (Oscar, Grammy, Eurovision) → SKIP\n\n"
-    "CRITERI DI VALUTAZIONE:\n"
-    "- Il prezzo è diverso dalla probabilità reale? (>10% gap = interessante)\n"
-    "- La whale ha trust score alto? (>70 = affidabile)\n"
-    "- Il mercato è su un evento verificabile con deadline chiara?\n"
-    "- C'è un catalizzatore imminente (elezione, decisione Fed, deadline legale, ecc.)?\n\n"
-    "VERDETTI (3 opzioni):\n"
-    "- COPY = Forte opportunità, prezzo chiaramente sbagliato o segnale forte dalla whale\n"
-    "- WATCH = Interessante, da tenere d'occhio, potrebbe diventare COPY\n"
-    "- SKIP = Non interessante, troppo rischioso, o è sport/entertainment\n\n"
-    "IMPORTANTE: Non essere troppo conservativo! Se una whale da milioni punta $200k+ "
-    "su un mercato politico/economico con prezzo basso, probabilmente sa qualcosa. "
-    "Almeno 2-3 mercati su 10 dovrebbero essere COPY o WATCH.\n\n"
+    "Sei un analista aggressivo di mercati predittivi (Polymarket). Il tuo obiettivo: "
+    "identificare trade da seguire, non evitarli.\n\n"
+    "REGOLA N°1 — SPORT/ENTERTAINMENT → SKIP IMMEDIATO (nessuna analisi):\n"
+    "Calcio, basket, tennis, F1, NFL, NBA, Oscar, Grammy, Eurovision → SKIP.\n\n"
+    "REGOLA N°2 — COPY DI DEFAULT (la più importante):\n"
+    "Se Trust Score ≥ 80 AND size ≥ $100k AND NON è sport → il verdetto è COPY "
+    "a MENO CHE tu non abbia una ragione specifica e concreta per non farlo "
+    "(es: mercato già a 95¢, whale nota per wash trading, evento già risolto).\n"
+    "Il dubbio va a favore del COPY, non dello SKIP.\n\n"
+    "REGOLA N°3 — WATCH se incerto:\n"
+    "Trust 60-79 OR size $50k-$99k OR contesto ambiguo → WATCH. "
+    "Non usare SKIP quando hai incertezza — usa WATCH.\n\n"
+    "CALIBRAZIONE PREZZI — guida rapida:\n"
+    "- Prezzo < 20¢: evento improbabile MA la whale sa qualcosa? → spesso COPY\n"
+    "- Prezzo 20-45¢: zona interessante, mercato sotto-prezzato → COPY o WATCH\n"
+    "- Prezzo 50-75¢: neutro, dipende dal contesto → WATCH o COPY se forte segnale\n"
+    "- Prezzo > 85¢: mercato quasi certo, poco valore → SKIP o WATCH\n\n"
+    "CONTESTO NEWS: Se vengono fornite notizie recenti correlate, usale come "
+    "conferma del movimento whale. Una whale che muove $200k+ DOPO una notizia "
+    "rilevante è quasi certamente un COPY.\n\n"
+    "TRACK RECORD: Se il sistema ha >60% accuracy → fidati ancora di più dei segnali.\n\n"
     "Rispondi SOLO in questo formato, in italiano:\n"
     "COPY (o WATCH o SKIP)\n"
     "Rischio: X/10\n"
-    "Vale la pena?: [1 frase chiara]\n"
-    "Cosa sta succedendo: [2-3 righe, spiega il mercato come a un amico]\n"
+    "Vale la pena?: [1 frase diretta e concisa]\n"
+    "Cosa sta succedendo: [2-3 righe MAX — spiega il mercato come a un amico]\n"
     "Sospetto?: No/Forse/Sì"
 )
 
@@ -899,6 +966,160 @@ def _parse_claude(raw, market, side, price, size, wallet, tier,
                                re.I | re.S) or raw[:300])[:400],
         "sospetto":         g(r"Sospetto\?[:\s]*(.+?)(?:\n|$)") or "No",
     }
+
+
+# ── BATCH CLAUDE — top 5 mercati in una sola chiamata ───────────────────────────
+BATCH_SYSTEM = (
+    "Sei un analista aggressivo di mercati predittivi. "
+    "Analizza i mercati in batch e rispondi nel formato esatto richiesto. "
+    "Sport/entertainment → SKIP immediato. "
+    "Trust ≥ 80 + size ≥ $100k + non sport → COPY di default. "
+    "Usa WATCH per i casi incerti, non SKIP."
+)
+
+def _build_trade_text(trade: dict, state: dict, news: str = "") -> str:
+    """Testo sintetico di un singolo trade per il prompt batch."""
+    size       = _sz(trade)
+    price      = float(trade.get("price") or 0.5)
+    side       = trade.get("side") or "YES"
+    market     = trade.get("title") or trade.get("question") or "Mercato"
+    trust      = trade.get("whale_trust_score", 40)
+    wname      = trade.get("whale_username", "?")
+    wallet_f   = (trade.get("maker") or trade.get("userAddress") or "").lower()
+    profile    = profile_whale(wallet_f, state)
+    total_vol  = profile.get("total_volume_usd", 0)
+    tier       = _classify(size, total_vol)
+    confidence = compute_confidence(trade, state)
+    lines = [
+        f"Titolo: {market}",
+        f"Direzione: {side} @ {price:.2f} ({price*100:.0f}¢)",
+        f"Size: ${size:,.0f} | Vol storico wallet: ${total_vol:,.0f}",
+        f"Whale: {wname} | Trust: {trust}/100 | Tier: {tier}",
+        f"Confidence pre-analisi: {confidence}/100",
+    ]
+    if news:
+        lines.append(f"Notizie correlate: {news}")
+    return "\n".join(lines)
+
+
+def analyze_batch_claude(trades: list, state: dict, reddit_context: str = "") -> list:
+    """
+    Analizza fino a 5 mercati in una singola chiamata Claude.
+    Riduce il numero di API call da N a 1, con parsing batch del risultato.
+    Ritorna lista di result dict (stesso formato di _parse_claude).
+    """
+    batch = trades[:5]
+    if not batch:
+        return []
+
+    # Prepara testo strutturato per ogni trade (con news context)
+    sections = []
+    trade_meta = []  # dati per parsing post-risposta
+    for i, trade in enumerate(batch, 1):
+        news = fetch_market_context(trade.get("title") or "")
+        if news:
+            log(f"  News [{i}]: {news[:80]}", "OK")
+        text = _build_trade_text(trade, state, news)
+        sections.append(f"=== MERCATO {i} ===\n{text}")
+        wallet_f = (trade.get("maker") or trade.get("userAddress") or "").lower()
+        profile  = profile_whale(wallet_f, state)
+        trade_meta.append({
+            "market":     trade.get("title") or trade.get("question") or "Mercato",
+            "side":       trade.get("side") or "YES",
+            "price":      float(trade.get("price") or 0.5),
+            "size":       _sz(trade),
+            "wallet":     wallet_f[:14] + "...",
+            "whale_name": trade.get("whale_username", "?"),
+            "tier":       _classify(_sz(trade), profile.get("total_volume_usd", 0)),
+            "trust":      trade.get("whale_trust_score", 40),
+            "confidence": compute_confidence(trade, state),
+        })
+
+    acc_str = ""
+    algo    = state.get("algo_stats", {})
+    if algo.get("accuracy_pct") is not None:
+        acc_str = f"\nTrack record sistema: {algo['accuracy_pct']}% accuracy."
+    if reddit_context:
+        acc_str += f"\nInsight r/Polymarket: {reddit_context}"
+
+    prompt = (
+        f"Analizza questi {len(batch)} mercati Polymarket.{acc_str}\n\n"
+        + "\n\n".join(sections)
+        + "\n\nRispondi ESATTAMENTE in questo formato (nessun testo extra tra i mercati):\n\n"
+        + "\n\n".join(
+            f"=== MERCATO {i} ===\nCOPY/WATCH/SKIP\nRischio: X/10\n"
+            "Vale la pena?: ...\nCosa sta succedendo: ...\nSospetto?: No/Forse/Sì"
+            for i in range(1, len(batch) + 1)
+        )
+    )
+
+    for model in MODELS:
+        try:
+            r = requests.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "Content-Type": "application/json",
+                    "x-api-key": ANTHROPIC_API_KEY,
+                    "anthropic-version": "2023-06-01",
+                },
+                json={
+                    "model": model,
+                    "max_tokens": 800,
+                    "system": BATCH_SYSTEM,
+                    "messages": [{"role": "user", "content": prompt}],
+                },
+                timeout=45,
+            )
+            if r.status_code != 200:
+                log(f"Batch Claude {r.status_code} ({model})", "WARN")
+                continue
+            raw = "".join(b.get("text", "") for b in r.json().get("content", []))
+            log(f"Batch Claude OK ({model}) — {len(batch)} mercati in 1 call", "OK")
+
+            # Parser batch: dividi per === MERCATO N ===
+            parts = re.split(r'===\s*MERCATO\s+\d+\s*===', raw)
+            parts = [p.strip() for p in parts if p.strip()]
+            results = []
+            for idx, (chunk, meta) in enumerate(zip(parts, trade_meta)):
+                try:
+                    res = _parse_claude(
+                        chunk,
+                        meta["market"], meta["side"], meta["price"], meta["size"],
+                        meta["wallet"], meta["tier"], meta["trust"], meta["whale_name"],
+                        meta["confidence"],
+                    )
+                    results.append(res)
+                    log(f"  [{idx+1}] {meta['market'][:45]}: {res['verdict']} "
+                        f"R{res['risk_score']}/10", "OK")
+                except Exception as e:
+                    log(f"  Batch parse errore mercato {idx+1}: {e}", "WARN")
+                    results.append({
+                        "market": meta["market"], "side": meta["side"],
+                        "price": meta["price"], "size": meta["size"],
+                        "wallet": meta["wallet"], "whale_name": meta["whale_name"],
+                        "tier": meta["tier"], "trust_score": meta["trust"],
+                        "confidence": meta["confidence"],
+                        "verdict": "SKIP", "risk_score": 5, "is_sport_flagged": False,
+                        "vale_pena": "", "spiegazione": chunk[:200], "sospetto": "No",
+                    })
+            # Completa risultati mancanti (se Claude ha risposto per meno mercati)
+            while len(results) < len(batch):
+                m = trade_meta[len(results)]
+                results.append({
+                    "market": m["market"], "side": m["side"],
+                    "price": m["price"], "size": m["size"],
+                    "wallet": m["wallet"], "whale_name": m["whale_name"],
+                    "tier": m["tier"], "trust_score": m["trust"],
+                    "confidence": m["confidence"],
+                    "verdict": "SKIP", "risk_score": 5, "is_sport_flagged": False,
+                    "vale_pena": "", "spiegazione": "Parsing batch fallito", "sospetto": "No",
+                })
+            return results
+        except Exception as e:
+            log(f"Batch Claude eccezione ({model}): {e}", "WARN")
+
+    log("Batch Claude fallito — fallback su chiamate singole", "WARN")
+    return []
 
 
 # ── TELEGRAM ────────────────────────────────────────────────────────────────────
@@ -1143,27 +1364,66 @@ def run():
              "userAddress": "0xdemo3", "whale_trust_score": 85, "whale_username": "demo_whale_3"},
         ]
 
-    # 5. Analisi Claude
-    results = []
-    for i, trade in enumerate(whales[:MAX_WHALES]):
-        name = trade.get("title") or trade.get("question") or "Mercato"
-        log(f"Analisi [{i+1}/{min(MAX_WHALES, len(whales))}]: {name[:55]}...")
+    # 5. Analisi Claude — BATCH per i primi 5, singola per i rimanenti
+    to_analyze = whales[:MAX_WHALES]
+    results: list = []
+
+    # 5a. Batch (top 5) — 1 call invece di 5, include news context
+    log(f"Analisi batch top 5 mercati (1 chiamata Claude)...")
+    batch_results = analyze_batch_claude(to_analyze[:5], state, reddit_context)
+    if batch_results:
+        results.extend(batch_results)
+    else:
+        # Fallback: analisi singola per i primi 5
+        for trade in to_analyze[:5]:
+            name = trade.get("title") or "Mercato"
+            log(f"Analisi singola fallback: {name[:55]}...")
+            try:
+                news = fetch_market_context(name)
+                result = analyze_with_claude(trade, state, reddit_context + (f" | News: {news}" if news else ""))
+                results.append(result)
+            except Exception as e:
+                log(f"Errore analisi: {e}", "ERR")
+                results.append({
+                    "market": name, "side": "N/D", "price": 0, "size": 0,
+                    "wallet": "—", "whale_name": "—", "tier": "—", "trust_score": 0,
+                    "verdict": "SKIP", "risk_score": 5, "is_sport_flagged": False,
+                    "vale_pena": "", "spiegazione": f"Errore: {str(e)[:100]}", "sospetto": "No",
+                })
+            time.sleep(1)
+
+    # 5b. Analisi singola per i mercati rimanenti (6-MAX_WHALES)
+    for i, trade in enumerate(to_analyze[5:], 6):
+        name = trade.get("title") or "Mercato"
+        log(f"Analisi [{i}/{len(to_analyze)}]: {name[:55]}...")
         try:
-            result = analyze_with_claude(trade, state, reddit_context)
+            news = fetch_market_context(name)
+            result = analyze_with_claude(
+                trade, state,
+                reddit_context + (f" | News: {news}" if news else "")
+            )
             results.append(result)
-            log(f"→ {result['verdict']} | Rischio {result['risk_score']}/10 | "
-                f"Trust {result.get('trust_score',40)} | Sospetto: {result.get('sospetto','No')}", "OK")
+            log(f"→ {result['verdict']} | R{result['risk_score']}/10 | "
+                f"Trust {result.get('trust_score',40)}", "OK")
         except Exception as e:
             log(f"Errore analisi: {e}", "ERR")
             results.append({
                 "market": name, "side": "N/D", "price": 0, "size": 0,
                 "wallet": "—", "whale_name": "—", "tier": "—", "trust_score": 0,
-                "verdict": "SKIP", "risk_score": 5,
-                "vale_pena": "", "spiegazione": f"Errore: {str(e)[:100]}",
-                "sospetto": "No",
+                "verdict": "SKIP", "risk_score": 5, "is_sport_flagged": False,
+                "vale_pena": "", "spiegazione": f"Errore: {str(e)[:100]}", "sospetto": "No",
             })
-        if i < MAX_WHALES - 1:
-            time.sleep(1)
+        time.sleep(1)
+
+    # Log lezioni apprese
+    copy_n  = sum(1 for r in results if r["verdict"] == "COPY")
+    watch_n = sum(1 for r in results if r["verdict"] == "WATCH")
+    skip_n  = sum(1 for r in results if r["verdict"] == "SKIP")
+    log(f"Analisi completata: {copy_n} COPY | {watch_n} WATCH | {skip_n} SKIP "
+        f"su {len(results)} mercati", "OK")
+    acc = state.get("algo_stats", {}).get("accuracy_pct")
+    if acc is not None:
+        log(f"Track record sistema: {acc}% accuracy su {state['algo_stats']['resolved_copies']} segnali risolti", "OK")
 
     # 6. Salva COPY in watched_markets per tracking futuro
     update_watched_markets(state, results)
