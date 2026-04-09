@@ -407,40 +407,72 @@ def check_resolutions(state: dict):
     watched = state.get("watched_markets", {})
     if not watched:
         return
+    
+    # 1. Pulizia mercati obsoleti (stale) > 30 giorni non risolti
+    now = datetime.now(timezone.utc)
+    removed_stale = 0
+    for key, market in list(watched.items()):
+        if market.get("resolved"):
+            continue
+        df_str = market.get("date_flagged")
+        if df_str:
+            try:
+                df_dt = datetime.strptime(df_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                if (now - df_dt).days > 30:
+                    del watched[key]
+                    removed_stale += 1
+            except: pass
+    if removed_stale:
+        log(f"Cleanup: rimossi {removed_stale} mercati obsoleti (>30gg)", "OK")
+
+    # 2. Verifica risoluzioni con Gamma API (bulk fetch per efficienza)
+    all_recent = []
+    for offset in [0, 500]:
+        r = _http_get(f"https://gamma-api.polymarket.com/markets?limit=500&offset={offset}")
+        if r and r.status_code == 200:
+            all_recent.extend(r.json() if isinstance(r.json(), list) else r.json().get("data", []))
+        time.sleep(0.3)
+    
+    market_map = {m.get("question", "").lower(): m for m in all_recent}
     newly_resolved = 0
+    
     for key, market in list(watched.items()):
         if market.get("resolved"):
             continue
         question = market.get("question", "")
-        if not question:
-            continue
-        try:
-            q = requests.utils.quote(question[:50])
-            r = _http_get(f"https://gamma-api.polymarket.com/markets?search={q}&limit=5")
-            if not r or r.status_code != 200:
-                continue
-            markets = r.json()
-            if not isinstance(markets, list):
-                markets = markets.get("data", [])
-            for m in markets:
-                m_q = (m.get("question") or m.get("title") or "").lower()
-                if question.lower()[:30] not in m_q:
-                    continue
-                if not (m.get("closed") or m.get("isResolved")):
-                    continue
-                winning = (m.get("winningOutcome") or "").upper()
+        q_lower = question.lower()
+        
+        # Cerca match (esatto o parziale)
+        match = market_map.get(q_lower)
+        if not match:
+            for m_q, m_obj in market_map.items():
+                if q_lower[:40] in m_q:
+                    match = m_obj
+                    break
+        
+        if match and (match.get("closed") or match.get("isResolved")):
+            winning = (match.get("winningOutcome") or "").upper()
+            # Fallback se winningOutcome è vuoto ma closed è true (controlla prezzi)
+            if not winning and match.get("closed"):
+                try:
+                    prices = json.loads(match.get("outcomePrices", "[]"))
+                    if prices and any(float(p) > 0.98 for p in prices):
+                        idx = [float(p) > 0.98 for p in prices].index(True)
+                        outcomes = json.loads(match.get("outcomes", "[]"))
+                        winning = outcomes[idx].upper() if idx < len(outcomes) else ""
+                except: pass
+            
+            if winning:
                 our_side = market.get("side", "YES").upper()
                 correct = (winning == our_side or
                            (winning in ("YES", "1") and our_side == "YES") or
                            (winning in ("NO", "0") and our_side == "NO"))
-                market.update({"resolved": True, "resolution": winning, "correct": correct})
+                market.update({"resolved": True, "resolution": winning, "correct": correct, 
+                               "resolution_date": datetime.now(timezone.utc).isoformat()})
                 newly_resolved += 1
-                break
-        except Exception as e:
-            log(f"Resolution check error: {e}", "WARN")
-    # Ricalcola algo_stats
-    all_resolved = [m for m in watched.values()
-                    if m.get("resolved") and m.get("correct") is not None]
+
+    # 3. Ricalcola algo_stats
+    all_resolved = [m for m in watched.values() if m.get("resolved") and m.get("correct") is not None]
     correct = sum(1 for m in all_resolved if m.get("correct"))
     total_copies = sum(1 for m in watched.values() if m.get("our_verdict") == "COPY")
     state["algo_stats"] = {
@@ -451,8 +483,7 @@ def check_resolutions(state: dict):
         "last_updated": datetime.now(timezone.utc).isoformat(),
     }
     if newly_resolved:
-        log(f"Resolution: {newly_resolved} mercati risolti, "
-            f"accuracy: {state['algo_stats']['accuracy_pct']}%", "OK")
+        log(f"Resolution: {newly_resolved} mercati risolti, accuracy: {state['algo_stats']['accuracy_pct']}%", "OK")
 
 
 # ── SPORT TAG FILTER (Gamma API) ─────────────────────────────────────────────────
