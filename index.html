@@ -6,6 +6,7 @@
   <title>🐋 Polymarket Whale Tracker v3</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
     :root {
       --bg-primary:    #0a0e1a;
@@ -162,6 +163,43 @@
       -webkit-background-clip: text;
       -webkit-text-fill-color: transparent;
       background-clip: text;
+    }
+
+    /* ── CHARTS GRID ───────────────────────────────────────────────────────── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .chart-container {
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+      border: 1.5px solid var(--border-light);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .chart-container:hover {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 24px rgba(0,240,255,0.2);
+    }
+
+    .chart-title {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .chart-canvas {
+      position: relative;
+      height: 300px;
+      margin-bottom: 12px;
     }
 
     /* ── SIGNAL CARDS (COPY/WATCH) ────────────────────────────────────────── */
@@ -440,6 +478,10 @@
         grid-template-columns: repeat(2, 1fr);
       }
 
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+
       .signal-grid {
         grid-template-columns: 1fr;
       }
@@ -487,6 +529,31 @@
     </div>
   </div>
 
+  <!-- CHARTS SECTION -->
+  <div class="section">
+    <h2>📊 Analisi Dati Whale</h2>
+    <div class="charts-grid">
+      <div class="chart-container">
+        <div class="chart-title">💰 Profitti Top 10 Whale</div>
+        <div class="chart-canvas">
+          <canvas id="profitsChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-container">
+        <div class="chart-title">🎯 Trust Score vs Profitto</div>
+        <div class="chart-canvas">
+          <canvas id="trustVsProfitChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-container">
+        <div class="chart-title">📈 Distribuzione Segnali</div>
+        <div class="chart-canvas">
+          <canvas id="signalsChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <!-- LEADERBOARD -->
   <div class="section">
     <h2>🏆 Top Whale Leaderboard</h2>
@@ -508,6 +575,9 @@
 </div>
 
 <script>
+// ── CHART INSTANCES ──────────────────────────────────────────────────────────
+let profitsChart, trustVsProfitChart, signalsChart;
+
 // ── UTILITIES ────────────────────────────────────────────────────────────────
 function fmt$(n) {
   if (!n && n !== 0) return '—';
@@ -545,6 +615,187 @@ function esc(s) {
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+// ── CHART RENDERING ──────────────────────────────────────────────────────────
+function renderCharts(state) {
+  const lb = state.leaderboard || {};
+  const lbArr = Object.entries(lb)
+    .map(([addr, d]) => ({addr, ...d}))
+    .sort((a,b) => (b.total_profit_usd||0) - (a.total_profit_usd||0))
+    .slice(0, 10);
+
+  const names = lbArr.map(w => w.username || w.addr?.slice(0,10) || '?');
+  const profits = lbArr.map(w => w.total_profit_usd || 0);
+  const trusts = lbArr.map(w => w.trust_score || 0);
+
+  // ── Profits Chart
+  const profitsCtx = document.getElementById('profitsChart').getContext('2d');
+  if (profitsChart) profitsChart.destroy();
+  profitsChart = new Chart(profitsCtx, {
+    type: 'bar',
+    data: {
+      labels: names,
+      datasets: [{
+        label: 'Profitto ($)',
+        data: profits,
+        backgroundColor: 'rgba(0, 255, 159, 0.3)',
+        borderColor: '#00ff9f',
+        borderWidth: 2,
+        borderRadius: 6,
+        hoverBackgroundColor: 'rgba(0, 255, 159, 0.5)',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(10, 14, 26, 0.95)',
+          titleColor: '#00ff9f',
+          bodyColor: '#e8f1ff',
+          borderColor: '#00ff9f',
+          borderWidth: 1,
+          padding: 12,
+          displayColors: false,
+          callbacks: {
+            label: function(ctx) {
+              return fmtK(ctx.parsed.y);
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { color: '#a0b8d8', font: { family: "'Fira Code'" } },
+          grid: { color: 'rgba(42, 63, 95, 0.2)' },
+          title: { display: true, text: 'Profitto USD', color: '#00f0ff' }
+        },
+        x: {
+          ticks: { color: '#a0b8d8', font: { family: "'Fira Code'" } },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  // ── Trust vs Profit Scatter Chart
+  const trustCtx = document.getElementById('trustVsProfitChart').getContext('2d');
+  if (trustVsProfitChart) trustVsProfitChart.destroy();
+  trustVsProfitChart = new Chart(trustCtx, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'Whale',
+        data: lbArr.map(w => ({
+          x: w.trust_score || 0,
+          y: w.total_profit_usd || 0,
+          name: w.username || w.addr?.slice(0,10)
+        })),
+        backgroundColor: 'rgba(0, 240, 255, 0.6)',
+        borderColor: '#00f0ff',
+        borderWidth: 2,
+        pointRadius: 6,
+        hoverRadius: 8,
+        pointHoverBackgroundColor: '#fcee0c'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(10, 14, 26, 0.95)',
+          titleColor: '#00f0ff',
+          bodyColor: '#e8f1ff',
+          borderColor: '#00f0ff',
+          borderWidth: 1,
+          padding: 12,
+          displayColors: false,
+          callbacks: {
+            title: function(ctx) {
+              return ctx[0].raw.name || 'Whale';
+            },
+            label: function(ctx) {
+              return 'Trust: ' + ctx.raw.x + ' | Profitto: ' + fmtK(ctx.raw.y);
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          position: 'bottom',
+          title: { display: true, text: 'Trust Score', color: '#00f0ff' },
+          ticks: { color: '#a0b8d8', font: { family: "'Fira Code'" } },
+          grid: { color: 'rgba(42, 63, 95, 0.2)' },
+          min: 0,
+          max: 100
+        },
+        y: {
+          title: { display: true, text: 'Profitto ($)', color: '#00f0ff' },
+          ticks: { color: '#a0b8d8', font: { family: "'Fira Code'" } },
+          grid: { color: 'rgba(42, 63, 95, 0.2)' },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  // ── Signals Distribution Pie Chart
+  const stats = state.algo_stats || {};
+  const resolved = stats.resolved_copies || 0;
+  const copy = (stats.total_copy_signals || 0) - resolved;
+  
+  const signalsCtx = document.getElementById('signalsChart').getContext('2d');
+  if (signalsChart) signalsChart.destroy();
+  signalsChart = new Chart(signalsCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['COPY Attivi', 'Risolti', 'WATCH'],
+      datasets: [{
+        data: [copy, resolved, 0],
+        backgroundColor: [
+          'rgba(0, 255, 159, 0.4)',
+          'rgba(74, 158, 255, 0.4)',
+          'rgba(252, 238, 12, 0.4)'
+        ],
+        borderColor: [
+          '#00ff9f',
+          '#4a9eff',
+          '#fcee0c'
+        ],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: '#e8f1ff',
+            font: { family: "'Fira Code'" },
+            padding: 16,
+            usePointStyle: true
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(10, 14, 26, 0.95)',
+          titleColor: '#00f0ff',
+          bodyColor: '#e8f1ff',
+          borderColor: '#00f0ff',
+          borderWidth: 1,
+          padding: 12,
+          displayColors: true
+        }
+      }
+    }
+  });
+}
+
 // ── RENDER ────────────────────────────────────────────────────────────────
 function render(state) {
   document.getElementById('loading').style.display = 'none';
@@ -569,6 +820,9 @@ function render(state) {
     accEl.textContent = 'N/D';
     accEl.style.color = '#a0b8d8';
   }
+
+  // ── Render Charts
+  renderCharts(state);
 
   // ── Leaderboard
   const lb = state.leaderboard || {};
