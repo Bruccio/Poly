@@ -211,6 +211,19 @@ def _is_past_market(title: str) -> bool:
             except ValueError:
                 pass
 
+    # Pattern 6: "in/by/before <Mese>" senza anno → assume anno corrente
+    # Es: "Fed decision in January?" → January di quest'anno → se già passato → True
+    for m in re.finditer(
+        r'\b(?:by|before|in|end of|through|until)\s+'
+        r'(january|february|march|april|may|june|july|august|september|'
+        r'october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)'
+        r'\b(?!\s+\d)',
+        t
+    ):
+        month_num = _MONTH_MAP.get(m.group(1), 0)
+        if month_num and month_num < now.month:
+            return True  # stesso anno corrente, mese già passato
+
     return False
 
 
