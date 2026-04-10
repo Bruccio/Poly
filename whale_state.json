@@ -47,7 +47,7 @@
     "bearwhale88": {
       "username": "BearWhale88",
       "wallet": "bearwhale88",
-      "total_profit_usd": 1389200,
+      "total_profit_usd": 2900000,
       "total_volume_usd": 2900000,
       "trust_score": 76,
       "times_seen": 1,
@@ -56,30 +56,7 @@
       "profiled": false
     }
   },
-  "watched_markets": {
-    "7c96cb205a78": {
-      "question": "Fed decision in January?",
-      "our_verdict": "WATCH",
-      "whale_wallet": "0xpool...",
-      "entry_price": 0.5,
-      "side": "YES",
-      "date_flagged": "2026-04-06",
-      "resolved": false,
-      "resolution": null,
-      "correct": null
-    },
-    "aa991505b798": {
-      "question": "US strikes Iran by...?",
-      "our_verdict": "WATCH",
-      "whale_wallet": "0xpool...",
-      "entry_price": 0.5,
-      "side": "YES",
-      "date_flagged": "2026-04-06",
-      "resolved": false,
-      "resolution": null,
-      "correct": null
-    }
-  },
+  "watched_markets": {},
   "algo_stats": {
     "total_copy_signals": 0,
     "resolved_copies": 0,
