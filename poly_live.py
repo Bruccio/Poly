@@ -9,7 +9,7 @@ from whale_tracker import (
     load_state, save_state, analyze_with_claude, 
     send_telegram, build_message, log, MIN_SIZE_USDC,
     is_wash_trader, _is_sport, check_resolutions,
-    is_future_market
+    is_future_market, _is_past_market
 )
 
 # Configurazione Logging
@@ -37,7 +37,11 @@ async def process_trade(trade_data, state):
         if _is_sport(market_title):
             return
 
-        # 2. Filtro Mercati Aperti (Time Filter)
+        # 2a. Filtro testuale date passate (fallback se endDate assente nel payload WS)
+        if _is_past_market(market_title):
+            return
+
+        # 2b. Filtro strutturato su endDate (quando disponibile)
         if not is_future_market(trade_data):
             return
 

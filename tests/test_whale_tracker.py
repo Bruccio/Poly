@@ -9,7 +9,7 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from whale_tracker import _is_sport, _parse_claude, compute_confidence
+from whale_tracker import _is_sport, _parse_claude, compute_confidence, _is_past_market
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -179,3 +179,56 @@ def test_confidence_capped_at_100():
              "userAddress": "0xtopwhale"}
     state = {"leaderboard": {"0xtopwhale": {"total_volume_usd": 5_000_000}}}
     assert compute_confidence(trade, state) <= 100
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# _is_past_market() — titoli con date passate devono essere bloccati
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_past_market_iso_date():
+    """Data ISO esplicitamente passata."""
+    assert _is_past_market("Will X happen on 2026-01-15?") is True
+
+def test_past_market_future_iso_date():
+    """Data ISO nel futuro → non bloccare."""
+    assert _is_past_market("Will X happen on 2026-12-31?") is False
+
+def test_past_market_past_year():
+    """Anno intero passato (2025)."""
+    assert _is_past_market("Will Trump win the 2025 election?") is True
+
+def test_past_market_by_month_year():
+    """'by January 2026' quando siamo in aprile → passato."""
+    assert _is_past_market("Will the Fed cut rates by January 2026?") is True
+
+def test_past_market_future_month_year():
+    """'by December 2026' → futuro → non bloccare."""
+    assert _is_past_market("Will the Fed cut rates by December 2026?") is False
+
+def test_past_market_month_only_past():
+    """'in January' senza anno → assume anno corrente → passato in aprile."""
+    assert _is_past_market("Fed decision in January?") is True
+
+def test_past_market_month_only_future():
+    """'in December' senza anno → futuro → non bloccare."""
+    assert _is_past_market("Fed decision in December?") is False
+
+def test_past_market_quarter_past():
+    """'Q1 2026' finisce il 31 marzo → passato in aprile."""
+    assert _is_past_market("Will Q1 2026 GDP exceed expectations?") is True
+
+def test_past_market_quarter_future():
+    """'Q4 2026' → futuro → non bloccare."""
+    assert _is_past_market("Will Q4 2026 GDP disappoint?") is False
+
+def test_past_market_bare_month_year():
+    """'January 2026 Fed decision' senza preposizione → passato."""
+    assert _is_past_market("January 2026 Fed decision outcome?") is True
+
+def test_past_market_politics_not_blocked():
+    """Mercato politico senza data → non bloccare."""
+    assert _is_past_market("Will Trump impose 50% tariffs on EU?") is False
+
+def test_past_market_crypto_future():
+    """BTC target futuro → non bloccare."""
+    assert _is_past_market("Will BTC reach $150k before July 2026?") is False
