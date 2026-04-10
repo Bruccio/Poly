@@ -129,6 +129,91 @@ def _is_sport(title: str) -> bool:
     return any(re.search(p, t) for p in SPORT_PATTERNS)
 
 
+# ── FILTRO MERCATI SCADUTI ───────────────────────────────────────────────────────
+_MONTH_MAP = {
+    "january": 1, "february": 2, "march": 3, "april": 4,
+    "may": 5, "june": 6, "july": 7, "august": 8,
+    "september": 9, "october": 10, "november": 11, "december": 12,
+    "jan": 1, "feb": 2, "mar": 3, "apr": 4, "jun": 6, "jul": 7,
+    "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+}
+_QUARTER_END = {1: (3, 31), 2: (6, 30), 3: (9, 30), 4: (12, 31)}
+
+
+def _is_past_market(title: str) -> bool:
+    """
+    Restituisce True se il titolo del mercato fa riferimento a una data già passata.
+    Previene notifiche per mercati già risolti/scaduti (es: "Fed by January 2026" ad aprile).
+    """
+    now = datetime.now(timezone.utc)
+    t = title.lower()
+
+    # Pattern 1: data ISO esplicita (2026-01-15 o 2025-12-31)
+    for m in re.finditer(r'\b(\d{4})-(\d{2})-(\d{2})\b', title):
+        try:
+            d = datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), tzinfo=timezone.utc)
+            if d < now:
+                return True
+        except ValueError:
+            pass
+
+    # Pattern 2: anno intero passato (2025 o precedenti)
+    for m in re.finditer(r'\b(20\d{2})\b', title):
+        year = int(m.group(1))
+        if year < now.year:
+            return True
+
+    # Pattern 3: "by/before/in/end of <Mese> <Anno>" con anno esplicito
+    for m in re.finditer(
+        r'\b(?:by|before|in|end of|through|until|prior to)\s+'
+        r'(january|february|march|april|may|june|july|august|september|'
+        r'october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)'
+        r'\s+(\d{4})\b',
+        t
+    ):
+        month_num = _MONTH_MAP.get(m.group(1), 0)
+        year = int(m.group(2))
+        if month_num:
+            # Considera il mese finito se siamo già al giorno seguente l'ultimo
+            try:
+                deadline = datetime(year, month_num, 28, 23, 59, tzinfo=timezone.utc)
+                if deadline < now:
+                    return True
+            except ValueError:
+                pass
+
+    # Pattern 4: "Q1 2026", "Q2 2025" etc.
+    for m in re.finditer(r'\bq([1-4])\s*(\d{4})\b', t):
+        quarter = int(m.group(1))
+        year = int(m.group(2))
+        end_month, end_day = _QUARTER_END[quarter]
+        try:
+            deadline = datetime(year, end_month, end_day, 23, 59, tzinfo=timezone.utc)
+            if deadline < now:
+                return True
+        except ValueError:
+            pass
+
+    # Pattern 5: "<Mese> <Anno>" senza preposizione (es: "January 2026 Fed decision")
+    for m in re.finditer(
+        r'\b(january|february|march|april|may|june|july|august|september|'
+        r'october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)'
+        r'\s+(\d{4})\b',
+        t
+    ):
+        month_num = _MONTH_MAP.get(m.group(1), 0)
+        year = int(m.group(2))
+        if month_num:
+            try:
+                deadline = datetime(year, month_num, 28, 23, 59, tzinfo=timezone.utc)
+                if deadline < now:
+                    return True
+            except ValueError:
+                pass
+
+    return False
+
+
 # ── LOGGING ─────────────────────────────────────────────────────────────────────
 # (definito prima così le funzioni successive possono usarlo)
 def log(msg, level="INFO"):
@@ -270,9 +355,63 @@ def fetch_reddit_insights(state: dict) -> str:
         return ""
 
 
+# ── PULIZIA MERCATI SCADUTI ──────────────────────────────────────────────────────
+def purge_stale_markets(state: dict):
+    """
+    Rimuove da watched_markets i mercati che sono:
+    - già risolti da più di 30 giorni
+    - la cui data nel titolo è chiaramente passata (e non hanno risoluzione tracciata)
+    - segnalati più di 60 giorni fa senza risoluzione (mercato zombie)
+    """
+    watched = state.get("watched_markets", {})
+    if not watched:
+        return
+    now = datetime.now(timezone.utc)
+    to_delete = []
+    for key, market in watched.items():
+        question = market.get("question", "")
+        date_flagged = market.get("date_flagged", "")
+
+        # 1. Risolto da più di 30 giorni → archivia
+        if market.get("resolved"):
+            try:
+                flagged_dt = datetime.fromisoformat(date_flagged.replace("Z", "+00:00")) \
+                    if "T" in date_flagged else \
+                    datetime(int(date_flagged[:4]), int(date_flagged[5:7]), int(date_flagged[8:10]),
+                             tzinfo=timezone.utc)
+                if (now - flagged_dt).days > 30:
+                    to_delete.append(key)
+                    continue
+            except Exception:
+                pass
+
+        # 2. Titolo indica data già passata → mercato fantasma
+        if question and _is_past_market(question):
+            to_delete.append(key)
+            continue
+
+        # 3. Mercato zombie: segnalato >60 giorni fa, mai risolto
+        if date_flagged:
+            try:
+                flagged_dt = datetime.fromisoformat(date_flagged.replace("Z", "+00:00")) \
+                    if "T" in date_flagged else \
+                    datetime(int(date_flagged[:4]), int(date_flagged[5:7]), int(date_flagged[8:10]),
+                             tzinfo=timezone.utc)
+                if (now - flagged_dt).days > 60:
+                    to_delete.append(key)
+            except Exception:
+                pass
+
+    for key in to_delete:
+        del watched[key]
+    if to_delete:
+        log(f"Pulizia watched_markets: rimossi {len(to_delete)} mercati scaduti/zombie", "OK")
+
+
 # ── SELF-IMPROVING: CONTROLLA RESOLUTION ────────────────────────────────────────
 def check_resolutions(state: dict):
     """Controlla se i mercati watched hanno avuto una resolution e aggiorna stats."""
+    purge_stale_markets(state)  # prima pulisce i mercati obsoleti
     watched = state.get("watched_markets", {})
     if not watched:
         return
@@ -595,12 +734,16 @@ def fetch_polymarket_whales(min_size, state: dict = None):
 
     log(f"Multi-source totale: {len(all_items)} mercati unici raccolti", "OK")
 
-    # ── Filtra sport e sotto soglia ──
+    # ── Filtra sport, mercati scaduti e sotto soglia ──
     filtered = [
         t for t in all_items
         if _sz(t) >= min_size * 0.5  # più permissivo per whale top
         and not _is_sport(t.get("title") or t.get("question") or "")
+        and not _is_past_market(t.get("title") or t.get("question") or "")
     ]
+    stale_count = len(all_items) - len([t for t in all_items if not _is_past_market(t.get("title") or t.get("question") or "")])
+    if stale_count:
+        log(f"  Esclusi {stale_count} mercati con data scaduta", "WARN")
 
     # ── Arricchisci con trust_score e filtra wash trader ──
     leaderboard = (state or {}).get("leaderboard", {})
@@ -645,32 +788,44 @@ MODELS = [
     "claude-3-haiku-20240307",
 ]
 
-SYSTEM_PROMPT = (
-    "Sei un analista finanziario esperto di mercati predittivi (Polymarket).\n"
-    "Stai valutando un mercato con alto volume dove una whale (grande investitore) ha piazzato >$100k.\n\n"
-    "Il tuo compito: decidere se vale la pena seguire questa whale.\n\n"
-    "REGOLE ASSOLUTE:\n"
-    "- Qualsiasi scommessa sportiva (calcio, basket, tennis, F1, partite, match) → SKIP\n"
-    "- Qualsiasi evento entertainment (Oscar, Grammy, Eurovision) → SKIP\n\n"
-    "CRITERI DI VALUTAZIONE:\n"
-    "- Il prezzo è diverso dalla probabilità reale? (>10% gap = interessante)\n"
-    "- La whale ha trust score alto? (>70 = affidabile)\n"
-    "- Il mercato è su un evento verificabile con deadline chiara?\n"
-    "- C'è un catalizzatore imminente (elezione, decisione Fed, deadline legale, ecc.)?\n\n"
-    "VERDETTI (3 opzioni):\n"
-    "- COPY = Forte opportunità, prezzo chiaramente sbagliato o segnale forte dalla whale\n"
-    "- WATCH = Interessante, da tenere d'occhio, potrebbe diventare COPY\n"
-    "- SKIP = Non interessante, troppo rischioso, o è sport/entertainment\n\n"
-    "IMPORTANTE: Non essere troppo conservativo! Se una whale da milioni punta $200k+ "
-    "su un mercato politico/economico con prezzo basso, probabilmente sa qualcosa. "
-    "Almeno 2-3 mercati su 10 dovrebbero essere COPY o WATCH.\n\n"
-    "Rispondi SOLO in questo formato, in italiano:\n"
-    "COPY (o WATCH o SKIP)\n"
-    "Rischio: X/10\n"
-    "Vale la pena?: [1 frase chiara]\n"
-    "Cosa sta succedendo: [2-3 righe, spiega il mercato come a un amico]\n"
-    "Sospetto?: No/Forse/Sì"
-)
+def _build_system_prompt() -> str:
+    """Costruisce il system prompt con la data odierna per evitare mercati anacronistici."""
+    today = datetime.now(timezone.utc).strftime("%d %B %Y")
+    today_iso = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    return (
+        f"Oggi è {today} ({today_iso}). Sei un analista finanziario esperto di mercati predittivi (Polymarket).\n"
+        "Stai valutando un mercato con alto volume dove una whale (grande investitore) ha piazzato >$100k.\n\n"
+        "Il tuo compito: decidere se vale la pena seguire questa whale.\n\n"
+        "REGOLA N°0 — MERCATO SCADUTO → SKIP IMMEDIATO (priorità assoluta):\n"
+        f"Se il titolo del mercato fa riferimento a un evento che doveva avvenire PRIMA di oggi ({today_iso}), "
+        "oppure contiene una data già passata (es: 'by January 2026', 'Q1 2026', 'before March 2026' "
+        f"quando siamo in {today}), → SKIP obbligatorio. "
+        "Spiega brevemente: 'Mercato già scaduto: [data nel titolo] è nel passato.'\n\n"
+        "REGOLE ASSOLUTE:\n"
+        "- Qualsiasi scommessa sportiva (calcio, basket, tennis, F1, partite, match) → SKIP\n"
+        "- Qualsiasi evento entertainment (Oscar, Grammy, Eurovision) → SKIP\n"
+        "- Mercato con deadline già passata rispetto a oggi → SKIP\n\n"
+        "CRITERI DI VALUTAZIONE (solo per mercati con deadline FUTURA):\n"
+        "- Il prezzo è diverso dalla probabilità reale? (>10% gap = interessante)\n"
+        "- La whale ha trust score alto? (>70 = affidabile)\n"
+        "- Il mercato è su un evento verificabile con deadline chiara?\n"
+        "- C'è un catalizzatore imminente (elezione, decisione Fed, deadline legale, ecc.)?\n\n"
+        "VERDETTI (3 opzioni):\n"
+        "- COPY = Forte opportunità, prezzo chiaramente sbagliato o segnale forte dalla whale\n"
+        "- WATCH = Interessante, da tenere d'occhio, potrebbe diventare COPY\n"
+        "- SKIP = Non interessante, troppo rischioso, sport/entertainment, o mercato SCADUTO\n\n"
+        "IMPORTANTE: Non essere troppo conservativo! Se una whale da milioni punta $200k+ "
+        "su un mercato politico/economico con prezzo basso E deadline futura, probabilmente sa qualcosa. "
+        "Almeno 2-3 mercati su 10 dovrebbero essere COPY o WATCH.\n\n"
+        "Rispondi SOLO in questo formato, in italiano:\n"
+        "COPY (o WATCH o SKIP)\n"
+        "Rischio: X/10\n"
+        "Vale la pena?: [1 frase chiara]\n"
+        "Cosa sta succedendo: [2-3 righe, spiega il mercato come a un amico]\n"
+        "Sospetto?: No/Forse/Sì"
+    )
+
+SYSTEM_PROMPT = _build_system_prompt()
 
 
 def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):
