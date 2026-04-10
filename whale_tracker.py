@@ -129,6 +129,75 @@ def _is_sport(title: str) -> bool:
         return True
     return any(re.search(p, t) for p in SPORT_PATTERNS)
 
+
+# ── FILTRO MERCATI SCADUTI (title-based fallback) ────────────────────────────────
+_MONTH_MAP = {
+    "january": 1, "february": 2, "march": 3, "april": 4,
+    "may": 5, "june": 6, "july": 7, "august": 8,
+    "september": 9, "october": 10, "november": 11, "december": 12,
+    "jan": 1, "feb": 2, "mar": 3, "apr": 4, "jun": 6, "jul": 7,
+    "aug": 8, "sep": 9, "oct": 10, "nov": 11, "dec": 12,
+}
+_QUARTER_END = {1: (3, 31), 2: (6, 30), 3: (9, 30), 4: (12, 31)}
+
+
+def _is_past_market(title: str) -> bool:
+    """
+    Fallback testuale: restituisce True se il titolo contiene una data già passata.
+    Complementa is_future_market() che richiede il campo endDate strutturato.
+    Es: "Fed decision in January?" → past in aprile 2026.
+    """
+    now = datetime.now(timezone.utc)
+    t = title.lower()
+    # ISO date: 2026-01-15
+    for m in re.finditer(r'\b(\d{4})-(\d{2})-(\d{2})\b', title):
+        try:
+            if datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)),
+                        tzinfo=timezone.utc) < now:
+                return True
+        except ValueError:
+            pass
+    # Anno intero passato: 2025
+    for m in re.finditer(r'\b(20\d{2})\b', title):
+        if int(m.group(1)) < now.year:
+            return True
+    # "by/in/before <Mese> <Anno>"
+    for m in re.finditer(
+        r'\b(?:by|before|in|end of|through|until)\s+'
+        r'(january|february|march|april|may|june|july|august|september|'
+        r'october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)'
+        r'\s+(\d{4})\b', t
+    ):
+        mn, yr = _MONTH_MAP.get(m.group(1), 0), int(m.group(2))
+        if mn and datetime(yr, mn, 28, tzinfo=timezone.utc) < now:
+            return True
+    # "in/by <Mese>" senza anno → assume anno corrente
+    for m in re.finditer(
+        r'\b(?:by|before|in|end of)\s+'
+        r'(january|february|march|april|may|june|july|august|september|'
+        r'october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)'
+        r'\b(?!\s+\d)', t
+    ):
+        mn = _MONTH_MAP.get(m.group(1), 0)
+        if mn and mn < now.month:
+            return True
+    # Q1-Q4 Anno
+    for m in re.finditer(r'\bq([1-4])\s*(\d{4})\b', t):
+        em, ed = _QUARTER_END[int(m.group(1))]
+        if datetime(int(m.group(2)), em, ed, tzinfo=timezone.utc) < now:
+            return True
+    # "<Mese> <Anno>" senza preposizione
+    for m in re.finditer(
+        r'\b(january|february|march|april|may|june|july|august|september|'
+        r'october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)'
+        r'\s+(\d{4})\b', t
+    ):
+        mn, yr = _MONTH_MAP.get(m.group(1), 0), int(m.group(2))
+        if mn and datetime(yr, mn, 28, tzinfo=timezone.utc) < now:
+            return True
+    return False
+
+
 # ── FILTRO MERCATI APERTI (Time Filter) ──────────────────────────────────────────
 import dateutil.parser
 def is_future_market(trade_data):
@@ -326,6 +395,8 @@ def fetch_whale_trades(state: dict) -> list:
                 if title_key in seen_titles:
                     continue
                 if _is_sport(title):
+                    continue
+                if _is_past_market(title):  # fallback testuale se endDate assente
                     continue
                 if not is_future_market(t):
                     continue
@@ -843,6 +914,7 @@ def fetch_polymarket_whales(min_size, state: dict = None):
         t for t in all_items
         if _sz(t) >= min_size * 0.5  # più permissivo per whale top
         and not _is_sport(t.get("title") or t.get("question") or "")
+        and not _is_past_market(t.get("title") or t.get("question") or "")
     ]
 
     # ── Arricchisci con trust_score e filtra wash trader ──
@@ -888,35 +960,44 @@ MODELS = [
     "claude-3-haiku-20240307",
 ]
 
-SYSTEM_PROMPT = (
-    "Sei un analista aggressivo di mercati predittivi (Polymarket). Il tuo obiettivo: "
-    "identificare trade da seguire, non evitarli.\n\n"
-    "REGOLA N°1 — SPORT/ENTERTAINMENT → SKIP IMMEDIATO (nessuna analisi):\n"
-    "Calcio, basket, tennis, F1, NFL, NBA, Oscar, Grammy, Eurovision → SKIP.\n\n"
-    "REGOLA N°2 — COPY DI DEFAULT (la più importante):\n"
-    "Se Trust Score ≥ 80 AND size ≥ $100k AND NON è sport → il verdetto è COPY "
-    "a MENO CHE tu non abbia una ragione specifica e concreta per non farlo "
-    "(es: mercato già a 95¢, whale nota per wash trading, evento già risolto).\n"
-    "Il dubbio va a favore del COPY, non dello SKIP.\n\n"
-    "REGOLA N°3 — WATCH se incerto:\n"
-    "Trust 60-79 OR size $50k-$99k OR contesto ambiguo → WATCH. "
-    "Non usare SKIP quando hai incertezza — usa WATCH.\n\n"
-    "CALIBRAZIONE PREZZI — guida rapida:\n"
-    "- Prezzo < 20¢: evento improbabile MA la whale sa qualcosa? → spesso COPY\n"
-    "- Prezzo 20-45¢: zona interessante, mercato sotto-prezzato → COPY o WATCH\n"
-    "- Prezzo 50-75¢: neutro, dipende dal contesto → WATCH o COPY se forte segnale\n"
-    "- Prezzo > 85¢: mercato quasi certo, poco valore → SKIP o WATCH\n\n"
-    "CONTESTO NEWS: Se vengono fornite notizie recenti correlate, usale come "
-    "conferma del movimento whale. Una whale che muove $200k+ DOPO una notizia "
-    "rilevante è quasi certamente un COPY.\n\n"
-    "TRACK RECORD: Se il sistema ha >60% accuracy → fidati ancora di più dei segnali.\n\n"
-    "Rispondi SOLO in questo formato, in italiano:\n"
-    "COPY (o WATCH o SKIP)\n"
-    "Rischio: X/10\n"
-    "Vale la pena?: [1 frase diretta e concisa]\n"
-    "Cosa sta succedendo: [2-3 righe MAX — spiega il mercato come a un amico]\n"
-    "Sospetto?: No/Forse/Sì"
-)
+def _build_system_prompt() -> str:
+    today = datetime.now(timezone.utc).strftime("%d %B %Y")
+    today_iso = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    return (
+        f"Oggi è {today} ({today_iso}). "
+        "Sei un analista aggressivo di mercati predittivi (Polymarket). Il tuo obiettivo: "
+        "identificare trade da seguire, non evitarli.\n\n"
+        "REGOLA N°0 — MERCATO SCADUTO → SKIP IMMEDIATO (priorità assoluta):\n"
+        f"Se il titolo fa riferimento a un evento con deadline PRIMA di oggi ({today_iso}) "
+        "(es: 'by January 2026', 'in March 2026', 'Q1 2026' quando siamo in aprile) → SKIP.\n\n"
+        "REGOLA N°1 — SPORT/ENTERTAINMENT → SKIP IMMEDIATO (nessuna analisi):\n"
+        "Calcio, basket, tennis, F1, NFL, NBA, Oscar, Grammy, Eurovision → SKIP.\n\n"
+        "REGOLA N°2 — COPY DI DEFAULT (la più importante):\n"
+        "Se Trust Score ≥ 80 AND size ≥ $100k AND NON è sport AND deadline FUTURA → COPY "
+        "a MENO CHE tu non abbia una ragione specifica e concreta per non farlo "
+        "(es: mercato già a 95¢, whale nota per wash trading, evento già risolto).\n"
+        "Il dubbio va a favore del COPY, non dello SKIP.\n\n"
+        "REGOLA N°3 — WATCH se incerto:\n"
+        "Trust 60-79 OR size $50k-$99k OR contesto ambiguo → WATCH. "
+        "Non usare SKIP quando hai incertezza — usa WATCH.\n\n"
+        "CALIBRAZIONE PREZZI — guida rapida:\n"
+        "- Prezzo < 20¢: evento improbabile MA la whale sa qualcosa? → spesso COPY\n"
+        "- Prezzo 20-45¢: zona interessante, mercato sotto-prezzato → COPY o WATCH\n"
+        "- Prezzo 50-75¢: neutro, dipende dal contesto → WATCH o COPY se forte segnale\n"
+        "- Prezzo > 85¢: mercato quasi certo, poco valore → SKIP o WATCH\n\n"
+        "CONTESTO NEWS: Se vengono fornite notizie recenti correlate, usale come "
+        "conferma del movimento whale. Una whale che muove $200k+ DOPO una notizia "
+        "rilevante è quasi certamente un COPY.\n\n"
+        "TRACK RECORD: Se il sistema ha >60% accuracy → fidati ancora di più dei segnali.\n\n"
+        "Rispondi SOLO in questo formato, in italiano:\n"
+        "COPY (o WATCH o SKIP)\n"
+        "Rischio: X/10\n"
+        "Vale la pena?: [1 frase diretta e concisa]\n"
+        "Cosa sta succedendo: [2-3 righe MAX — spiega il mercato come a un amico]\n"
+        "Sospetto?: No/Forse/Sì"
+    )
+
+SYSTEM_PROMPT = _build_system_prompt()
 
 
 def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):

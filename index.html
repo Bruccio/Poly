@@ -675,6 +675,41 @@ function esc(s) {
     .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
+function isPastMarket(title) {
+  if (!title) return false;
+  const now = new Date();
+  const nowYear = now.getFullYear();
+  const nowMonth = now.getMonth() + 1;
+  const t = title.toLowerCase();
+  const M = {
+    january:1,february:2,march:3,april:4,may:5,june:6,
+    july:7,august:8,september:9,october:10,november:11,december:12,
+    jan:1,feb:2,mar:3,apr:4,jun:6,jul:7,aug:8,sep:9,oct:10,nov:11,dec:12
+  };
+  const QEND = {1:[3,31],2:[6,30],3:[9,30],4:[12,31]};
+  for (const m of title.matchAll(/\b(\d{4})-(\d{2})-(\d{2})\b/g))
+    if (new Date(+m[1],+m[2]-1,+m[3]) < now) return true;
+  for (const m of title.matchAll(/\b(20\d{2})\b/g))
+    if (+m[1] < nowYear) return true;
+  const re1 = /\b(?:by|before|in|end of|through|until)\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\s+(\d{4})\b/g;
+  for (const m of t.matchAll(re1)) {
+    const mn=M[m[1]],yr=+m[2];
+    if (mn && (yr<nowYear||(yr===nowYear&&mn<nowMonth))) return true;
+  }
+  const re2 = /\b(?:by|before|in|end of)\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\b(?!\s+\d)/g;
+  for (const m of t.matchAll(re2)) { if (M[m[1]]&&M[m[1]]<nowMonth) return true; }
+  for (const m of t.matchAll(/\bq([1-4])\s*(\d{4})\b/g)) {
+    const [em,ed]=QEND[+m[1]];
+    if (new Date(+m[2],em-1,ed)<now) return true;
+  }
+  const re3 = /\b(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\s+(\d{4})\b/g;
+  for (const m of t.matchAll(re3)) {
+    const mn=M[m[1]],yr=+m[2];
+    if (mn&&(yr<nowYear||(yr===nowYear&&mn<nowMonth))) return true;
+  }
+  return false;
+}
+
 // ── CHART RENDERING ──────────────────────────────────────────────────────────
 function renderCharts(state) {
   const lb = state.leaderboard || {};
@@ -923,8 +958,9 @@ function render(state) {
     </table>`;
   }
 
-  // ── Watched markets
+  // ── Watched markets — esclude i mercati con date già passate (non risolti)
   const watched = Object.values(state.watched_markets || {})
+    .filter(m => m.resolved || !isPastMarket(m.question))
     .sort((a,b) => (b.date_flagged||'').localeCompare(a.date_flagged||''));
   const wC = document.getElementById('watched-container');
   if (!watched.length) {
