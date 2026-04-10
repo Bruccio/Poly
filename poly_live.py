@@ -8,7 +8,8 @@ from datetime import datetime, timezone
 from whale_tracker import (
     load_state, save_state, analyze_with_claude, 
     send_telegram, build_message, log, MIN_SIZE_USDC,
-    is_wash_trader, _is_sport, check_resolutions
+    is_wash_trader, _is_sport, check_resolutions,
+    is_future_market
 )
 
 # Configurazione Logging
@@ -36,7 +37,11 @@ async def process_trade(trade_data, state):
         if _is_sport(market_title):
             return
 
-        # 2. Filtro Wash Trading
+        # 2. Filtro Mercati Aperti (Time Filter)
+        if not is_future_market(trade_data):
+            return
+
+        # 3. Filtro Wash Trading
         if is_wash_trader(wallet):
             log(f"Live: Escluso wash trader {wallet[:14]}...", "WARN")
             return

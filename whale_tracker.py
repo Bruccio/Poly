@@ -129,6 +129,37 @@ def _is_sport(title: str) -> bool:
         return True
     return any(re.search(p, t) for p in SPORT_PATTERNS)
 
+# ── FILTRO MERCATI APERTI (Time Filter) ──────────────────────────────────────────
+import dateutil.parser
+def is_future_market(trade_data):
+    """
+    Verifica se il mercato è ancora aperto basandosi sulla endDate.
+    Implementazione suggerita dalla guida Whale Tracking.
+    """
+    now = datetime.now(timezone.utc)
+    if trade_data.get('resolved') is True:
+        return False
+    
+    # Prova diversi campi possibili per la data di fine
+    end_date = (trade_data.get('end_date_iso') or 
+                trade_data.get('endDate') or 
+                trade_data.get('end_timestamp') or
+                trade_data.get('closedTime'))
+    
+    if not end_date:
+        # Se non abbiamo info sulla data di fine, per sicurezza consideriamo il mercato aperto
+        # a meno che non sia esplicitamente risolto.
+        return True
+        
+    try:
+        end_dt = dateutil.parser.isoparse(str(end_date))
+        if end_dt.tzinfo is None:
+            end_dt = end_dt.replace(tzinfo=timezone.utc)
+        return end_dt > now
+    except Exception as e:
+        log(f"Failed parsing end_date {end_date}: {e}", "WARN")
+        return True # In caso di errore, meglio un falso positivo (mercato aperto)
+
 
 # ── LOGGING ─────────────────────────────────────────────────────────────────────
 # (definito prima così le funzioni successive possono usarlo)
@@ -295,6 +326,8 @@ def fetch_whale_trades(state: dict) -> list:
                 if title_key in seen_titles:
                     continue
                 if _is_sport(title):
+                    continue
+                if not is_future_market(t):
                     continue
                 seen_titles.add(title_key)
                 all_trades.append({
