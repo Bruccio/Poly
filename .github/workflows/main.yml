@@ -1,4 +1,4 @@
-name: 🐋 Whale Tracker v2
+name: 🐋 Whale Tracker v3
 
 on:
   # 09:00 e 21:00 ora italiana (UTC+2 estate)
@@ -6,13 +6,8 @@ on:
   schedule:
     - cron: "0 7,19 * * *"
 
-  # Lancio manuale dal tab "Actions"
+  # Lancio manuale dal tab "Actions" — nessun parametro richiesto
   workflow_dispatch:
-    inputs:
-      min_whale_size:
-        description: "Soglia minima whale in USDC (default: 100000)"
-        required: false
-        default: "100000"
 
 permissions:
   contents: write
@@ -28,7 +23,6 @@ jobs:
       TELEGRAM_BOT_TOKEN:  ${{ secrets.TELEGRAM_BOT_TOKEN }}
       TELEGRAM_CHAT_ID:    ${{ secrets.TELEGRAM_CHAT_ID }}
       GMAIL_APP_PASSWORD:  ${{ secrets.GMAIL_APP_PASSWORD }}
-      MIN_WHALE_SIZE:      ${{ github.event.inputs.min_whale_size || '100000' }}
       ONLY_NOTIFY_ON_COPY: "false"
 
     steps:
@@ -46,6 +40,10 @@ jobs:
       - name: Installa dipendenze
         run: pip install -r requirements.txt
 
+      - name: Testa funzioni critiche
+        run: python -m pytest tests/ -q --tb=short
+        continue-on-error: true
+
       - name: Esegui Whale Tracker
         run: python whale_tracker.py
 
@@ -54,7 +52,7 @@ jobs:
         run: |
           git config user.name "Whale Tracker Bot"
           git config user.email "whale-bot@github-actions.local"
-          git add whale_state.json || true
+          git add whale_state.json index.html || true
           git diff --cached --quiet || git commit -m "chore: aggiorna whale_state run #$(date +%Y%m%d-%H%M) [skip ci]"
           git push || echo "Push fallito (nessuna modifica?)"
 

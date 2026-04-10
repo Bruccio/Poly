@@ -1,0 +1,181 @@
+"""
+Pytest tests for whale_tracker.py critical functions.
+
+Tests run in GitHub Actions after each deploy (continue-on-error=true).
+They act as a safety net — a failing test is a warning, not a blocker.
+"""
+import sys
+import os
+
+sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
+from whale_tracker import _is_sport, _parse_claude, compute_confidence
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# _is_sport() — SPORT must be caught (false negatives are the real risk)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_sport_match_day_pattern():
+    """The classic bypass: 'Will X win on YYYY-MM-DD?'"""
+    assert _is_sport("Will Olympique Lyonnais win on 2026-04-05?") is True
+
+def test_sport_beat_pattern():
+    assert _is_sport("Will Arsenal beat Chelsea in the Premier League?") is True
+
+def test_sport_nba_keyword():
+    assert _is_sport("NBA: Lakers vs Celtics game 7?") is True
+
+def test_sport_vs_separator():
+    assert _is_sport("Manchester City vs Real Madrid — Champions League?") is True
+
+def test_sport_championship_pattern():
+    assert _is_sport("Will Brazil win the World Cup 2026?") is True
+
+def test_sport_goals_pattern():
+    assert _is_sport("Will Mbappe score 2+ goals against PSG?") is True
+
+def test_sport_nfl_keyword():
+    assert _is_sport("Will the Chiefs win Super Bowl LX?") is True
+
+def test_sport_tennis_keyword():
+    assert _is_sport("Will Sinner win Wimbledon 2026?") is True
+
+def test_sport_f1_keyword():
+    assert _is_sport("Will Verstappen win the Monaco GP?") is True
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# _is_sport() — POLITICS/ECONOMY must NOT be blocked (false positives)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_not_sport_fed():
+    assert _is_sport("Will the Fed cut rates in June 2026?") is False
+
+def test_not_sport_trump_tariffs():
+    assert _is_sport("Will Trump impose 50% tariffs on EU goods?") is False
+
+def test_not_sport_btc():
+    assert _is_sport("Will BTC reach $150k before July 2026?") is False
+
+def test_not_sport_election():
+    assert _is_sport("Will Joe Biden run for president in 2028?") is False
+
+def test_not_sport_recession():
+    assert _is_sport("Will the US enter recession in 2026?") is False
+
+def test_not_sport_crypto():
+    assert _is_sport("Will Ethereum ETF launch in Q2 2026?") is False
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# _parse_claude() — verdict parsing
+# ─────────────────────────────────────────────────────────────────────────────
+
+FAKE_COPY = (
+    "COPY\n"
+    "Rischio: 3/10\n"
+    "Vale la pena?: Sì, il prezzo sembra chiaramente sottovalutato.\n"
+    "Cosa sta succedendo: Una whale da $4M ha appena comprato $180k di YES a 28¢. "
+    "Il mercato politico ha un catalizzatore imminente.\n"
+    "Sospetto?: No"
+)
+
+FAKE_WATCH = (
+    "WATCH\n"
+    "Rischio: 5/10\n"
+    "Vale la pena?: Interessante ma serve conferma.\n"
+    "Cosa sta succedendo: Whale con buon track record punta su evento incerto.\n"
+    "Sospetto?: Forse"
+)
+
+FAKE_SKIP = (
+    "SKIP\n"
+    "Rischio: 8/10\n"
+    "Vale la pena?: No, troppo rischioso.\n"
+    "Cosa sta succedendo: Evento con poca liquidità e deadline lontana.\n"
+    "Sospetto?: No"
+)
+
+FAKE_SPORT_IN_RESPONSE = (
+    "COPY\n"
+    "Rischio: 2/10\n"
+    "Vale la pena?: Sì.\n"
+    "Cosa sta succedendo: Questo mercato è una partita di calcio sport.\n"
+    "Sospetto?: No"
+)
+
+
+def test_parse_copy_verdict():
+    r = _parse_claude(FAKE_COPY, "Test market", "YES", 0.28, 180000, "0xabc", "Top Whale",
+                      trust_score=90, whale_name="HorizonSplendidView")
+    assert r["verdict"] == "COPY"
+
+
+def test_parse_watch_verdict():
+    r = _parse_claude(FAKE_WATCH, "Test market", "YES", 0.5, 100000, "0xdef", "Big Whale",
+                      trust_score=75, whale_name="beachboy4")
+    assert r["verdict"] == "WATCH"
+
+
+def test_parse_skip_verdict():
+    r = _parse_claude(FAKE_SKIP, "Test market", "NO", 0.8, 100000, "0xghi", "Whale",
+                      trust_score=60, whale_name="testwhale")
+    assert r["verdict"] == "SKIP"
+
+
+def test_parse_sport_in_response_forces_skip():
+    """If Claude mentions 'sport'/'calcio' the verdict must be forced to SKIP."""
+    r = _parse_claude(FAKE_SPORT_IN_RESPONSE, "Test sport market", "YES", 0.3, 100000,
+                      "0xjkl", "Whale", trust_score=70, whale_name="testwhale")
+    assert r["verdict"] == "SKIP"
+
+
+def test_parse_risk_score_extracted():
+    r = _parse_claude(FAKE_COPY, "Test", "YES", 0.3, 150000, "0x1", "Top Whale")
+    assert r["risk_score"] == 3
+
+
+def test_parse_market_and_side_preserved():
+    r = _parse_claude(FAKE_WATCH, "My Market", "NO", 0.7, 120000, "0x2", "Big Whale")
+    assert r["market"] == "My Market"
+    assert r["side"] == "NO"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# compute_confidence() — scoring
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_confidence_base_score():
+    trade = {"usdcSize": "100000", "price": "0.5", "whale_trust_score": 50}
+    state = {"leaderboard": {}}
+    score = compute_confidence(trade, state)
+    assert 50 <= score <= 100
+
+
+def test_confidence_high_trust_increases_score():
+    low_trust  = {"usdcSize": "100000", "price": "0.5", "whale_trust_score": 30}
+    high_trust = {"usdcSize": "100000", "price": "0.5", "whale_trust_score": 90}
+    state = {"leaderboard": {}}
+    assert compute_confidence(high_trust, state) > compute_confidence(low_trust, state)
+
+
+def test_confidence_large_size_increases_score():
+    small = {"usdcSize": "100000",  "price": "0.5", "whale_trust_score": 60}
+    large = {"usdcSize": "600000",  "price": "0.5", "whale_trust_score": 60}
+    state = {"leaderboard": {}}
+    assert compute_confidence(large, state) > compute_confidence(small, state)
+
+
+def test_confidence_extreme_price_increases_score():
+    mid    = {"usdcSize": "150000", "price": "0.5",  "whale_trust_score": 60}
+    corner = {"usdcSize": "150000", "price": "0.1",  "whale_trust_score": 60}
+    state  = {"leaderboard": {}}
+    assert compute_confidence(corner, state) > compute_confidence(mid, state)
+
+
+def test_confidence_capped_at_100():
+    trade = {"usdcSize": "1000000", "price": "0.05", "whale_trust_score": 100,
+             "userAddress": "0xtopwhale"}
+    state = {"leaderboard": {"0xtopwhale": {"total_volume_usd": 5_000_000}}}
+    assert compute_confidence(trade, state) <= 100

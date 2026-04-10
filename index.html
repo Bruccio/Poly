@@ -3,361 +3,566 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>🐋 Polymarket Whale Tracker</title>
+  <title>🐋 Polymarket Whale Tracker v3</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;600;700&display=swap');
     :root {
-      --bg: #000000;
-      --card: rgba(0, 15, 0, 0.88);
-      --accent: #00ff41;
-      --accent2: #00cc33;
-      --accent-dim: #008f11;
-      --warn: #ffb400;
-      --danger: #ff3333;
-      --text: #00ff41;
-      --muted: #006b1a;
-      --border: #003300;
-      --glow: 0 0 10px rgba(0,255,65,0.3);
+      --bg-primary:    #0a0e1a;
+      --bg-secondary:  #141b2f;
+      --bg-tertiary:   #1a2847;
+      --accent-green:  #00ff9f;
+      --accent-cyan:   #00f0ff;
+      --accent-yellow: #fcee0c;
+      --accent-red:    #ff3c5a;
+      --accent-blue:   #4a9eff;
+      --text-primary:  #e8f1ff;
+      --text-secondary:#a0b8d8;
+      --border-light:  #2a3f5f;
+      --border-dark:   #1a2f4f;
     }
+
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    
     body {
-      background: #000;
-      color: var(--text);
-      font-family: 'Fira Code', 'Courier New', monospace;
+      background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
+      color: var(--text-primary);
+      font-family: 'Inter', system-ui, sans-serif;
       min-height: 100vh;
       overflow-x: hidden;
     }
 
-    /* MATRIX RAIN CANVAS */
-    #matrix-bg {
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      opacity: 0.12;
-    }
-
-    /* SCANLINES */
-    #scanlines {
-      position: fixed;
-      inset: 0;
-      z-index: 3;
-      pointer-events: none;
-      background: repeating-linear-gradient(
-        0deg,
-        transparent,
-        transparent 2px,
-        rgba(0,255,65,0.015) 2px,
-        rgba(0,255,65,0.015) 4px
-      );
-    }
-
-    /* MAIN APP */
-    #app {
-      position: relative;
-      z-index: 1;
-    }
-
-    /* HEADER */
+    /* ── HEADER ───────────────────────────────────────────────────────────── */
     header {
-      background: linear-gradient(180deg, rgba(0,30,0,0.95) 0%, rgba(0,10,0,0.9) 100%);
-      border-bottom: 1px solid var(--accent-dim);
-      padding: 18px 24px;
+      background: linear-gradient(90deg, rgba(10,14,26,0.95) 0%, rgba(20,27,47,0.95) 100%);
+      border-bottom: 2px solid var(--accent-cyan);
+      padding: 20px 32px;
       display: flex;
       align-items: center;
       justify-content: space-between;
       flex-wrap: wrap;
-      gap: 12px;
-      box-shadow: 0 2px 20px rgba(0,255,65,0.1);
+      gap: 16px;
+      box-shadow: 0 8px 32px rgba(0,240,255,0.15);
     }
+
     header h1 {
-      font-size: 1.3rem;
+      font-family: 'Fira Code', monospace;
+      font-size: 1.6rem;
       font-weight: 700;
-      text-shadow: var(--glow);
-      letter-spacing: 0.05em;
-    }
-    header h1 span { color: var(--accent-dim); font-weight: 400; }
-    #last-update { font-size: 0.7rem; color: var(--muted); }
-    #status-dot {
-      width: 8px; height: 8px; border-radius: 50%;
-      background: var(--muted); display: inline-block; margin-right: 6px;
-    }
-    #status-dot.ok {
-      background: var(--accent);
-      box-shadow: 0 0 8px var(--accent), 0 0 20px rgba(0,255,65,0.4);
-      animation: pulse 2s ease-in-out infinite;
-    }
-    @keyframes pulse {
-      0%, 100% { opacity: 1; }
-      50% { opacity: 0.5; }
+      background: linear-gradient(90deg, var(--accent-green) 0%, var(--accent-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      letter-spacing: 0.04em;
     }
 
-    /* TERMINAL INTRO */
-    #terminal-intro {
-      background: var(--card);
-      border: 1px solid var(--border);
-      margin: 16px;
-      padding: 14px 18px;
-      border-radius: 4px;
-      font-size: 0.72rem;
-      color: var(--muted);
-      line-height: 1.7;
-    }
-    #terminal-intro .prompt { color: var(--accent); }
-    #terminal-intro .cmd { color: #00ff41; }
-    .cursor {
-      display: inline-block;
-      width: 8px;
-      height: 14px;
-      background: var(--accent);
-      animation: blink 1s step-end infinite;
-      vertical-align: middle;
-      margin-left: 2px;
-    }
-    @keyframes blink { 50% { opacity: 0; } }
-
-    /* MAIN LAYOUT */
-    main { max-width: 1100px; margin: 0 auto; padding: 8px 16px 24px; }
-
-    /* STATS ROW */
-    .stats-row {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
-      gap: 12px;
-      margin-bottom: 24px;
-    }
-    .stat-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 16px;
-      text-align: center;
-      transition: border-color 0.3s;
-    }
-    .stat-card:hover { border-color: var(--accent-dim); box-shadow: var(--glow); }
-    .stat-card .label {
-      font-size: 0.62rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.12em;
-      margin-bottom: 6px;
-    }
-    .stat-card .value {
-      font-size: 1.8rem;
-      font-weight: 700;
-      text-shadow: var(--glow);
-    }
-
-    /* SECTION */
-    .section { margin-bottom: 28px; }
-    .section h2 {
-      font-size: 0.82rem;
-      color: var(--accent-dim);
-      text-transform: uppercase;
-      letter-spacing: 0.15em;
-      margin-bottom: 12px;
-      padding-bottom: 6px;
-      border-bottom: 1px solid var(--border);
-    }
-    .section h2::before { content: '> '; color: var(--accent); }
-
-    /* LEADERBOARD TABLE */
-    .lb-table { width: 100%; border-collapse: collapse; font-size: 0.78rem; }
-    .lb-table th {
-      text-align: left;
-      font-size: 0.62rem;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      padding: 6px 10px;
-      border-bottom: 1px solid var(--border);
-    }
-    .lb-table td {
-      padding: 10px 10px;
-      border-bottom: 1px solid rgba(0,255,65,0.05);
-    }
-    .lb-table tr:hover td {
-      background: rgba(0,255,65,0.03);
-    }
-    .rank { color: var(--muted); font-weight: 700; width: 30px; }
-    .whale-name { font-weight: 600; color: var(--accent); }
-    .profit { color: var(--accent); font-weight: 700; }
-    .trust-bar-wrap { display: flex; align-items: center; gap: 6px; }
-    .trust-bar {
-      height: 4px; border-radius: 2px; background: var(--border);
-      flex: 1; max-width: 70px;
-      overflow: hidden;
-    }
-    .trust-bar-fill { height: 100%; border-radius: 2px; }
-    .trust-val { font-size: 0.68rem; color: var(--muted); }
-
-    /* SIGNAL CARDS */
-    .signal-grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
-      gap: 12px;
-    }
-    .signal-card {
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 16px;
-      transition: border-color 0.3s, box-shadow 0.3s;
-    }
-    .signal-card:hover { border-color: var(--accent-dim); box-shadow: var(--glow); }
-    .signal-card.copy { border-left: 3px solid var(--accent); }
-    .signal-card.watch { border-left: 3px solid var(--warn); }
-    .signal-card.skip { border-left: 3px solid var(--border); }
-    .signal-card.resolved-ok { border-left: 3px solid var(--accent); }
-    .signal-card.resolved-ko { border-left: 3px solid var(--danger); }
-    .signal-badge {
-      display: inline-block;
-      font-size: 0.6rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 0.1em;
-      padding: 2px 6px;
-      border-radius: 2px;
-      margin-bottom: 8px;
-    }
-    .badge-copy { background: rgba(0,255,65,0.12); color: var(--accent); }
-    .badge-watch { background: rgba(255,180,0,0.12); color: var(--warn); }
-    .badge-ok { background: rgba(0,255,65,0.12); color: var(--accent); }
-    .badge-ko { background: rgba(255,51,51,0.12); color: var(--danger); }
-    .signal-title {
-      font-size: 0.82rem;
-      font-weight: 600;
-      line-height: 1.4;
-      margin-bottom: 8px;
-      color: var(--text);
-    }
-    .signal-meta {
-      font-size: 0.68rem;
-      color: var(--muted);
-      display: flex;
-      flex-wrap: wrap;
-      gap: 6px;
-    }
-    .signal-meta span {
-      background: rgba(0,255,65,0.05);
-      padding: 2px 6px;
-      border-radius: 2px;
-      border: 1px solid var(--border);
-    }
-
-    /* ACCURACY */
-    .acc-row {
+    .header-status {
       display: flex;
       align-items: center;
       gap: 16px;
-      background: var(--card);
-      border: 1px solid var(--border);
-      border-radius: 4px;
-      padding: 18px 20px;
+      flex-wrap: wrap;
     }
-    .acc-circle {
-      width: 70px; height: 70px;
+
+    .live-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 6px 12px;
+      border-radius: 6px;
+      background: rgba(0, 255, 159, 0.2);
+      border: 1.5px solid var(--accent-green);
+      color: var(--accent-green);
+      text-shadow: 0 0 8px rgba(0, 255, 159, 0.6);
+      animation: pulse-badge 1.5s ease-in-out infinite;
+    }
+
+    .live-dot {
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 1.2rem; font-weight: 700;
-      flex-shrink: 0;
-      text-shadow: var(--glow);
+      background: var(--accent-green);
+      box-shadow: 0 0 8px var(--accent-green);
+      animation: blink 1s step-end infinite;
     }
-    .acc-info h3 { font-size: 0.85rem; margin-bottom: 4px; }
-    .acc-info p { font-size: 0.72rem; color: var(--muted); line-height: 1.5; }
 
-    /* EMPTY */
-    .empty {
+    @keyframes pulse-badge { 0%,100% { opacity: 1; } 50% { opacity: 0.6; } }
+    @keyframes blink { 50% { opacity: 0; } }
+
+    #last-update {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+    }
+
+    /* ── MAIN LAYOUT ───────────────────────────────────────────────────────── */
+    main {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 32px 24px;
+    }
+
+    /* ── STATS ROW ────────────────────────────────────────────────────────── */
+    .stats-row {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 16px;
+      margin-bottom: 32px;
+    }
+
+    .stat-card {
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+      border: 1.5px solid var(--border-light);
+      border-radius: 12px;
+      padding: 24px;
       text-align: center;
-      color: var(--muted);
-      padding: 30px;
-      font-size: 0.78rem;
-      font-style: italic;
+      transition: all 0.3s ease;
+      cursor: pointer;
     }
 
-    /* LOADING */
-    #loading {
-      position: fixed; inset: 0;
-      background: #000;
-      display: flex; align-items: center; justify-content: center;
-      flex-direction: column; gap: 16px;
-      z-index: 100;
+    .stat-card:hover {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 24px rgba(0,240,255,0.2);
+      transform: translateY(-2px);
     }
-    .spinner-text {
+
+    .stat-card .label {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 8px;
+    }
+
+    .stat-card .value {
+      font-family: 'Fira Code', monospace;
+      font-size: 2rem;
+      font-weight: 700;
+      color: var(--accent-cyan);
+      text-shadow: 0 0 12px rgba(0,240,255,0.4);
+    }
+
+    /* ── SECTIONS ────────────────────────────────────────────────────────── */
+    .section {
+      margin-bottom: 40px;
+    }
+
+    .section h2 {
+      font-family: 'Fira Code', monospace;
       font-size: 0.9rem;
-      color: var(--accent);
-      text-shadow: var(--glow);
+      text-transform: uppercase;
+      letter-spacing: 0.2em;
+      margin-bottom: 20px;
+      padding-bottom: 12px;
+      border-bottom: 2px solid var(--accent-cyan);
+      background: linear-gradient(90deg, var(--accent-green) 0%, var(--accent-cyan) 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
     }
+
+    /* ── CHARTS GRID ───────────────────────────────────────────────────────── */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+      gap: 24px;
+      margin-bottom: 40px;
+    }
+
+    .chart-container {
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+      border: 1.5px solid var(--border-light);
+      border-radius: 12px;
+      padding: 24px;
+      transition: all 0.3s ease;
+    }
+
+    .chart-container:hover {
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 24px rgba(0,240,255,0.2);
+    }
+
+    .chart-title {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.85rem;
+      color: var(--accent-cyan);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+      font-weight: 600;
+    }
+
+    .chart-canvas {
+      position: relative;
+      height: 300px;
+      margin-bottom: 12px;
+    }
+
+    /* ── UMA SECTION ─────────────────────────────────────────────────────── */
+    .uma-section {
+      background: linear-gradient(135deg, rgba(255, 60, 90, 0.1) 0%, rgba(74, 158, 255, 0.1) 100%);
+      border: 2px solid var(--accent-blue);
+      border-radius: 12px;
+      padding: 24px;
+      margin-bottom: 40px;
+    }
+
+    .uma-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 16px;
+    }
+
+    .uma-logo {
+      width: 32px;
+      height: 32px;
+      background: #ff3c5a;
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: bold;
+      color: white;
+    }
+
+    .uma-content {
+      font-size: 0.95rem;
+      line-height: 1.6;
+      color: var(--text-primary);
+    }
+
+    .uma-link {
+      color: var(--accent-cyan);
+      text-decoration: none;
+      font-weight: 600;
+      border-bottom: 1px solid transparent;
+      transition: all 0.2s;
+    }
+
+    .uma-link:hover {
+      border-bottom-color: var(--accent-cyan);
+    }
+
+    /* ── SIGNAL CARDS (COPY/WATCH) ────────────────────────────────────────── */
+    .signal-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 20px;
+    }
+
+    .signal-card {
+      background: linear-gradient(135deg, var(--bg-secondary) 0%, var(--bg-tertiary) 100%);
+      border: 2px solid var(--border-light);
+      border-radius: 12px;
+      padding: 20px;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .signal-card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+    }
+
+    .signal-card.copy {
+      border-color: var(--accent-green);
+      box-shadow: 0 0 20px rgba(0,255,159,0.2);
+    }
+
+    .signal-card.copy:hover {
+      box-shadow: 0 0 30px rgba(0,255,159,0.4);
+      transform: translateY(-4px);
+    }
+
+    .signal-card.watch {
+      border-color: var(--accent-yellow);
+      box-shadow: 0 0 20px rgba(252,238,12,0.15);
+    }
+
+    .signal-card.watch:hover {
+      box-shadow: 0 0 30px rgba(252,238,12,0.3);
+      transform: translateY(-4px);
+    }
+
+    .signal-card.resolved-ok {
+      border-color: var(--accent-green);
+      opacity: 0.8;
+    }
+
+    .signal-card.resolved-ko {
+      border-color: var(--accent-red);
+      opacity: 0.7;
+    }
+
+    .signal-badge {
+      display: inline-block;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.65rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 6px 12px;
+      border-radius: 6px;
+      margin-bottom: 12px;
+    }
+
+    .badge-copy {
+      background: rgba(0,255,159,0.25);
+      color: var(--accent-green);
+      border: 1px solid var(--accent-green);
+    }
+
+    .badge-watch {
+      background: rgba(252,238,12,0.25);
+      color: var(--accent-yellow);
+      border: 1px solid var(--accent-yellow);
+    }
+
+    .badge-ok {
+      background: rgba(0,255,159,0.25);
+      color: var(--accent-green);
+      border: 1px solid var(--accent-green);
+    }
+
+    .badge-ko {
+      background: rgba(255,60,90,0.25);
+      color: var(--accent-red);
+      border: 1px solid var(--accent-red);
+    }
+
+    .signal-title {
+      font-size: 1.1rem;
+      font-weight: 600;
+      color: var(--text-primary);
+      margin-bottom: 12px;
+      line-height: 1.4;
+    }
+
+    .signal-meta {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      font-size: 0.8rem;
+      color: var(--text-secondary);
+      margin-top: 12px;
+      padding-top: 12px;
+      border-top: 1px solid var(--border-dark);
+    }
+
+    .signal-meta span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+    }
+
+    .yes-tag {
+      color: var(--accent-green);
+      font-weight: 600;
+    }
+
+    .no-tag {
+      color: var(--accent-red);
+      font-weight: 600;
+    }
+
+    /* ── LEADERBOARD ───────────────────────────────────────────────────────── */
+    .lb-wrap {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1.5px solid var(--border-light);
+      background: var(--bg-secondary);
+    }
+
+    .lb-table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+      min-width: 600px;
+    }
+
+    .lb-table th {
+      font-family: 'Fira Code', monospace;
+      text-align: left;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      padding: 16px;
+      border-bottom: 2px solid var(--accent-cyan);
+      background: rgba(0,240,255,0.05);
+    }
+
+    .lb-table td {
+      padding: 14px 16px;
+      border-bottom: 1px solid var(--border-dark);
+      vertical-align: middle;
+    }
+
+    .lb-table tr:hover td {
+      background: rgba(0,240,255,0.05);
+    }
+
+    .rank {
+      font-family: 'Fira Code', monospace;
+      color: var(--accent-cyan);
+      font-weight: 700;
+      width: 40px;
+    }
+
+    .whale-name {
+      font-weight: 600;
+      color: var(--accent-green);
+    }
+
+    .profit {
+      font-family: 'Fira Code', monospace;
+      color: var(--accent-green);
+      font-weight: 700;
+    }
+
+    .trust-bar-wrap {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .trust-bar {
+      height: 6px;
+      border-radius: 4px;
+      background: var(--border-dark);
+      flex: 1;
+      max-width: 100px;
+      overflow: hidden;
+    }
+
+    .trust-bar-fill {
+      height: 100%;
+      border-radius: 4px;
+      box-shadow: 0 0 8px currentColor;
+    }
+
+    /* ── LOADING & EMPTY STATES ────────────────────────────────────────────── */
+    #loading {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      min-height: 80vh;
+      gap: 24px;
+    }
+
+    .spinner-text {
+      font-family: 'Fira Code', monospace;
+      font-size: 1rem;
+      color: var(--text-secondary);
+    }
+
     .spinner-bar {
-      width: 200px; height: 3px;
-      background: var(--border);
+      width: 280px;
+      height: 4px;
+      background: var(--border-light);
       border-radius: 2px;
       overflow: hidden;
     }
+
     .spinner-fill {
       width: 40%;
       height: 100%;
-      background: var(--accent);
-      box-shadow: var(--glow);
+      background: linear-gradient(90deg, var(--accent-green), var(--accent-cyan));
+      box-shadow: 0 0 12px rgba(0,240,255,0.5);
       animation: load 1.2s ease-in-out infinite;
     }
+
     @keyframes load {
       0% { transform: translateX(-100%); }
       100% { transform: translateX(350%); }
     }
 
-    /* FOOTER */
+    .empty {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      color: var(--text-secondary);
+      text-align: center;
+      padding: 40px;
+      font-style: italic;
+    }
+
+    /* ── FOOTER ────────────────────────────────────────────────────────────── */
     footer {
       text-align: center;
-      padding: 20px;
-      color: var(--muted);
-      font-size: 0.65rem;
-      border-top: 1px solid var(--border);
-      margin-top: 16px;
+      padding: 32px 24px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.75rem;
+      color: var(--text-secondary);
+      border-top: 1px solid var(--border-light);
+      margin-top: 40px;
     }
-    footer a { color: var(--accent-dim); text-decoration: none; }
-    footer a:hover { color: var(--accent); text-shadow: var(--glow); }
 
-    @media (max-width: 600px) {
-      .stats-row { grid-template-columns: repeat(2, 1fr); }
-      .signal-grid { grid-template-columns: 1fr; }
-      .acc-row { flex-direction: column; text-align: center; }
-      header h1 { font-size: 1rem; }
+    /* ── RESPONSIVE ────────────────────────────────────────────────────────── */
+    @media (max-width: 768px) {
+      header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+
+      header h1 {
+        font-size: 1.3rem;
+      }
+
+      .stats-row {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .signal-grid {
+        grid-template-columns: 1fr;
+      }
+
+      main {
+        padding: 20px 16px;
+      }
     }
   </style>
 </head>
 <body>
 
-<canvas id="matrix-bg"></canvas>
-<div id="scanlines"></div>
-
 <div id="loading">
-  <div class="spinner-text">> Connessione alla blockchain...</div>
+  <div class="spinner-text">&gt; Connessione ai dati whale...</div>
   <div class="spinner-bar"><div class="spinner-fill"></div></div>
 </div>
 
 <div id="app" style="display:none">
 
 <header>
-  <h1>🐋 WHALE_TRACKER <span>v3</span></h1>
-  <div>
-    <span id="status-dot"></span>
-    <span id="last-update">—</span>
+  <h1>🐋 WHALE INTELLIGENCE TERMINAL <small style="font-size:0.6em;color:var(--text-secondary);">v3</small></h1>
+  <div class="header-status">
+    <div class="live-badge"><span class="live-dot"></span> 4x DAILY</div>
+    <div id="last-update" style="font-size:0.85rem;">LAST_RUN: —</div>
   </div>
 </header>
-
-<div id="terminal-intro">
-  <span class="prompt">whale@tracker:~$</span> <span class="cmd">./monitor --mode=alpha --threshold=100k</span><br>
-  <span class="prompt">[SYSTEM]</span> Leaderboard caricata. Filtro wash trading attivo. Self-improving ON.<span class="cursor"></span>
-</div>
 
 <main>
   <div class="stats-row">
     <div class="stat-card">
-      <div class="label">Run totali</div>
+      <div class="label">Run Totali</div>
       <div class="value" id="stat-runs">—</div>
     </div>
     <div class="stat-card">
-      <div class="label">Whale tracciate</div>
+      <div class="label">Whale Tracciati</div>
       <div class="value" id="stat-whales">—</div>
     </div>
     <div class="stat-card">
@@ -370,117 +575,104 @@
     </div>
   </div>
 
-  <div class="section" id="section-accuracy" style="display:none">
-    <h2>Track Record</h2>
-    <div class="acc-row">
-      <div class="acc-circle" id="acc-circle">—</div>
-      <div class="acc-info">
-        <h3 id="acc-title">—</h3>
-        <p id="acc-desc">—</p>
+  <!-- CHARTS SECTION -->
+  <div class="section">
+    <h2>📊 Analisi Dati Whale</h2>
+    <div class="charts-grid">
+      <div class="chart-container">
+        <div class="chart-title">💰 Profitti Top 10 Whale</div>
+        <div class="chart-canvas">
+          <canvas id="profitsChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-container">
+        <div class="chart-title">🎯 Trust Score vs Profitto</div>
+        <div class="chart-canvas">
+          <canvas id="trustVsProfitChart"></canvas>
+        </div>
+      </div>
+      <div class="chart-container">
+        <div class="chart-title">📈 Distribuzione Segnali</div>
+        <div class="chart-canvas">
+          <canvas id="signalsChart"></canvas>
+        </div>
       </div>
     </div>
   </div>
 
+  <!-- LEADERBOARD -->
   <div class="section">
-    <h2>Whale Leaderboard</h2>
-    <div id="leaderboard-container">
-      <div class="empty">// leaderboard vuota — si popola dopo il primo run</div>
+    <h2>🏆 Top Whale Leaderboard</h2>
+    <div class="lb-wrap" id="leaderboard-container">
+      <div class="empty">// leaderboard vuota — primo run in attesa</div>
     </div>
   </div>
 
+  <!-- SEGNALI COPY/WATCH -->
   <div class="section">
-    <h2>Mercati Monitorati</h2>
+    <h2>🎯 Segnali Attivi & Risolti</h2>
     <div class="signal-grid" id="watched-container">
-      <div class="empty">// nessun segnale COPY/WATCH ancora</div>
+      <div class="empty">// nessun segnale ancora — primo run in attesa</div>
     </div>
   </div>
 
-  <div class="section" id="section-reddit" style="display:none">
-    <h2>Reddit Insights</h2>
-    <div id="reddit-container"></div>
-  </div>
-</main>
+  <section class="uma-section">
+    <div class="uma-header">
+      <div class="uma-logo">U</div>
+      <h2 style="margin:0; border:0; background:none; -webkit-text-fill-color: var(--accent-blue); color: var(--accent-blue); text-transform: none; letter-spacing: normal;">Cosa ne pensa UMA?</h2>
+    </div>
+    <div class="uma-content">
+      I mercati di Polymarket vengono risolti tramite l'<strong>Optimistic Oracle di UMA</strong>. 
+      Quando un mercato scade, la risoluzione proposta viene sottoposta a un periodo di liveness. 
+      Se non contestata, diventa definitiva. In caso di disputa, il Data Verification Mechanism (DVM) di UMA garantisce una decisione decentralizzata e sicura.
+      <br><br>
+      <a href="https://uma.xyz" target="_blank" class="uma-link">Scopri di più su UMA →</a>
+    </div>
+  </section>
 
-<footer>
-  POLYMARKET WHALE TRACKER v3 — Bruno &nbsp;|&nbsp;
-  Auto-update ogni 12h via GitHub Actions &nbsp;|&nbsp;
-  <a href="https://polymarket.com" target="_blank">polymarket.com</a>
-</footer>
+</main>
 
 </div>
 
 <script>
-// ── MATRIX RAIN ──────────────────────────────────────────────────────
-const canvas = document.getElementById('matrix-bg');
-const ctx = canvas.getContext('2d');
-let W, H, columns, drops;
-const CHARS = 'PolymarketWHALE01アイウエオカキクケコサシスセソ$¥€₿⟁◊≡∞∴∵';
-const FONT_SIZE = 14;
+// ── CHART INSTANCES ──────────────────────────────────────────────────────────
+let profitsChart, trustVsProfitChart, signalsChart;
 
-function initMatrix() {
-  W = canvas.width = window.innerWidth;
-  H = canvas.height = window.innerHeight;
-  columns = Math.floor(W / FONT_SIZE);
-  drops = Array(columns).fill(1);
-}
-
-function drawMatrix() {
-  ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
-  ctx.fillRect(0, 0, W, H);
-  ctx.fillStyle = '#00ff41';
-  ctx.font = FONT_SIZE + 'px monospace';
-  for (let i = 0; i < drops.length; i++) {
-    const ch = CHARS[Math.floor(Math.random() * CHARS.length)];
-    ctx.fillText(ch, i * FONT_SIZE, drops[i] * FONT_SIZE);
-    if (drops[i] * FONT_SIZE > H && Math.random() > 0.975) drops[i] = 0;
-    drops[i]++;
-  }
-}
-
-initMatrix();
-window.addEventListener('resize', initMatrix);
-setInterval(drawMatrix, 50);
-
-// ── DATA LOADING ─────────────────────────────────────────────────────
-const STATE_URL = "whale_state.json";
-const RAW_URL = "https://raw.githubusercontent.com/bruccio/Poly/main/whale_state.json";
-
-async function loadState() {
-  for (const url of [STATE_URL + "?t=" + Date.now(), RAW_URL + "?t=" + Date.now()]) {
-    try {
-      const res = await fetch(url);
-      if (res.ok) return await res.json();
-    } catch {}
-  }
-  document.getElementById("loading").innerHTML =
-    '<div style="color:#ff3333;font-size:0.85rem;font-family:monospace;">' +
-    '> ERROR: whale_state.json non trovato<br>' +
-    '<span style="color:#006b1a;">Il bot deve eseguire almeno un run prima.</span></div>';
-  return null;
-}
-
+// ── UTILITIES ────────────────────────────────────────────────────────────────
 function fmt$(n) {
-  if (!n && n !== 0) return "—";
+  if (!n && n !== 0) return '—';
   n = parseFloat(n);
-  if (n >= 1e6) return "+$" + (n/1e6).toFixed(1) + "M";
-  if (n >= 1e3) return "+$" + Math.round(n).toLocaleString("it-IT");
-  return "+$" + n.toFixed(0);
+  if (n >= 1e6) return '+$' + (n/1e6).toFixed(2) + 'M';
+  if (n >= 1e3) return '+$' + Math.round(n).toLocaleString('it-IT');
+  return '+$' + n.toFixed(0);
+}
+
+function fmtK(n) {
+  if (!n && n !== 0) return '—';
+  n = parseFloat(n);
+  if (n >= 1e6) return '$' + (n/1e6).toFixed(1) + 'M';
+  if (n >= 1e3) return '$' + Math.round(n/1000) + 'k';
+  return '$' + n.toFixed(0);
 }
 
 function trustColor(t) {
-  if (t >= 70) return "#00ff41";
-  if (t >= 50) return "#ffb400";
-  return "#ff3333";
+  if (t >= 80) return '#00ff9f';
+  if (t >= 60) return '#fcee0c';
+  if (t >= 40) return '#ff9900';
+  return '#ff3c5a';
 }
 
 function fmtDate(iso) {
-  if (!iso) return "—";
-  try { return new Date(iso).toLocaleDateString("it-IT", {day:"2-digit",month:"short",year:"numeric"}); }
-  catch { return "—"; }
+  if (!iso) return '—';
+  try {
+    return new Date(iso).toLocaleDateString('it-IT', {day:'2-digit',month:'short'});
+  } catch { return '—'; }
 }
 
 function esc(s) {
-  return String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+  return String(s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
 
 function isPastMarket(title) {
@@ -505,10 +697,7 @@ function isPastMarket(title) {
     if (mn && (yr<nowYear||(yr===nowYear&&mn<nowMonth))) return true;
   }
   const re2 = /\b(?:by|before|in|end of)\s+(january|february|march|april|may|june|july|august|september|october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)\b(?!\s+\d)/g;
-  for (const m of t.matchAll(re2)) {
-    const mn=M[m[1]];
-    if (mn && mn<nowMonth) return true;
-  }
+  for (const m of t.matchAll(re2)) { if (M[m[1]]&&M[m[1]]<nowMonth) return true; }
   for (const m of t.matchAll(/\bq([1-4])\s*(\d{4})\b/g)) {
     const [em,ed]=QEND[+m[1]];
     if (new Date(+m[2],em-1,ed)<now) return true;
@@ -521,119 +710,310 @@ function isPastMarket(title) {
   return false;
 }
 
-function render(state) {
-  document.getElementById("loading").style.display = "none";
-  document.getElementById("app").style.display = "";
-  document.getElementById("status-dot").classList.add("ok");
-
-  const stats = state.algo_stats || {};
-  const lastUpd = stats.last_updated ? new Date(stats.last_updated).toLocaleString("it-IT") : "—";
-  document.getElementById("last-update").textContent = "LAST_UPDATE: " + lastUpd;
-
-  document.getElementById("stat-runs").textContent = state.run_count ?? "—";
-  document.getElementById("stat-whales").textContent = Object.keys(state.leaderboard||{}).length || "—";
-  document.getElementById("stat-copies").textContent = stats.total_copy_signals ?? "—";
-
-  const acc = stats.accuracy_pct;
-  const accEl = document.getElementById("stat-accuracy");
-  if (acc != null) {
-    accEl.textContent = acc + "%";
-    accEl.style.color = acc >= 60 ? "#00ff41" : acc >= 40 ? "#ffb400" : "#ff3333";
-  } else {
-    accEl.textContent = "N/D";
-    accEl.style.color = "#006b1a";
-  }
-
-  // Track record
-  if (stats.resolved_copies > 0) {
-    document.getElementById("section-accuracy").style.display = "";
-    const circle = document.getElementById("acc-circle");
-    circle.textContent = (acc ?? "—") + (acc != null ? "%" : "");
-    const fg = acc >= 60 ? "#00ff41" : acc >= 40 ? "#ffb400" : "#ff3333";
-    circle.style.border = `2px solid ${fg}`;
-    circle.style.color = fg;
-    circle.style.background = "rgba(0,255,65,0.05)";
-    circle.style.textShadow = `0 0 10px ${fg}40`;
-    document.getElementById("acc-title").textContent =
-      `${stats.correct_copies??0} corretti / ${stats.resolved_copies} risolti`;
-    document.getElementById("acc-desc").textContent =
-      `${stats.total_copy_signals??0} segnali totali. Accuracy: ${acc}%. Il sistema migliora ad ogni run.`;
-  }
-
-  // Leaderboard
+// ── CHART RENDERING ──────────────────────────────────────────────────────────
+function renderCharts(state) {
   const lb = state.leaderboard || {};
   const lbArr = Object.entries(lb)
-    .map(([a,d]) => ({addr:a,...d}))
+    .map(([addr, d]) => ({addr, ...d}))
     .sort((a,b) => (b.total_profit_usd||0) - (a.total_profit_usd||0))
-    .slice(0,20);
+    .slice(0, 10);
 
-  const lbC = document.getElementById("leaderboard-container");
-  if (!lbArr.length) {
-    lbC.innerHTML = '<div class="empty">// leaderboard vuota — primo run pendente</div>';
+  const names = lbArr.map(w => w.username || w.addr?.slice(0,10) || '?');
+  const profits = lbArr.map(w => w.total_profit_usd || 0);
+  const trusts = lbArr.map(w => w.trust_score || 0);
+
+  // ── Profits Chart
+  const profitsCtx = document.getElementById('profitsChart').getContext('2d');
+  if (profitsChart) profitsChart.destroy();
+  profitsChart = new Chart(profitsCtx, {
+    type: 'bar',
+    data: {
+      labels: names,
+      datasets: [{
+        label: 'Profitto ($)',
+        data: profits,
+        backgroundColor: 'rgba(0, 255, 159, 0.3)',
+        borderColor: '#00ff9f',
+        borderWidth: 2,
+        borderRadius: 6,
+        hoverBackgroundColor: 'rgba(0, 255, 159, 0.5)',
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(10, 14, 26, 0.95)',
+          titleColor: '#00ff9f',
+          bodyColor: '#e8f1ff',
+          borderColor: '#00ff9f',
+          borderWidth: 1,
+          padding: 12,
+          displayColors: false,
+          callbacks: {
+            label: function(ctx) {
+              return fmtK(ctx.parsed.y);
+            }
+          }
+        }
+      },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { color: '#a0b8d8', font: { family: "'Fira Code'" } },
+          grid: { color: 'rgba(42, 63, 95, 0.2)' },
+          title: { display: true, text: 'Profitto USD', color: '#00f0ff' }
+        },
+        x: {
+          ticks: { color: '#a0b8d8', font: { family: "'Fira Code'" } },
+          grid: { display: false }
+        }
+      }
+    }
+  });
+
+  // ── Trust vs Profit Scatter Chart
+  const trustCtx = document.getElementById('trustVsProfitChart').getContext('2d');
+  if (trustVsProfitChart) trustVsProfitChart.destroy();
+  trustVsProfitChart = new Chart(trustCtx, {
+    type: 'scatter',
+    data: {
+      datasets: [{
+        label: 'Whale',
+        data: lbArr.map(w => ({
+          x: w.trust_score || 0,
+          y: w.total_profit_usd || 0,
+          name: w.username || w.addr?.slice(0,10)
+        })),
+        backgroundColor: 'rgba(0, 240, 255, 0.6)',
+        borderColor: '#00f0ff',
+        borderWidth: 2,
+        pointRadius: 6,
+        hoverRadius: 8,
+        pointHoverBackgroundColor: '#fcee0c'
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: 'rgba(10, 14, 26, 0.95)',
+          titleColor: '#00f0ff',
+          bodyColor: '#e8f1ff',
+          borderColor: '#00f0ff',
+          borderWidth: 1,
+          padding: 12,
+          displayColors: false,
+          callbacks: {
+            title: function(ctx) {
+              return ctx[0].raw.name || 'Whale';
+            },
+            label: function(ctx) {
+              return 'Trust: ' + ctx.raw.x + ' | Profitto: ' + fmtK(ctx.raw.y);
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          type: 'linear',
+          position: 'bottom',
+          title: { display: true, text: 'Trust Score', color: '#00f0ff' },
+          ticks: { color: '#a0b8d8', font: { family: "'Fira Code'" } },
+          grid: { color: 'rgba(42, 63, 95, 0.2)' },
+          min: 0,
+          max: 100
+        },
+        y: {
+          title: { display: true, text: 'Profitto ($)', color: '#00f0ff' },
+          ticks: { color: '#a0b8d8', font: { family: "'Fira Code'" } },
+          grid: { color: 'rgba(42, 63, 95, 0.2)' },
+          beginAtZero: true
+        }
+      }
+    }
+  });
+
+  // ── Signals Distribution Pie Chart
+  const stats = state.algo_stats || {};
+  const resolved = stats.resolved_copies || 0;
+  const copy = (stats.total_copy_signals || 0) - resolved;
+  
+  const signalsCtx = document.getElementById('signalsChart').getContext('2d');
+  if (signalsChart) signalsChart.destroy();
+  signalsChart = new Chart(signalsCtx, {
+    type: 'doughnut',
+    data: {
+      labels: ['COPY Attivi', 'Risolti', 'WATCH'],
+      datasets: [{
+        data: [copy, resolved, 0],
+        backgroundColor: [
+          'rgba(0, 255, 159, 0.4)',
+          'rgba(74, 158, 255, 0.4)',
+          'rgba(252, 238, 12, 0.4)'
+        ],
+        borderColor: [
+          '#00ff9f',
+          '#4a9eff',
+          '#fcee0c'
+        ],
+        borderWidth: 2
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      plugins: {
+        legend: {
+          position: 'bottom',
+          labels: {
+            color: '#e8f1ff',
+            font: { family: "'Fira Code'" },
+            padding: 16,
+            usePointStyle: true
+          }
+        },
+        tooltip: {
+          backgroundColor: 'rgba(10, 14, 26, 0.95)',
+          titleColor: '#00f0ff',
+          bodyColor: '#e8f1ff',
+          borderColor: '#00f0ff',
+          borderWidth: 1,
+          padding: 12,
+          displayColors: true
+        }
+      }
+    }
+  });
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function render(state) {
+  document.getElementById('loading').style.display = 'none';
+  document.getElementById('app').style.display = '';
+
+  const stats = state.algo_stats || {};
+  const lastUpd = state.last_run
+    ? new Date(state.last_run).toLocaleString('it-IT')
+    : (stats.last_updated ? new Date(stats.last_updated).toLocaleString('it-IT') : '—');
+  document.getElementById('last-update').textContent = 'LAST_RUN: ' + lastUpd;
+
+  document.getElementById('stat-runs').textContent = state.run_count ?? '—';
+  document.getElementById('stat-whales').textContent = Object.keys(state.leaderboard||{}).length || '—';
+  document.getElementById('stat-copies').textContent = stats.total_copy_signals ?? '—';
+
+  const acc = stats.accuracy_pct;
+  const accEl = document.getElementById('stat-accuracy');
+  if (acc != null) {
+    accEl.textContent = acc + '%';
+    accEl.style.color = acc >= 60 ? '#00ff9f' : acc >= 40 ? '#fcee0c' : '#ff3c5a';
   } else {
-    const rows = lbArr.map((w,i) => {
-      const t = w.trust_score ?? 40;
-      const tc = trustColor(t);
-      return `<tr>
-        <td class="rank">${i+1}</td>
-        <td class="whale-name">${esc(w.username||w.addr?.slice(0,12))}</td>
-        <td class="profit">${fmt$(w.total_profit_usd)}</td>
-        <td><div class="trust-bar-wrap">
-          <div class="trust-bar"><div class="trust-bar-fill" style="width:${t}%;background:${tc}"></div></div>
-          <span class="trust-val" style="color:${tc}">${t}</span>
-        </div></td>
-        <td style="color:#006b1a;font-size:0.68rem;">${fmtDate(w.last_seen)}</td>
-      </tr>`;
-    }).join("");
-    lbC.innerHTML = `<table class="lb-table">
-      <thead><tr><th>#</th><th>Whale</th><th>Profitto</th><th>Trust</th><th>Ultimo</th></tr></thead>
-      <tbody>${rows}</tbody></table>`;
+    accEl.textContent = 'N/D';
+    accEl.style.color = '#a0b8d8';
   }
 
-  // Watched markets — filtra mercati con date già passate (non ancora risolti)
+  // ── Render Charts
+  renderCharts(state);
+
+  // ── Leaderboard
+  const lb = state.leaderboard || {};
+  const lbArr = Object.entries(lb)
+    .map(([addr, d]) => ({addr, ...d}))
+    .sort((a,b) => (b.total_profit_usd||0) - (a.total_profit_usd||0))
+    .slice(0, 20);
+
+  const lbC = document.getElementById('leaderboard-container');
+  if (!lbArr.length) {
+    lbC.innerHTML = '<div class="empty">// leaderboard vuota — primo run in attesa</div>';
+  } else {
+    let rows = '';
+    lbArr.forEach((w, i) => {
+      const t = w.trust_score ?? 40;
+      const tc = trustColor(t);
+      const displayName = w.username || (w.addr ? w.addr.slice(0,6) + '...' + w.addr.slice(-4) : '?');
+      rows += `<tr>
+        <td class="rank">#${i+1}</td>
+        <td class="whale-name">${esc(displayName)}</td>
+        <td class="profit">${fmt$(w.total_profit_usd)}</td>
+        <td>
+          <div class="trust-bar-wrap">
+            <div class="trust-bar">
+              <div class="trust-bar-fill" style="width:${t}%;background:${tc};"></div>
+            </div>
+            <span style="color:${tc};font-family:'Fira Code',monospace;font-weight:600;">${t}</span>
+          </div>
+        </td>
+        <td style="color:var(--text-secondary);font-family:'Fira Code',monospace;font-size:0.8rem;">${fmtDate(w.last_seen)}</td>
+      </tr>`;
+    });
+    lbC.innerHTML = `<table class="lb-table">
+      <thead><tr>
+        <th>#</th><th>Whale</th><th>Profitto</th><th>Trust</th><th>Visto</th>
+      </tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+  }
+
+  // ── Watched markets — esclude i mercati con date già passate (non risolti)
   const watched = Object.values(state.watched_markets || {})
     .filter(m => m.resolved || !isPastMarket(m.question))
-    .sort((a,b) => (b.date_flagged||"").localeCompare(a.date_flagged||""));
-  const wC = document.getElementById("watched-container");
+    .sort((a,b) => (b.date_flagged||'').localeCompare(a.date_flagged||''));
+  const wC = document.getElementById('watched-container');
   if (!watched.length) {
-    wC.innerHTML = '<div class="empty">// nessun segnale tracciato — primo run pendente</div>';
+    wC.innerHTML = '<div class="empty">// nessun segnale ancora — primo run in attesa</div>';
   } else {
     wC.innerHTML = watched.map(m => {
       let cls, badgeCls, badgeTxt;
       if (m.resolved) {
-        cls = m.correct ? "resolved-ok" : "resolved-ko";
-        badgeCls = m.correct ? "badge-ok" : "badge-ko";
-        badgeTxt = m.correct ? "RESOLVED_OK" : "RESOLVED_FAIL";
+        cls = m.correct ? 'resolved-ok' : 'resolved-ko';
+        badgeCls = m.correct ? 'badge-ok' : 'badge-ko';
+        badgeTxt = m.correct ? '✓ RISOLTO OK' : '✗ RISOLTO FAIL';
       } else {
-        const v = m.our_verdict || "COPY";
-        cls = v === "COPY" ? "copy" : "watch";
-        badgeCls = v === "COPY" ? "badge-copy" : "badge-watch";
-        badgeTxt = v === "COPY" ? "TRACKING_COPY" : "TRACKING_WATCH";
+        const v = m.our_verdict || 'COPY';
+        cls = v === 'COPY' ? 'copy' : 'watch';
+        badgeCls = v === 'COPY' ? 'badge-copy' : 'badge-watch';
+        badgeTxt = v === 'COPY' ? '▶ COPY' : '◉ WATCH';
       }
-      const pr = m.entry_price ? (parseFloat(m.entry_price)*100).toFixed(0)+"%" : "—";
+      const pr = m.entry_price ? (parseFloat(m.entry_price)*100).toFixed(0)+'%' : '—';
+      const side = (m.side || 'YES').toUpperCase();
+      const sideClass = side === 'YES' || side.includes('YES') ? 'yes-tag' : 'no-tag';
       return `<div class="signal-card ${cls}">
         <span class="signal-badge ${badgeCls}">${badgeTxt}</span>
-        <div class="signal-title">${esc(m.question||"???")}</div>
+        <div class="signal-title">${esc(m.question||'???')}</div>
         <div class="signal-meta">
-          <span>${m.date_flagged||"—"}</span>
-          <span>${m.side||"YES"} @ ${pr}</span>
-          ${m.resolution ? `<span>EXIT: ${m.resolution}</span>` : ""}
+          <span class="${sideClass}">${side} @ ${pr}</span>
+          <span>${m.date_flagged ? new Date(m.date_flagged).toLocaleDateString('it-IT') : '—'}</span>
+          ${m.resolution ? `<span>EXIT: ${esc(m.resolution)}</span>` : ''}
         </div>
       </div>`;
-    }).join("");
-  }
-
-  // Reddit
-  const strategies = (state.reddit_cache||{}).top_strategies || [];
-  if (strategies.length) {
-    document.getElementById("section-reddit").style.display = "";
-    document.getElementById("reddit-container").innerHTML = strategies.map(s =>
-      `<div style="background:var(--card);border:1px solid var(--border);border-radius:4px;padding:12px;margin-bottom:8px;font-size:0.75rem;color:var(--muted);">${esc(s)}</div>`
-    ).join("");
+    }).join('');
   }
 }
 
-loadState().then(d => { if (d) setTimeout(() => render(d), 800); });
+// ── LOAD ──────────────────────────────────────────────────────────────
+const STATE_URL = 'whale_state.json';
+const RAW_URL = 'https://raw.githubusercontent.com/bruccio/Poly/main/whale_state.json';
+
+async function loadState() {
+  for (const url of [STATE_URL + '?t=' + Date.now(), RAW_URL + '?t=' + Date.now()]) {
+    try {
+      const res = await fetch(url);
+      if (res.ok) return await res.json();
+    } catch {}
+  }
+  document.getElementById('loading').innerHTML =
+    '<div style="color:#ff3c5a;font-family:monospace;font-size:1rem;text-align:center;">' +
+    '&gt; ERROR: whale_state.json non trovato<br>' +
+    '<span style="color:#a0b8d8;font-size:0.9rem;">Il bot deve eseguire almeno un run prima.</span></div>';
+  return null;
+}
+
+loadState().then(d => { if (d) setTimeout(() => render(d), 600); });
 </script>
+
 </body>
 </html>

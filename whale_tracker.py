@@ -17,6 +17,7 @@ import math
 import hashlib
 import smtplib
 import requests
+import urllib.parse
 from datetime import datetime, timezone
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
@@ -129,7 +130,7 @@ def _is_sport(title: str) -> bool:
     return any(re.search(p, t) for p in SPORT_PATTERNS)
 
 
-# ── FILTRO MERCATI SCADUTI ───────────────────────────────────────────────────────
+# ── FILTRO MERCATI SCADUTI (title-based fallback) ────────────────────────────────
 _MONTH_MAP = {
     "january": 1, "february": 2, "march": 3, "april": 4,
     "may": 5, "june": 6, "july": 7, "august": 8,
@@ -142,89 +143,91 @@ _QUARTER_END = {1: (3, 31), 2: (6, 30), 3: (9, 30), 4: (12, 31)}
 
 def _is_past_market(title: str) -> bool:
     """
-    Restituisce True se il titolo del mercato fa riferimento a una data già passata.
-    Previene notifiche per mercati già risolti/scaduti (es: "Fed by January 2026" ad aprile).
+    Fallback testuale: restituisce True se il titolo contiene una data già passata.
+    Complementa is_future_market() che richiede il campo endDate strutturato.
+    Es: "Fed decision in January?" → past in aprile 2026.
     """
     now = datetime.now(timezone.utc)
     t = title.lower()
-
-    # Pattern 1: data ISO esplicita (2026-01-15 o 2025-12-31)
+    # ISO date: 2026-01-15
     for m in re.finditer(r'\b(\d{4})-(\d{2})-(\d{2})\b', title):
         try:
-            d = datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)), tzinfo=timezone.utc)
-            if d < now:
+            if datetime(int(m.group(1)), int(m.group(2)), int(m.group(3)),
+                        tzinfo=timezone.utc) < now:
                 return True
         except ValueError:
             pass
-
-    # Pattern 2: anno intero passato (2025 o precedenti)
+    # Anno intero passato: 2025
     for m in re.finditer(r'\b(20\d{2})\b', title):
-        year = int(m.group(1))
-        if year < now.year:
+        if int(m.group(1)) < now.year:
             return True
-
-    # Pattern 3: "by/before/in/end of <Mese> <Anno>" con anno esplicito
-    for m in re.finditer(
-        r'\b(?:by|before|in|end of|through|until|prior to)\s+'
-        r'(january|february|march|april|may|june|july|august|september|'
-        r'october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)'
-        r'\s+(\d{4})\b',
-        t
-    ):
-        month_num = _MONTH_MAP.get(m.group(1), 0)
-        year = int(m.group(2))
-        if month_num:
-            # Considera il mese finito se siamo già al giorno seguente l'ultimo
-            try:
-                deadline = datetime(year, month_num, 28, 23, 59, tzinfo=timezone.utc)
-                if deadline < now:
-                    return True
-            except ValueError:
-                pass
-
-    # Pattern 4: "Q1 2026", "Q2 2025" etc.
-    for m in re.finditer(r'\bq([1-4])\s*(\d{4})\b', t):
-        quarter = int(m.group(1))
-        year = int(m.group(2))
-        end_month, end_day = _QUARTER_END[quarter]
-        try:
-            deadline = datetime(year, end_month, end_day, 23, 59, tzinfo=timezone.utc)
-            if deadline < now:
-                return True
-        except ValueError:
-            pass
-
-    # Pattern 5: "<Mese> <Anno>" senza preposizione (es: "January 2026 Fed decision")
-    for m in re.finditer(
-        r'\b(january|february|march|april|may|june|july|august|september|'
-        r'october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)'
-        r'\s+(\d{4})\b',
-        t
-    ):
-        month_num = _MONTH_MAP.get(m.group(1), 0)
-        year = int(m.group(2))
-        if month_num:
-            try:
-                deadline = datetime(year, month_num, 28, 23, 59, tzinfo=timezone.utc)
-                if deadline < now:
-                    return True
-            except ValueError:
-                pass
-
-    # Pattern 6: "in/by/before <Mese>" senza anno → assume anno corrente
-    # Es: "Fed decision in January?" → January di quest'anno → se già passato → True
+    # "by/in/before <Mese> <Anno>"
     for m in re.finditer(
         r'\b(?:by|before|in|end of|through|until)\s+'
         r'(january|february|march|april|may|june|july|august|september|'
         r'october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)'
-        r'\b(?!\s+\d)',
-        t
+        r'\s+(\d{4})\b', t
     ):
-        month_num = _MONTH_MAP.get(m.group(1), 0)
-        if month_num and month_num < now.month:
-            return True  # stesso anno corrente, mese già passato
-
+        mn, yr = _MONTH_MAP.get(m.group(1), 0), int(m.group(2))
+        if mn and datetime(yr, mn, 28, tzinfo=timezone.utc) < now:
+            return True
+    # "in/by <Mese>" senza anno → assume anno corrente
+    for m in re.finditer(
+        r'\b(?:by|before|in|end of)\s+'
+        r'(january|february|march|april|may|june|july|august|september|'
+        r'october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)'
+        r'\b(?!\s+\d)', t
+    ):
+        mn = _MONTH_MAP.get(m.group(1), 0)
+        if mn and mn < now.month:
+            return True
+    # Q1-Q4 Anno
+    for m in re.finditer(r'\bq([1-4])\s*(\d{4})\b', t):
+        em, ed = _QUARTER_END[int(m.group(1))]
+        if datetime(int(m.group(2)), em, ed, tzinfo=timezone.utc) < now:
+            return True
+    # "<Mese> <Anno>" senza preposizione
+    for m in re.finditer(
+        r'\b(january|february|march|april|may|june|july|august|september|'
+        r'october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)'
+        r'\s+(\d{4})\b', t
+    ):
+        mn, yr = _MONTH_MAP.get(m.group(1), 0), int(m.group(2))
+        if mn and datetime(yr, mn, 28, tzinfo=timezone.utc) < now:
+            return True
     return False
+
+
+# ── FILTRO MERCATI APERTI (Time Filter) ──────────────────────────────────────────
+import dateutil.parser
+def is_future_market(trade_data):
+    """
+    Verifica se il mercato è ancora aperto basandosi sulla endDate.
+    Implementazione suggerita dalla guida Whale Tracking.
+    """
+    now = datetime.now(timezone.utc)
+    if trade_data.get('resolved') is True:
+        return False
+    
+    # Prova diversi campi possibili per la data di fine
+    end_date = (trade_data.get('end_date_iso') or 
+                trade_data.get('endDate') or 
+                trade_data.get('end_timestamp') or
+                trade_data.get('closedTime'))
+    
+    if not end_date:
+        # Se non abbiamo info sulla data di fine, per sicurezza consideriamo il mercato aperto
+        # a meno che non sia esplicitamente risolto.
+        return True
+        
+    try:
+        end_dt = dateutil.parser.isoparse(str(end_date))
+        if end_dt.tzinfo is None:
+            end_dt = end_dt.replace(tzinfo=timezone.utc)
+        return end_dt > now
+    except Exception as e:
+        log(f"Failed parsing end_date {end_date}: {e}", "WARN")
+        return True # In caso di errore, meglio un falso positivo (mercato aperto)
 
 
 # ── LOGGING ─────────────────────────────────────────────────────────────────────
@@ -233,6 +236,56 @@ def log(msg, level="INFO"):
     ts = datetime.now().strftime("%H:%M:%S")
     icon = {"OK": "✓", "ERR": "✗", "WARN": "⚠"}.get(level, "·")
     print(f"[{ts}] {icon} {msg}", flush=True)
+
+
+# ── HTTP HELPER con RETRY + BACKOFF ─────────────────────────────────────────────
+_H = {"Accept": "application/json", "User-Agent": "WhaleTracker/3.0"}
+
+def _http_get(url: str, timeout: int = 12, retries: int = 3):
+    """
+    Wrapper per requests.get con retry esponenziale (2s/4s/8s).
+    Gestisce 429 (rate limit), timeout e errori di rete.
+    Restituisce requests.Response oppure None senza lanciare eccezioni.
+    """
+    for attempt in range(retries):
+        try:
+            r = requests.get(url, headers=_H, timeout=timeout)
+            if r.status_code == 429:
+                wait = 2 ** (attempt + 1)
+                log(f"Rate limit (429), attendo {wait}s... [{url[:55]}]", "WARN")
+                time.sleep(wait)
+                continue
+            return r
+        except requests.exceptions.Timeout:
+            log(f"Timeout tentativo {attempt+1}: {url[:60]}", "WARN")
+        except requests.exceptions.RequestException as e:
+            log(f"Errore rete tentativo {attempt+1}: {str(e)[:80]}", "WARN")
+        if attempt < retries - 1:
+            time.sleep(2 ** attempt)
+    log(f"Tutti i tentativi falliti: {url[:60]}", "ERR")
+    return None
+
+
+# ── CACHE IN-RUN PER ACTIVITY WALLET ────────────────────────────────────────────
+_ACTIVITY_CACHE: dict = {}  # svuotato all'inizio di ogni run()
+
+def _cached_activity(wallet: str, limit: int = 100) -> list:
+    """
+    Scarica (e memorizza per il run corrente) l'attività di trading di un wallet.
+    Evita di chiamare lo stesso endpoint 2-3 volte per run.
+    """
+    url = (f"https://data-api.polymarket.com/activity"
+           f"?user={wallet}&limit={limit}&type=TRADE")
+    if url in _ACTIVITY_CACHE:
+        return _ACTIVITY_CACHE[url]
+    r = _http_get(url, timeout=10)
+    if not r or r.status_code != 200:
+        _ACTIVITY_CACHE[url] = []
+        return []
+    data = r.json()
+    result = data if isinstance(data, list) else data.get("data", [])
+    _ACTIVITY_CACHE[url] = result
+    return result
 
 
 # ── LEADERBOARD POLYMARKET ──────────────────────────────────────────────────────
@@ -248,8 +301,8 @@ def fetch_breaking_leaderboard(state: dict):
     ]
     for url in urls:
         try:
-            r = requests.get(url, headers=H, timeout=12)
-            if r.status_code != 200:
+            r = _http_get(url)
+            if not r or r.status_code != 200:
                 continue
             data = r.json()
             entries = data if isinstance(data, list) else data.get("data", data.get("leaderboard", []))
@@ -287,6 +340,96 @@ def fetch_breaking_leaderboard(state: dict):
     log("Leaderboard: impossibile scaricare (continuo senza)", "WARN")
 
 
+# ── WHALE-FIRST AUTO DETECTION ───────────────────────────────────────────────────
+def fetch_whale_trades(state: dict) -> list:
+    """
+    Whale-first approach: scarica i trade recenti dei top wallet dalla leaderboard.
+    Non usa soglie manuali — le whale sono già identificate per profitto storico.
+    Restituisce lista di trade pronti per analisi Claude.
+    """
+    leaderboard = state.get("leaderboard", {})
+    if not leaderboard:
+        log("fetch_whale_trades: leaderboard vuota, skip", "WARN")
+        return []
+
+    # Prendi top 20 wallet ordinati per trust_score
+    sorted_wallets = sorted(
+        leaderboard.items(),
+        key=lambda kv: kv[1].get("trust_score", 0),
+        reverse=True,
+    )[:20]
+
+    all_trades: list = []
+    seen_titles: set = set()
+
+    for wallet_key, lb_entry in sorted_wallets:
+        wallet = lb_entry.get("wallet") or wallet_key
+        # Salta wallet demo/pool
+        if wallet.startswith("0x") and len(wallet) < 15:
+            continue
+        username = lb_entry.get("username", wallet[:10])
+        trust_score = lb_entry.get("trust_score", 50)
+        log(f"  Scarico trade da wallet {username} (trust {trust_score})...")
+        try:
+            trades = _cached_activity(wallet, limit=20)
+            added = 0
+            wallet_bets: list = []  # per recent_bets di questo wallet
+            for t in trades:
+                title = (t.get("title") or t.get("question") or
+                         t.get("market") or "").strip()
+                if not title:
+                    continue
+                size = float(t.get("usdcSize") or t.get("size") or
+                             t.get("amount") or 0)
+                price = float(t.get("price") or t.get("outcomePrice") or 0.5)
+                side = t.get("side") or t.get("type") or "YES"
+                # Salva nelle recenti del wallet (max 3, include anche sport per trasparenza)
+                if len(wallet_bets) < 3:
+                    wallet_bets.append({
+                        "title": title,
+                        "side":  side,
+                        "size":  size,
+                        "price": price,
+                    })
+                title_key = title.lower()
+                if title_key in seen_titles:
+                    continue
+                if _is_sport(title):
+                    continue
+                if _is_past_market(title):  # fallback testuale se endDate assente
+                    continue
+                if not is_future_market(t):
+                    continue
+                seen_titles.add(title_key)
+                all_trades.append({
+                    "usdcSize":         str(size),
+                    "price":            str(price),
+                    "side":             side,
+                    "title":            title,
+                    "userAddress":      wallet,
+                    "whale_trust_score": trust_score,
+                    "whale_username":   username,
+                    "_source":          "whale-first",
+                })
+                added += 1
+            # Aggiorna recent_bets nel leaderboard per la dashboard
+            if wallet_bets:
+                state["leaderboard"][wallet_key]["recent_bets"] = wallet_bets
+            if added:
+                log(f"    → {added} trade da {username}", "OK")
+            time.sleep(0.5)  # rate limit cortesia
+        except Exception as e:
+            log(f"  fetch_whale_trades {username}: {str(e)[:80]}", "WARN")
+
+    # Ordina per trust_score × size (trade più significativi prima)
+    all_trades.sort(
+        key=lambda x: x["whale_trust_score"] * float(x.get("usdcSize") or 0),
+        reverse=True,
+    )
+    log(f"fetch_whale_trades: {len(all_trades)} trade da {len(sorted_wallets)} wallet", "OK")
+    return all_trades
+
+
 # ── WASH TRADING DETECTION ──────────────────────────────────────────────────────
 def is_wash_trader(wallet: str) -> bool:
     """
@@ -295,15 +438,8 @@ def is_wash_trader(wallet: str) -> bool:
     """
     if not wallet or wallet.startswith("0xpool") or wallet.startswith("0xdemo"):
         return False
-    H = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
     try:
-        url = f"https://data-api.polymarket.com/activity?user={wallet}&limit=100&type=TRADE"
-        r = requests.get(url, headers=H, timeout=10)
-        if r.status_code != 200:
-            return False
-        trades = r.json()
-        if not isinstance(trades, list):
-            trades = trades.get("data", [])
+        trades = _cached_activity(wallet, limit=100)
         if len(trades) < 10:
             return False
         market_sides: dict = {}
@@ -340,11 +476,12 @@ def fetch_reddit_insights(state: dict) -> str:
     if run_count % 10 != 1 and cache.get("top_strategies"):
         return cache["top_strategies"][0] if cache["top_strategies"] else ""
     try:
-        H = {"Accept": "application/json",
-             "User-Agent": "WhaleTracker/2.0 (by /u/polymarket_bot)"}
-        r = requests.get("https://www.reddit.com/r/Polymarket/hot.json?limit=10",
-                         headers=H, timeout=12)
-        if r.status_code != 200:
+        r = requests.get(
+            "https://www.reddit.com/r/Polymarket/hot.json?limit=10",
+            headers={"Accept": "application/json",
+                     "User-Agent": "WhaleTracker/3.0 (by /u/polymarket_bot)"},
+            timeout=12)
+        if not r or r.status_code != 200:
             return ""
         posts = r.json().get("data", {}).get("children", [])
         KEYS = ["underpriced", "strategy", "alpha", "edge", "opportunity",
@@ -368,103 +505,78 @@ def fetch_reddit_insights(state: dict) -> str:
         return ""
 
 
-# ── PULIZIA MERCATI SCADUTI ──────────────────────────────────────────────────────
-def purge_stale_markets(state: dict):
-    """
-    Rimuove da watched_markets i mercati che sono:
-    - già risolti da più di 30 giorni
-    - la cui data nel titolo è chiaramente passata (e non hanno risoluzione tracciata)
-    - segnalati più di 60 giorni fa senza risoluzione (mercato zombie)
-    """
-    watched = state.get("watched_markets", {})
-    if not watched:
-        return
-    now = datetime.now(timezone.utc)
-    to_delete = []
-    for key, market in watched.items():
-        question = market.get("question", "")
-        date_flagged = market.get("date_flagged", "")
-
-        # 1. Risolto da più di 30 giorni → archivia
-        if market.get("resolved"):
-            try:
-                flagged_dt = datetime.fromisoformat(date_flagged.replace("Z", "+00:00")) \
-                    if "T" in date_flagged else \
-                    datetime(int(date_flagged[:4]), int(date_flagged[5:7]), int(date_flagged[8:10]),
-                             tzinfo=timezone.utc)
-                if (now - flagged_dt).days > 30:
-                    to_delete.append(key)
-                    continue
-            except Exception:
-                pass
-
-        # 2. Titolo indica data già passata → mercato fantasma
-        if question and _is_past_market(question):
-            to_delete.append(key)
-            continue
-
-        # 3. Mercato zombie: segnalato >60 giorni fa, mai risolto
-        if date_flagged:
-            try:
-                flagged_dt = datetime.fromisoformat(date_flagged.replace("Z", "+00:00")) \
-                    if "T" in date_flagged else \
-                    datetime(int(date_flagged[:4]), int(date_flagged[5:7]), int(date_flagged[8:10]),
-                             tzinfo=timezone.utc)
-                if (now - flagged_dt).days > 60:
-                    to_delete.append(key)
-            except Exception:
-                pass
-
-    for key in to_delete:
-        del watched[key]
-    if to_delete:
-        log(f"Pulizia watched_markets: rimossi {len(to_delete)} mercati scaduti/zombie", "OK")
-
-
 # ── SELF-IMPROVING: CONTROLLA RESOLUTION ────────────────────────────────────────
 def check_resolutions(state: dict):
     """Controlla se i mercati watched hanno avuto una resolution e aggiorna stats."""
-    purge_stale_markets(state)  # prima pulisce i mercati obsoleti
     watched = state.get("watched_markets", {})
     if not watched:
         return
-    H = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
+    
+    # 1. Pulizia mercati obsoleti (stale) > 30 giorni non risolti
+    now = datetime.now(timezone.utc)
+    removed_stale = 0
+    for key, market in list(watched.items()):
+        if market.get("resolved"):
+            continue
+        df_str = market.get("date_flagged")
+        if df_str:
+            try:
+                df_dt = datetime.strptime(df_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
+                if (now - df_dt).days > 30:
+                    del watched[key]
+                    removed_stale += 1
+            except: pass
+    if removed_stale:
+        log(f"Cleanup: rimossi {removed_stale} mercati obsoleti (>30gg)", "OK")
+
+    # 2. Verifica risoluzioni con Gamma API (bulk fetch per efficienza)
+    all_recent = []
+    for offset in [0, 500]:
+        r = _http_get(f"https://gamma-api.polymarket.com/markets?limit=500&offset={offset}")
+        if r and r.status_code == 200:
+            all_recent.extend(r.json() if isinstance(r.json(), list) else r.json().get("data", []))
+        time.sleep(0.3)
+    
+    market_map = {m.get("question", "").lower(): m for m in all_recent}
     newly_resolved = 0
+    
     for key, market in list(watched.items()):
         if market.get("resolved"):
             continue
         question = market.get("question", "")
-        if not question:
-            continue
-        try:
-            q = requests.utils.quote(question[:50])
-            r = requests.get(
-                f"https://gamma-api.polymarket.com/markets?search={q}&limit=5",
-                headers=H, timeout=10)
-            if r.status_code != 200:
-                continue
-            markets = r.json()
-            if not isinstance(markets, list):
-                markets = markets.get("data", [])
-            for m in markets:
-                m_q = (m.get("question") or m.get("title") or "").lower()
-                if question.lower()[:30] not in m_q:
-                    continue
-                if not (m.get("closed") or m.get("isResolved")):
-                    continue
-                winning = (m.get("winningOutcome") or "").upper()
+        q_lower = question.lower()
+        
+        # Cerca match (esatto o parziale)
+        match = market_map.get(q_lower)
+        if not match:
+            for m_q, m_obj in market_map.items():
+                if q_lower[:40] in m_q:
+                    match = m_obj
+                    break
+        
+        if match and (match.get("closed") or match.get("isResolved")):
+            winning = (match.get("winningOutcome") or "").upper()
+            # Fallback se winningOutcome è vuoto ma closed è true (controlla prezzi)
+            if not winning and match.get("closed"):
+                try:
+                    prices = json.loads(match.get("outcomePrices", "[]"))
+                    if prices and any(float(p) > 0.98 for p in prices):
+                        idx = [float(p) > 0.98 for p in prices].index(True)
+                        outcomes = json.loads(match.get("outcomes", "[]"))
+                        winning = outcomes[idx].upper() if idx < len(outcomes) else ""
+                except: pass
+            
+            if winning:
                 our_side = market.get("side", "YES").upper()
                 correct = (winning == our_side or
                            (winning in ("YES", "1") and our_side == "YES") or
                            (winning in ("NO", "0") and our_side == "NO"))
-                market.update({"resolved": True, "resolution": winning, "correct": correct})
+                market.update({"resolved": True, "resolution": winning, "correct": correct, 
+                               "resolution_date": datetime.now(timezone.utc).isoformat()})
                 newly_resolved += 1
-                break
-        except Exception as e:
-            log(f"Resolution check error: {e}", "WARN")
-    # Ricalcola algo_stats
-    all_resolved = [m for m in watched.values()
-                    if m.get("resolved") and m.get("correct") is not None]
+
+    # 3. Ricalcola algo_stats
+    all_resolved = [m for m in watched.values() if m.get("resolved") and m.get("correct") is not None]
     correct = sum(1 for m in all_resolved if m.get("correct"))
     total_copies = sum(1 for m in watched.values() if m.get("our_verdict") == "COPY")
     state["algo_stats"] = {
@@ -475,8 +587,67 @@ def check_resolutions(state: dict):
         "last_updated": datetime.now(timezone.utc).isoformat(),
     }
     if newly_resolved:
-        log(f"Resolution: {newly_resolved} mercati risolti, "
-            f"accuracy: {state['algo_stats']['accuracy_pct']}%", "OK")
+        log(f"Resolution: {newly_resolved} mercati risolti, accuracy: {state['algo_stats']['accuracy_pct']}%", "OK")
+
+
+# ── SPORT TAG FILTER (Gamma API) ─────────────────────────────────────────────────
+_SPORT_TAGS = {
+    "soccer", "football", "basketball", "nba", "nfl", "mlb", "nhl", "tennis",
+    "formula-1", "f1", "mma", "ufc", "boxing", "rugby", "cricket", "golf",
+    "sports", "sport", "esports", "olympics", "volleyball", "baseball",
+    "hockey", "cycling", "atletica", "nuoto", "swimming", "wrestling",
+}
+
+def _has_sport_tag(market_obj: dict) -> bool:
+    """Controlla se un market Gamma ha tag o categoria sportiva."""
+    tags = market_obj.get("tags") or []
+    for tag in tags:
+        slug = (tag.get("slug") or tag.get("id") or tag if isinstance(tag, str) else "").lower()
+        label = (tag.get("label") or tag.get("name") or "").lower()
+        if slug in _SPORT_TAGS or label in _SPORT_TAGS:
+            return True
+    cat = (market_obj.get("category") or market_obj.get("groupItemTitle") or "").lower()
+    return any(s in cat for s in _SPORT_TAGS)
+
+
+# ── NEWS CONTEXT (Google News RSS) ───────────────────────────────────────────────
+def fetch_market_context(title: str) -> str:
+    """
+    Cerca le ultime 3 notizie correlate al mercato via Google News RSS.
+    Restituisce stringa con i titoli separati da ' | '.
+    Gratis, nessuna API key, usato per dare a Claude contesto reale.
+    """
+    # Keyword principali (ignora stop words e punteggiatura)
+    stop = {
+        "will", "the", "a", "an", "in", "on", "at", "to", "for", "of",
+        "is", "be", "are", "was", "has", "have", "by", "from", "with",
+        "that", "this", "or", "and", "its", "their"
+    }
+    words = [
+        w.strip("?.,!") for w in title.split()
+        if w.lower().strip("?.,!") not in stop and len(w) > 2
+    ][:6]
+    query = urllib.parse.quote(" ".join(words))
+    url = f"https://news.google.com/rss/search?q={query}&hl=en&gl=US&ceid=US:en"
+    try:
+        r = _http_get(url, timeout=8, retries=2)
+        if not r or r.status_code != 200:
+            return ""
+        # Estrai titoli da RSS XML — CDATA o testo semplice
+        items = re.findall(
+            r'<item>.*?<title>(?:<!\[CDATA\[)?(.*?)(?:\]\]>)?</title>',
+            r.text, re.S
+        )
+        headlines = []
+        for raw_title in items[:4]:
+            clean = raw_title.strip()
+            # Rimuovi " - NomeTestate" alla fine
+            clean = re.sub(r'\s*[-–]\s*[^-–]+$', '', clean).strip()
+            if clean and len(clean) > 15:
+                headlines.append(clean)
+        return " | ".join(headlines[:3])
+    except Exception:
+        return ""
 
 
 # ── AGGIORNA WATCHED MARKETS ─────────────────────────────────────────────────────
@@ -513,15 +684,14 @@ def profile_whale(wallet: str, state: dict) -> dict:
     if cached.get("profiled"):
         return cached
 
-    H = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
     total_volume = 0.0
     markets_seen = set()
     try:
-        for offset in [0, 500]:  # max 2 pagine = 1000 trade
+        for page_offset in [0, 500]:  # max 2 pagine = 1000 trade
             url = (f"https://data-api.polymarket.com/activity"
-                   f"?user={wallet}&limit=500&offset={offset}&type=TRADE")
-            r = requests.get(url, headers=H, timeout=12)
-            if r.status_code != 200:
+                   f"?user={wallet}&limit=500&offset={page_offset}&type=TRADE")
+            r = _http_get(url, timeout=12)
+            if not r or r.status_code != 200:
                 break
             trades = r.json()
             if not isinstance(trades, list):
@@ -600,7 +770,6 @@ def fetch_polymarket_whales(min_size, state: dict = None):
     Multi-source crawling: aggrega dati da TUTTI gli endpoint Polymarket disponibili.
     Non si ferma al primo — prende tutto e deduplica.
     """
-    H = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
     all_items: list = []
     seen_titles: set = set()
 
@@ -618,10 +787,8 @@ def fetch_polymarket_whales(min_size, state: dict = None):
 
     # ── Source 1: Gamma API Markets (volume 24h) ──
     try:
-        r = requests.get(
-            "https://gamma-api.polymarket.com/markets?limit=100&active=true&order=volume24hr&ascending=false",
-            headers=H, timeout=12)
-        if r.status_code == 200:
+        r = _http_get("https://gamma-api.polymarket.com/markets?limit=100&active=true&order=volume24hr&ascending=false")
+        if r and r.status_code == 200:
             mlist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
             _add_items([{
                 "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
@@ -631,17 +798,16 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                 "userAddress": "0xpool",
                 "conditionId": m.get("conditionId") or "",
             } for m in mlist
-              if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size],
+              if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size
+              and not _has_sport_tag(m)],
             "gamma-markets")
     except Exception as e:
         log(f"  gamma-markets: {str(e)[:80]}", "WARN")
 
     # ── Source 2: Gamma API Events (volume totale) ──
     try:
-        r = requests.get(
-            "https://gamma-api.polymarket.com/events?limit=80&active=true&order=volume&ascending=false",
-            headers=H, timeout=12)
-        if r.status_code == 200:
+        r = _http_get("https://gamma-api.polymarket.com/events?limit=80&active=true&order=volume&ascending=false")
+        if r and r.status_code == 200:
             elist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
             _add_items([{
                 "usdcSize":    str(float(ev.get("volume") or ev.get("volumeNum") or 0)),
@@ -650,7 +816,8 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                 "title":       ev.get("title") or ev.get("question") or "Evento",
                 "userAddress": "0xpool",
             } for ev in elist
-              if float(ev.get("volume") or ev.get("volumeNum") or 0) >= min_size],
+              if float(ev.get("volume") or ev.get("volumeNum") or 0) >= min_size
+              and not _has_sport_tag(ev)],
             "gamma-events")
     except Exception as e:
         log(f"  gamma-events: {str(e)[:80]}", "WARN")
@@ -658,10 +825,8 @@ def fetch_polymarket_whales(min_size, state: dict = None):
     # ── Source 3: Gamma API Trending/Popular markets ──
     for tag in ["trending", "popular"]:
         try:
-            r = requests.get(
-                f"https://gamma-api.polymarket.com/markets?limit=50&active=true&tag={tag}",
-                headers=H, timeout=10)
-            if r.status_code == 200:
+            r = _http_get(f"https://gamma-api.polymarket.com/markets?limit=50&active=true&tag={tag}")
+            if r and r.status_code == 200:
                 mlist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
                 _add_items([{
                     "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
@@ -670,17 +835,16 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                     "title":       m.get("question") or m.get("title") or "Mercato",
                     "userAddress": "0xpool",
                 } for m in mlist
-                  if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size],
+                  if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size
+                  and not _has_sport_tag(m)],
                 f"gamma-{tag}")
         except Exception as e:
             log(f"  gamma-{tag}: {str(e)[:80]}", "WARN")
 
     # ── Source 4: Data API Activity (trade reali con wallet) ──
     try:
-        r = requests.get(
-            "https://data-api.polymarket.com/activity?limit=200&type=TRADE",
-            headers=H, timeout=12)
-        if r.status_code == 200:
+        r = _http_get("https://data-api.polymarket.com/activity?limit=200&type=TRADE")
+        if r and r.status_code == 200:
             trades = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
             _add_items([{
                 "usdcSize":    str(float(t.get("usdcSize") or t.get("amount") or 0)),
@@ -724,10 +888,8 @@ def fetch_polymarket_whales(min_size, state: dict = None):
         if wallet_addr.startswith("0xpool") or wallet_addr.startswith("0xdemo"):
             continue
         try:
-            r = requests.get(
-                f"https://data-api.polymarket.com/activity?user={wallet_addr}&limit=20&type=TRADE",
-                headers=H, timeout=10)
-            if r.status_code == 200:
+            r = _http_get(f"https://data-api.polymarket.com/activity?user={wallet_addr}&limit=20&type=TRADE", timeout=10)
+            if r and r.status_code == 200:
                 trades = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
                 _add_items([{
                     "usdcSize":    str(float(t.get("usdcSize") or t.get("amount") or 0)),
@@ -747,16 +909,13 @@ def fetch_polymarket_whales(min_size, state: dict = None):
 
     log(f"Multi-source totale: {len(all_items)} mercati unici raccolti", "OK")
 
-    # ── Filtra sport, mercati scaduti e sotto soglia ──
+    # ── Filtra sport e sotto soglia ──
     filtered = [
         t for t in all_items
         if _sz(t) >= min_size * 0.5  # più permissivo per whale top
         and not _is_sport(t.get("title") or t.get("question") or "")
         and not _is_past_market(t.get("title") or t.get("question") or "")
     ]
-    stale_count = len(all_items) - len([t for t in all_items if not _is_past_market(t.get("title") or t.get("question") or "")])
-    if stale_count:
-        log(f"  Esclusi {stale_count} mercati con data scaduta", "WARN")
 
     # ── Arricchisci con trust_score e filtra wash trader ──
     leaderboard = (state or {}).get("leaderboard", {})
@@ -802,39 +961,39 @@ MODELS = [
 ]
 
 def _build_system_prompt() -> str:
-    """Costruisce il system prompt con la data odierna per evitare mercati anacronistici."""
     today = datetime.now(timezone.utc).strftime("%d %B %Y")
     today_iso = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     return (
-        f"Oggi è {today} ({today_iso}). Sei un analista finanziario esperto di mercati predittivi (Polymarket).\n"
-        "Stai valutando un mercato con alto volume dove una whale (grande investitore) ha piazzato >$100k.\n\n"
-        "Il tuo compito: decidere se vale la pena seguire questa whale.\n\n"
+        f"Oggi è {today} ({today_iso}). "
+        "Sei un analista aggressivo di mercati predittivi (Polymarket). Il tuo obiettivo: "
+        "identificare trade da seguire, non evitarli.\n\n"
         "REGOLA N°0 — MERCATO SCADUTO → SKIP IMMEDIATO (priorità assoluta):\n"
-        f"Se il titolo del mercato fa riferimento a un evento che doveva avvenire PRIMA di oggi ({today_iso}), "
-        "oppure contiene una data già passata (es: 'by January 2026', 'Q1 2026', 'before March 2026' "
-        f"quando siamo in {today}), → SKIP obbligatorio. "
-        "Spiega brevemente: 'Mercato già scaduto: [data nel titolo] è nel passato.'\n\n"
-        "REGOLE ASSOLUTE:\n"
-        "- Qualsiasi scommessa sportiva (calcio, basket, tennis, F1, partite, match) → SKIP\n"
-        "- Qualsiasi evento entertainment (Oscar, Grammy, Eurovision) → SKIP\n"
-        "- Mercato con deadline già passata rispetto a oggi → SKIP\n\n"
-        "CRITERI DI VALUTAZIONE (solo per mercati con deadline FUTURA):\n"
-        "- Il prezzo è diverso dalla probabilità reale? (>10% gap = interessante)\n"
-        "- La whale ha trust score alto? (>70 = affidabile)\n"
-        "- Il mercato è su un evento verificabile con deadline chiara?\n"
-        "- C'è un catalizzatore imminente (elezione, decisione Fed, deadline legale, ecc.)?\n\n"
-        "VERDETTI (3 opzioni):\n"
-        "- COPY = Forte opportunità, prezzo chiaramente sbagliato o segnale forte dalla whale\n"
-        "- WATCH = Interessante, da tenere d'occhio, potrebbe diventare COPY\n"
-        "- SKIP = Non interessante, troppo rischioso, sport/entertainment, o mercato SCADUTO\n\n"
-        "IMPORTANTE: Non essere troppo conservativo! Se una whale da milioni punta $200k+ "
-        "su un mercato politico/economico con prezzo basso E deadline futura, probabilmente sa qualcosa. "
-        "Almeno 2-3 mercati su 10 dovrebbero essere COPY o WATCH.\n\n"
+        f"Se il titolo fa riferimento a un evento con deadline PRIMA di oggi ({today_iso}) "
+        "(es: 'by January 2026', 'in March 2026', 'Q1 2026' quando siamo in aprile) → SKIP.\n\n"
+        "REGOLA N°1 — SPORT/ENTERTAINMENT → SKIP IMMEDIATO (nessuna analisi):\n"
+        "Calcio, basket, tennis, F1, NFL, NBA, Oscar, Grammy, Eurovision → SKIP.\n\n"
+        "REGOLA N°2 — COPY DI DEFAULT (la più importante):\n"
+        "Se Trust Score ≥ 80 AND size ≥ $100k AND NON è sport AND deadline FUTURA → COPY "
+        "a MENO CHE tu non abbia una ragione specifica e concreta per non farlo "
+        "(es: mercato già a 95¢, whale nota per wash trading, evento già risolto).\n"
+        "Il dubbio va a favore del COPY, non dello SKIP.\n\n"
+        "REGOLA N°3 — WATCH se incerto:\n"
+        "Trust 60-79 OR size $50k-$99k OR contesto ambiguo → WATCH. "
+        "Non usare SKIP quando hai incertezza — usa WATCH.\n\n"
+        "CALIBRAZIONE PREZZI — guida rapida:\n"
+        "- Prezzo < 20¢: evento improbabile MA la whale sa qualcosa? → spesso COPY\n"
+        "- Prezzo 20-45¢: zona interessante, mercato sotto-prezzato → COPY o WATCH\n"
+        "- Prezzo 50-75¢: neutro, dipende dal contesto → WATCH o COPY se forte segnale\n"
+        "- Prezzo > 85¢: mercato quasi certo, poco valore → SKIP o WATCH\n\n"
+        "CONTESTO NEWS: Se vengono fornite notizie recenti correlate, usale come "
+        "conferma del movimento whale. Una whale che muove $200k+ DOPO una notizia "
+        "rilevante è quasi certamente un COPY.\n\n"
+        "TRACK RECORD: Se il sistema ha >60% accuracy → fidati ancora di più dei segnali.\n\n"
         "Rispondi SOLO in questo formato, in italiano:\n"
         "COPY (o WATCH o SKIP)\n"
         "Rischio: X/10\n"
-        "Vale la pena?: [1 frase chiara]\n"
-        "Cosa sta succedendo: [2-3 righe, spiega il mercato come a un amico]\n"
+        "Vale la pena?: [1 frase diretta e concisa]\n"
+        "Cosa sta succedendo: [2-3 righe MAX — spiega il mercato come a un amico]\n"
         "Sospetto?: No/Forse/Sì"
     )
 
@@ -952,6 +1111,160 @@ def _parse_claude(raw, market, side, price, size, wallet, tier,
                                re.I | re.S) or raw[:300])[:400],
         "sospetto":         g(r"Sospetto\?[:\s]*(.+?)(?:\n|$)") or "No",
     }
+
+
+# ── BATCH CLAUDE — top 5 mercati in una sola chiamata ───────────────────────────
+BATCH_SYSTEM = (
+    "Sei un analista aggressivo di mercati predittivi. "
+    "Analizza i mercati in batch e rispondi nel formato esatto richiesto. "
+    "Sport/entertainment → SKIP immediato. "
+    "Trust ≥ 80 + size ≥ $100k + non sport → COPY di default. "
+    "Usa WATCH per i casi incerti, non SKIP."
+)
+
+def _build_trade_text(trade: dict, state: dict, news: str = "") -> str:
+    """Testo sintetico di un singolo trade per il prompt batch."""
+    size       = _sz(trade)
+    price      = float(trade.get("price") or 0.5)
+    side       = trade.get("side") or "YES"
+    market     = trade.get("title") or trade.get("question") or "Mercato"
+    trust      = trade.get("whale_trust_score", 40)
+    wname      = trade.get("whale_username", "?")
+    wallet_f   = (trade.get("maker") or trade.get("userAddress") or "").lower()
+    profile    = profile_whale(wallet_f, state)
+    total_vol  = profile.get("total_volume_usd", 0)
+    tier       = _classify(size, total_vol)
+    confidence = compute_confidence(trade, state)
+    lines = [
+        f"Titolo: {market}",
+        f"Direzione: {side} @ {price:.2f} ({price*100:.0f}¢)",
+        f"Size: ${size:,.0f} | Vol storico wallet: ${total_vol:,.0f}",
+        f"Whale: {wname} | Trust: {trust}/100 | Tier: {tier}",
+        f"Confidence pre-analisi: {confidence}/100",
+    ]
+    if news:
+        lines.append(f"Notizie correlate: {news}")
+    return "\n".join(lines)
+
+
+def analyze_batch_claude(trades: list, state: dict, reddit_context: str = "") -> list:
+    """
+    Analizza fino a 5 mercati in una singola chiamata Claude.
+    Riduce il numero di API call da N a 1, con parsing batch del risultato.
+    Ritorna lista di result dict (stesso formato di _parse_claude).
+    """
+    batch = trades[:5]
+    if not batch:
+        return []
+
+    # Prepara testo strutturato per ogni trade (con news context)
+    sections = []
+    trade_meta = []  # dati per parsing post-risposta
+    for i, trade in enumerate(batch, 1):
+        news = fetch_market_context(trade.get("title") or "")
+        if news:
+            log(f"  News [{i}]: {news[:80]}", "OK")
+        text = _build_trade_text(trade, state, news)
+        sections.append(f"=== MERCATO {i} ===\n{text}")
+        wallet_f = (trade.get("maker") or trade.get("userAddress") or "").lower()
+        profile  = profile_whale(wallet_f, state)
+        trade_meta.append({
+            "market":     trade.get("title") or trade.get("question") or "Mercato",
+            "side":       trade.get("side") or "YES",
+            "price":      float(trade.get("price") or 0.5),
+            "size":       _sz(trade),
+            "wallet":     wallet_f[:14] + "...",
+            "whale_name": trade.get("whale_username", "?"),
+            "tier":       _classify(_sz(trade), profile.get("total_volume_usd", 0)),
+            "trust":      trade.get("whale_trust_score", 40),
+            "confidence": compute_confidence(trade, state),
+        })
+
+    acc_str = ""
+    algo    = state.get("algo_stats", {})
+    if algo.get("accuracy_pct") is not None:
+        acc_str = f"\nTrack record sistema: {algo['accuracy_pct']}% accuracy."
+    if reddit_context:
+        acc_str += f"\nInsight r/Polymarket: {reddit_context}"
+
+    prompt = (
+        f"Analizza questi {len(batch)} mercati Polymarket.{acc_str}\n\n"
+        + "\n\n".join(sections)
+        + "\n\nRispondi ESATTAMENTE in questo formato (nessun testo extra tra i mercati):\n\n"
+        + "\n\n".join(
+            f"=== MERCATO {i} ===\nCOPY/WATCH/SKIP\nRischio: X/10\n"
+            "Vale la pena?: ...\nCosa sta succedendo: ...\nSospetto?: No/Forse/Sì"
+            for i in range(1, len(batch) + 1)
+        )
+    )
+
+    for model in MODELS:
+        try:
+            r = requests.post(
+                "https://api.anthropic.com/v1/messages",
+                headers={
+                    "Content-Type": "application/json",
+                    "x-api-key": ANTHROPIC_API_KEY,
+                    "anthropic-version": "2023-06-01",
+                },
+                json={
+                    "model": model,
+                    "max_tokens": 800,
+                    "system": BATCH_SYSTEM,
+                    "messages": [{"role": "user", "content": prompt}],
+                },
+                timeout=45,
+            )
+            if r.status_code != 200:
+                log(f"Batch Claude {r.status_code} ({model})", "WARN")
+                continue
+            raw = "".join(b.get("text", "") for b in r.json().get("content", []))
+            log(f"Batch Claude OK ({model}) — {len(batch)} mercati in 1 call", "OK")
+
+            # Parser batch: dividi per === MERCATO N ===
+            parts = re.split(r'===\s*MERCATO\s+\d+\s*===', raw)
+            parts = [p.strip() for p in parts if p.strip()]
+            results = []
+            for idx, (chunk, meta) in enumerate(zip(parts, trade_meta)):
+                try:
+                    res = _parse_claude(
+                        chunk,
+                        meta["market"], meta["side"], meta["price"], meta["size"],
+                        meta["wallet"], meta["tier"], meta["trust"], meta["whale_name"],
+                        meta["confidence"],
+                    )
+                    results.append(res)
+                    log(f"  [{idx+1}] {meta['market'][:45]}: {res['verdict']} "
+                        f"R{res['risk_score']}/10", "OK")
+                except Exception as e:
+                    log(f"  Batch parse errore mercato {idx+1}: {e}", "WARN")
+                    results.append({
+                        "market": meta["market"], "side": meta["side"],
+                        "price": meta["price"], "size": meta["size"],
+                        "wallet": meta["wallet"], "whale_name": meta["whale_name"],
+                        "tier": meta["tier"], "trust_score": meta["trust"],
+                        "confidence": meta["confidence"],
+                        "verdict": "SKIP", "risk_score": 5, "is_sport_flagged": False,
+                        "vale_pena": "", "spiegazione": chunk[:200], "sospetto": "No",
+                    })
+            # Completa risultati mancanti (se Claude ha risposto per meno mercati)
+            while len(results) < len(batch):
+                m = trade_meta[len(results)]
+                results.append({
+                    "market": m["market"], "side": m["side"],
+                    "price": m["price"], "size": m["size"],
+                    "wallet": m["wallet"], "whale_name": m["whale_name"],
+                    "tier": m["tier"], "trust_score": m["trust"],
+                    "confidence": m["confidence"],
+                    "verdict": "SKIP", "risk_score": 5, "is_sport_flagged": False,
+                    "vale_pena": "", "spiegazione": "Parsing batch fallito", "sospetto": "No",
+                })
+            return results
+        except Exception as e:
+            log(f"Batch Claude eccezione ({model}): {e}", "WARN")
+
+    log("Batch Claude fallito — fallback su chiamate singole", "WARN")
+    return []
 
 
 # ── TELEGRAM ────────────────────────────────────────────────────────────────────
@@ -1152,26 +1465,36 @@ def send_email(results, state: dict = None, is_demo=False, best_skip=None):
 
 # ── RUN SINGOLO ─────────────────────────────────────────────────────────────────
 def run():
+    _ACTIVITY_CACHE.clear()  # azzera cache per questo run
     state = load_state()
     state["run_count"] = state.get("run_count", 0) + 1
     run_n = state["run_count"]
 
     log("=" * 60)
-    log(f"Run #{run_n} | Soglia: >${MIN_SIZE_USDC:,} | Max: {MAX_WHALES}")
+    log(f"Run #{run_n} | Whale-first auto detection | Max: {MAX_WHALES}")
     log("=" * 60)
 
     # 1. Controlla resolution dei mercati passati (self-improving)
     check_resolutions(state)
 
-    # 2. Aggiorna leaderboard da Polymarket
+    # 2. Aggiorna leaderboard da Polymarket (chi sono le whale?)
     fetch_breaking_leaderboard(state)
 
     # 3. Reddit insights (ogni 10 run)
     reddit_context = fetch_reddit_insights(state)
 
-    # 4. Fetch mercati whale
-    ok, whales, total = fetch_polymarket_whales(MIN_SIZE_USDC, state)
-    is_demo = not ok or not whales
+    # 4. Whale-first: prendi i trade recenti dei top wallet
+    log("Scarico trade recenti delle top whale...")
+    whales = fetch_whale_trades(state)
+
+    # 4b. Fallback: se nessun trade da wallet, usa mercati per volume
+    if not whales:
+        log("Nessun trade da wallet — fallback su volume mercati", "WARN")
+        ok, whales, total = fetch_polymarket_whales(MIN_SIZE_USDC, state)
+    else:
+        ok = True
+
+    is_demo = not whales
     if is_demo:
         log("Nessun dato reale — uso dati demo.", "WARN")
         whales = [
@@ -1186,27 +1509,66 @@ def run():
              "userAddress": "0xdemo3", "whale_trust_score": 85, "whale_username": "demo_whale_3"},
         ]
 
-    # 5. Analisi Claude
-    results = []
-    for i, trade in enumerate(whales[:MAX_WHALES]):
-        name = trade.get("title") or trade.get("question") or "Mercato"
-        log(f"Analisi [{i+1}/{min(MAX_WHALES, len(whales))}]: {name[:55]}...")
+    # 5. Analisi Claude — BATCH per i primi 5, singola per i rimanenti
+    to_analyze = whales[:MAX_WHALES]
+    results: list = []
+
+    # 5a. Batch (top 5) — 1 call invece di 5, include news context
+    log(f"Analisi batch top 5 mercati (1 chiamata Claude)...")
+    batch_results = analyze_batch_claude(to_analyze[:5], state, reddit_context)
+    if batch_results:
+        results.extend(batch_results)
+    else:
+        # Fallback: analisi singola per i primi 5
+        for trade in to_analyze[:5]:
+            name = trade.get("title") or "Mercato"
+            log(f"Analisi singola fallback: {name[:55]}...")
+            try:
+                news = fetch_market_context(name)
+                result = analyze_with_claude(trade, state, reddit_context + (f" | News: {news}" if news else ""))
+                results.append(result)
+            except Exception as e:
+                log(f"Errore analisi: {e}", "ERR")
+                results.append({
+                    "market": name, "side": "N/D", "price": 0, "size": 0,
+                    "wallet": "—", "whale_name": "—", "tier": "—", "trust_score": 0,
+                    "verdict": "SKIP", "risk_score": 5, "is_sport_flagged": False,
+                    "vale_pena": "", "spiegazione": f"Errore: {str(e)[:100]}", "sospetto": "No",
+                })
+            time.sleep(1)
+
+    # 5b. Analisi singola per i mercati rimanenti (6-MAX_WHALES)
+    for i, trade in enumerate(to_analyze[5:], 6):
+        name = trade.get("title") or "Mercato"
+        log(f"Analisi [{i}/{len(to_analyze)}]: {name[:55]}...")
         try:
-            result = analyze_with_claude(trade, state, reddit_context)
+            news = fetch_market_context(name)
+            result = analyze_with_claude(
+                trade, state,
+                reddit_context + (f" | News: {news}" if news else "")
+            )
             results.append(result)
-            log(f"→ {result['verdict']} | Rischio {result['risk_score']}/10 | "
-                f"Trust {result.get('trust_score',40)} | Sospetto: {result.get('sospetto','No')}", "OK")
+            log(f"→ {result['verdict']} | R{result['risk_score']}/10 | "
+                f"Trust {result.get('trust_score',40)}", "OK")
         except Exception as e:
             log(f"Errore analisi: {e}", "ERR")
             results.append({
                 "market": name, "side": "N/D", "price": 0, "size": 0,
                 "wallet": "—", "whale_name": "—", "tier": "—", "trust_score": 0,
-                "verdict": "SKIP", "risk_score": 5,
-                "vale_pena": "", "spiegazione": f"Errore: {str(e)[:100]}",
-                "sospetto": "No",
+                "verdict": "SKIP", "risk_score": 5, "is_sport_flagged": False,
+                "vale_pena": "", "spiegazione": f"Errore: {str(e)[:100]}", "sospetto": "No",
             })
-        if i < MAX_WHALES - 1:
-            time.sleep(1)
+        time.sleep(1)
+
+    # Log lezioni apprese
+    copy_n  = sum(1 for r in results if r["verdict"] == "COPY")
+    watch_n = sum(1 for r in results if r["verdict"] == "WATCH")
+    skip_n  = sum(1 for r in results if r["verdict"] == "SKIP")
+    log(f"Analisi completata: {copy_n} COPY | {watch_n} WATCH | {skip_n} SKIP "
+        f"su {len(results)} mercati", "OK")
+    acc = state.get("algo_stats", {}).get("accuracy_pct")
+    if acc is not None:
+        log(f"Track record sistema: {acc}% accuracy su {state['algo_stats']['resolved_copies']} segnali risolti", "OK")
 
     # 6. Salva COPY in watched_markets per tracking futuro
     update_watched_markets(state, results)
