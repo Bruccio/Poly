@@ -743,18 +743,55 @@ def check_resolutions(state: dict):
     if removed_stale:
         log(f"Cleanup: rimossi {removed_stale} mercati obsoleti (>30gg)", "OK")
 
-    # 2. Usa la Gamma resolution cache (già costruita da build_gamma_resolution_cache())
+    # 2. Usa la Gamma resolution cache + targeted API per mercati non in cache
     market_map = _GAMMA_RESOLUTION_CACHE if _GAMMA_RESOLUTION_CACHE else {}
     if not market_map:
         log("check_resolutions: cache Gamma vuota, skip verifica", "WARN")
     newly_resolved = 0
+
+    def _fetch_market_status(question: str, cond_id: str) -> dict | None:
+        """Targeted Gamma API call per un singolo mercato non trovato in cache bulk."""
+        # Prova prima per conditionId diretto
+        if cond_id:
+            r = _http_get(
+                f"https://gamma-api.polymarket.com/markets?conditionId={cond_id}&limit=1",
+                timeout=8, retries=2,
+            )
+            if r and r.status_code == 200:
+                items = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+                if items:
+                    m = items[0]
+                    _GAMMA_RESOLUTION_CACHE[cond_id] = m
+                    q = (m.get("question") or "").lower().strip()
+                    if q:
+                        _GAMMA_RESOLUTION_CACHE[q] = m
+                    return m
+        # Fallback: ricerca per testo
+        if question:
+            encoded = urllib.parse.quote(question[:80])
+            r = _http_get(
+                f"https://gamma-api.polymarket.com/markets?search={encoded}&limit=3",
+                timeout=8, retries=2,
+            )
+            if r and r.status_code == 200:
+                items = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+                q_lower = question.lower()
+                for candidate in items:
+                    cq = (candidate.get("question") or "").lower().strip()
+                    if q_lower[:40] in cq or cq[:40] in q_lower:
+                        _GAMMA_RESOLUTION_CACHE[cq] = candidate
+                        cid_c = candidate.get("conditionId") or candidate.get("id") or ""
+                        if cid_c:
+                            _GAMMA_RESOLUTION_CACHE[cid_c] = candidate
+                        return candidate
+        return None
 
     for key, market in list(watched.items()):
         question = market.get("question", "")
         q_lower = question.lower()
         cond_id = market.get("conditionId") or market.get("condition_id") or ""
 
-        # Cerca match: prima per conditionId, poi per titolo
+        # Cerca match nella cache bulk: conditionId → titolo esatto → titolo parziale
         match = (market_map.get(cond_id) if cond_id else None)
         if not match:
             match = market_map.get(q_lower)
@@ -764,28 +801,41 @@ def check_resolutions(state: dict):
                     match = m_obj
                     break
 
-        if match and (match.get("closed") or match.get("isResolved")):
-            winning = (match.get("winningOutcome") or "").upper()
-            if not winning and match.get("closed"):
-                try:
-                    prices = json.loads(match.get("outcomePrices", "[]"))
-                    if prices and any(float(p) > 0.98 for p in prices):
-                        idx = [float(p) > 0.98 for p in prices].index(True)
-                        outcomes = json.loads(match.get("outcomes", "[]"))
-                        winning = outcomes[idx].upper() if idx < len(outcomes) else ""
-                except: pass
+        # Se non trovato nella cache bulk → chiamata API mirata (ogni run, per ogni watched)
+        if not match:
+            log(f"  Resolution: {question[:55]}... non in cache, chiamo API...", "OK")
+            match = _fetch_market_status(question, cond_id)
+            time.sleep(0.3)  # rate limit cortesia
 
-            if winning:
-                our_side = market.get("side", "YES").upper()
-                correct = (winning == our_side or
-                           (winning in ("YES", "1") and our_side == "YES") or
-                           (winning in ("NO", "0") and our_side == "NO"))
-                market.update({"resolved": True, "resolution": winning, "correct": correct,
-                               "resolution_date": now.isoformat()})
-                # Sposta in archive, rimuovi da watched → non compare più in dashboard
-                archive.append(market)
-                del watched[key]
-                newly_resolved += 1
+        if not match:
+            continue  # non trovato da nessuna parte, lascia in watched
+
+        # Controlla resolved/closed + endDate passata
+        if not _resolved_from_cache_entry(match):
+            continue  # ancora aperto
+
+        winning = (match.get("winningOutcome") or "").upper()
+        if not winning and match.get("closed"):
+            try:
+                prices = json.loads(match.get("outcomePrices", "[]"))
+                if prices and any(float(p) > 0.98 for p in prices):
+                    idx = [float(p) > 0.98 for p in prices].index(True)
+                    outcomes = json.loads(match.get("outcomes", "[]"))
+                    winning = outcomes[idx].upper() if idx < len(outcomes) else ""
+            except: pass
+
+        our_side = market.get("side", "YES").upper()
+        correct = (winning == our_side or
+                   (winning in ("YES", "1") and our_side == "YES") or
+                   (winning in ("NO", "0") and our_side == "NO")) if winning else None
+        market.update({"resolved": True, "resolution": winning or "?", "correct": correct,
+                       "resolution_date": now.isoformat()})
+        # Sposta in archive, rimuovi da watched → non compare più in dashboard
+        archive.append(market)
+        del watched[key]
+        newly_resolved += 1
+        log(f"  ✓ Risolto: {question[:55]}... → {winning or '?'} "
+            f"({'✓' if correct else '✗' if correct is False else '?'})", "OK")
 
     # 3. Limita archive a 200 voci (le più recenti)
     state["resolved_archive"] = archive[-200:]
