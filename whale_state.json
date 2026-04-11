@@ -74,11 +74,22 @@
     "resolved_copies": 0,
     "correct_copies": 0,
     "accuracy_pct": null,
-    "last_updated": "2026-04-10T08:21:55.207710+00:00"
+    "last_updated": "2026-04-11T19:37:34.196837+00:00"
   },
   "reddit_cache": {
     "last_checked": null,
     "top_strategies": []
   },
-  "run_count": 20
+  "run_count": 21,
+  "resolved_archive": [],
+  "github_cache": {
+    "last_checked": "2026-04-11T19:37:39.926695+00:00",
+    "insights": "Repo GitHub Polymarket/Prediction-Market (aggiornati oggi):\n• SheikhRabiul/A-Deep-Learning-Based-Illegal-Insider-Trading-Detection-and-Prediction-Technique-in-Stock-Market (119★, 2026-04-09): Illegal insider trading of stocks is based on releasing non-public information (e.g., new product launch, quarterly financial report, acquisition or m\n\n• ilovecrypt0/Awesome-Polymarket-Trading-Bots-Analysis-Tools-And-More (3★, 2026-04-09): A curated list of awesome Polymarket tools, AI trading bots, analytics platforms, and prediction market trackers to gain a competitive edge.\n  README: # 🌟 Awesome Polymarket Trading Bots, Analysis Tools And More  > **A beautifully curated, categorized list of the best tools, bots, and resources for the Polymarket prediction market ecosystem.**  [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)  ⭐ **If you find this directory helpful, \n\n• kbchyo/polymarket-whale-tracker (1★, 2026-04-09): Python project for tracking Polymarket whale activity and simulating copy-trading strategies in paper mode with risk controls and performance analytic\n  README: # Polymarket Whale Tracker (Hybrid, Paper Trading) A Python-based analytics project that tracks high-volume wallet activity (\"whales\") on Polymarket and simulates copy-trading decisions in paper mode (no real money).  This project is designed as a portfolio piece, emphasizing: - data collection and \n\n• hardwarestorecat/whaleleaks (0★, 2026-04-11): Geopolitical prediction market whale tracker — Polymarket order flow, Discord alerts, live web dashboard",
+    "repos": [
+      "SheikhRabiul/A-Deep-Learning-Based-Illegal-Insider-Trading-Detection-and-Prediction-Technique-in-Stock-Market",
+      "ilovecrypt0/Awesome-Polymarket-Trading-Bots-Analysis-Tools-And-More",
+      "kbchyo/polymarket-whale-tracker",
+      "hardwarestorecat/whaleleaks"
+    ]
+  }
 }
