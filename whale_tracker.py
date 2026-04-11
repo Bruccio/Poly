@@ -358,11 +358,28 @@ def is_market_resolved(title: str, condition_id: str = "") -> bool:
     if not title and not condition_id:
         return False
 
-    # 0. Lookup diretto per conditionId — il modo più affidabile
+    # 0. Lookup per conditionId — SEMPRE prioritario sul text matching
     if condition_id:
         m = _GAMMA_RESOLUTION_CACHE.get(condition_id)
         if m is not None:
             return _resolved_from_cache_entry(m)
+        # Non è nella cache bulk → chiama Gamma API direttamente per ID
+        # Questo è il fix definitivo: ID-based lookup non dipende dal formato del titolo
+        r = _http_get(
+            f"https://gamma-api.polymarket.com/markets?conditionId={condition_id}&limit=1",
+            timeout=8, retries=2,
+        )
+        if r and r.status_code == 200:
+            items = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            if items:
+                m = items[0]
+                _GAMMA_RESOLUTION_CACHE[condition_id] = m
+                q = (m.get("question") or "").lower().strip()
+                if q:
+                    _GAMMA_RESOLUTION_CACHE[q] = m
+                return _resolved_from_cache_entry(m)
+            # ID trovato ma lista vuota → mercato non esiste o rimosso, skip sicuro
+            # (non blocchiamo per sicurezza, lasciamo passare al text matching)
 
     if not title:
         return False
