@@ -43,6 +43,7 @@ def _empty_state() -> dict:
     return {
         "leaderboard": {},
         "watched_markets": {},
+        "resolved_archive": [],          # mercati risolti (rimossi da watched_markets)
         "algo_stats": {
             "total_copy_signals": 0,
             "resolved_copies": 0,
@@ -53,6 +54,11 @@ def _empty_state() -> dict:
         "reddit_cache": {
             "last_checked": None,
             "top_strategies": [],
+        },
+        "github_cache": {
+            "last_checked": None,
+            "insights": "",
+            "repos": [],
         },
         "run_count": 0,
     }
@@ -632,19 +638,100 @@ def fetch_reddit_insights(state: dict) -> str:
         return ""
 
 
+# ── GITHUB ALGORITHM SCOUT ──────────────────────────────────────────────────────
+def fetch_github_insights(state: dict) -> str:
+    """Ogni run cerca su GitHub i repo Polymarket/prediction-market più aggiornati.
+    Estrae pattern algoritmici dai README e li passa come contesto a Claude.
+    Usa GITHUB_TOKEN (disponibile in GitHub Actions) per evitare rate limit."""
+    token = os.environ.get("GITHUB_TOKEN", "")
+    hdrs = {"Accept": "application/vnd.github+json", "User-Agent": "PolyWhaleBot/3.0"}
+    if token:
+        hdrs["Authorization"] = f"Bearer {token}"
+
+    queries = [
+        "polymarket whale tracker language:python",
+        "polymarket analytics prediction market",
+        "prediction market insider trading detection",
+    ]
+
+    repos: dict = {}
+    for q in queries:
+        try:
+            url = (f"https://api.github.com/search/repositories"
+                   f"?q={urllib.parse.quote(q)}&sort=updated&order=desc&per_page=5")
+            r = requests.get(url, headers=hdrs, timeout=10)
+            if r.status_code == 403:
+                log("GitHub API rate limit", "WARN")
+                break
+            if r.status_code != 200:
+                continue
+            for item in r.json().get("items", [])[:5]:
+                name = item.get("full_name", "")
+                if name and name not in repos:
+                    repos[name] = {
+                        "stars": item.get("stargazers_count", 0),
+                        "desc": (item.get("description") or "")[:150],
+                        "updated": (item.get("updated_at") or "")[:10],
+                        "url": item.get("html_url", ""),
+                    }
+        except Exception as e:
+            log(f"GitHub search: {e}", "WARN")
+        time.sleep(0.8)
+
+    if not repos:
+        return state.get("github_cache", {}).get("insights", "")
+
+    # Top 4 repo per stars — leggi README per estrarre pattern
+    top = sorted(repos.items(), key=lambda x: x[1]["stars"], reverse=True)[:4]
+    parts = []
+    for name, meta in top:
+        snippet = ""
+        for branch in ("main", "master"):
+            try:
+                raw = f"https://raw.githubusercontent.com/{name}/{branch}/README.md"
+                rr = requests.get(raw, timeout=6, headers={"User-Agent": "PolyWhaleBot/3.0"})
+                if rr.status_code == 200:
+                    # Estrai le prime 600 char del README (di solito contengono la descrizione algo)
+                    snippet = rr.text[:600].replace("\n", " ").strip()
+                    break
+            except Exception:
+                pass
+        line = f"• {name} ({meta['stars']}★, {meta['updated']}): {meta['desc']}"
+        if snippet:
+            line += f"\n  README: {snippet[:300]}"
+        parts.append(line)
+        time.sleep(0.3)
+
+    summary = "Repo GitHub Polymarket/Prediction-Market (aggiornati oggi):\n" + "\n\n".join(parts)
+    state["github_cache"] = {
+        "last_checked": datetime.now(timezone.utc).isoformat(),
+        "insights": summary,
+        "repos": [n for n, _ in top],
+    }
+    log(f"GitHub scout: {len(repos)} repo trovati, {len(top)} analizzati", "OK")
+    return summary
+
+
 # ── SELF-IMPROVING: CONTROLLA RESOLUTION ────────────────────────────────────────
 def check_resolutions(state: dict):
-    """Controlla se i mercati watched hanno avuto una resolution e aggiorna stats."""
+    """Controlla se i mercati watched hanno avuto una resolution.
+    I mercati risolti vengono spostati in resolved_archive e rimossi da watched_markets
+    (così non compaiono più nella dashboard).
+    """
     watched = state.get("watched_markets", {})
-    if not watched:
-        return
-    
-    # 1. Pulizia mercati obsoleti (stale) > 30 giorni non risolti
+    archive = state.setdefault("resolved_archive", [])
     now = datetime.now(timezone.utc)
-    removed_stale = 0
+
+    # 0. Migrazione one-shot: se ci sono mercati già risolti in watched (da vecchie versioni),
+    #    spostali subito in archive
     for key, market in list(watched.items()):
         if market.get("resolved"):
-            continue
+            archive.append(market)
+            del watched[key]
+
+    # 1. Pulizia mercati obsoleti (stale) > 30 giorni non risolti
+    removed_stale = 0
+    for key, market in list(watched.items()):
         df_str = market.get("date_flagged")
         if df_str:
             try:
@@ -661,24 +748,24 @@ def check_resolutions(state: dict):
     if not market_map:
         log("check_resolutions: cache Gamma vuota, skip verifica", "WARN")
     newly_resolved = 0
-    
+
     for key, market in list(watched.items()):
-        if market.get("resolved"):
-            continue
         question = market.get("question", "")
         q_lower = question.lower()
-        
-        # Cerca match (esatto o parziale)
-        match = market_map.get(q_lower)
+        cond_id = market.get("conditionId") or market.get("condition_id") or ""
+
+        # Cerca match: prima per conditionId, poi per titolo
+        match = (market_map.get(cond_id) if cond_id else None)
+        if not match:
+            match = market_map.get(q_lower)
         if not match:
             for m_q, m_obj in market_map.items():
-                if q_lower[:40] in m_q:
+                if isinstance(m_q, str) and q_lower[:40] in m_q:
                     match = m_obj
                     break
-        
+
         if match and (match.get("closed") or match.get("isResolved")):
             winning = (match.get("winningOutcome") or "").upper()
-            # Fallback se winningOutcome è vuoto ma closed è true (controlla prezzi)
             if not winning and match.get("closed"):
                 try:
                     prices = json.loads(match.get("outcomePrices", "[]"))
@@ -687,29 +774,39 @@ def check_resolutions(state: dict):
                         outcomes = json.loads(match.get("outcomes", "[]"))
                         winning = outcomes[idx].upper() if idx < len(outcomes) else ""
                 except: pass
-            
+
             if winning:
                 our_side = market.get("side", "YES").upper()
                 correct = (winning == our_side or
                            (winning in ("YES", "1") and our_side == "YES") or
                            (winning in ("NO", "0") and our_side == "NO"))
-                market.update({"resolved": True, "resolution": winning, "correct": correct, 
-                               "resolution_date": datetime.now(timezone.utc).isoformat()})
+                market.update({"resolved": True, "resolution": winning, "correct": correct,
+                               "resolution_date": now.isoformat()})
+                # Sposta in archive, rimuovi da watched → non compare più in dashboard
+                archive.append(market)
+                del watched[key]
                 newly_resolved += 1
 
-    # 3. Ricalcola algo_stats
-    all_resolved = [m for m in watched.values() if m.get("resolved") and m.get("correct") is not None]
-    correct = sum(1 for m in all_resolved if m.get("correct"))
-    total_copies = sum(1 for m in watched.values() if m.get("our_verdict") == "COPY")
+    # 3. Limita archive a 200 voci (le più recenti)
+    state["resolved_archive"] = archive[-200:]
+
+    # 4. Ricalcola algo_stats dall'archive (tutti i mercati risolti storicamente)
+    all_resolved = [m for m in state["resolved_archive"]
+                    if m.get("correct") is not None]
+    correct_count = sum(1 for m in all_resolved if m.get("correct"))
+    # total_copy_signals = segnali COPY attivi + archiviati
+    active_copies = sum(1 for m in watched.values() if m.get("our_verdict") == "COPY")
+    archived_copies = sum(1 for m in state["resolved_archive"] if m.get("our_verdict") == "COPY")
     state["algo_stats"] = {
-        "total_copy_signals": total_copies,
+        "total_copy_signals": active_copies + archived_copies,
         "resolved_copies": len(all_resolved),
-        "correct_copies": correct,
-        "accuracy_pct": round(correct / len(all_resolved) * 100, 1) if all_resolved else None,
-        "last_updated": datetime.now(timezone.utc).isoformat(),
+        "correct_copies": correct_count,
+        "accuracy_pct": round(correct_count / len(all_resolved) * 100, 1) if all_resolved else None,
+        "last_updated": now.isoformat(),
     }
     if newly_resolved:
-        log(f"Resolution: {newly_resolved} mercati risolti, accuracy: {state['algo_stats']['accuracy_pct']}%", "OK")
+        log(f"Resolution: {newly_resolved} mercati risolti e rimossi dalla dashboard, "
+            f"accuracy: {state['algo_stats']['accuracy_pct']}%", "OK")
 
 
 # ── SPORT TAG FILTER (Gamma API) ─────────────────────────────────────────────────
@@ -1604,8 +1701,10 @@ def run():
     # 2. Aggiorna leaderboard da Polymarket (chi sono le whale?)
     fetch_breaking_leaderboard(state)
 
-    # 3. Reddit insights (ogni 10 run)
+    # 3. Reddit insights (ogni 10 run) + GitHub algorithm scout (ogni run)
     reddit_context = fetch_reddit_insights(state)
+    github_context = fetch_github_insights(state)
+    extra_context = "\n\n".join(filter(None, [reddit_context, github_context]))
 
     # 4. Whale-first: prendi i trade recenti dei top wallet
     log("Scarico trade recenti delle top whale...")
@@ -1639,7 +1738,7 @@ def run():
 
     # 5a. Batch (top 5) — 1 call invece di 5, include news context
     log(f"Analisi batch top 5 mercati (1 chiamata Claude)...")
-    batch_results = analyze_batch_claude(to_analyze[:5], state, reddit_context)
+    batch_results = analyze_batch_claude(to_analyze[:5], state, extra_context)
     if batch_results:
         results.extend(batch_results)
     else:
@@ -1649,7 +1748,7 @@ def run():
             log(f"Analisi singola fallback: {name[:55]}...")
             try:
                 news = fetch_market_context(name)
-                result = analyze_with_claude(trade, state, reddit_context + (f" | News: {news}" if news else ""))
+                result = analyze_with_claude(trade, state, extra_context + (f" | News: {news}" if news else ""))
                 results.append(result)
             except Exception as e:
                 log(f"Errore analisi: {e}", "ERR")
@@ -1669,7 +1768,7 @@ def run():
             news = fetch_market_context(name)
             result = analyze_with_claude(
                 trade, state,
-                reddit_context + (f" | News: {news}" if news else "")
+                extra_context + (f" | News: {news}" if news else "")
             )
             results.append(result)
             log(f"→ {result['verdict']} | R{result['risk_score']}/10 | "
