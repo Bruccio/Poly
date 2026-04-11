@@ -6,10 +6,11 @@ import os
 import sys
 from datetime import datetime, timezone
 from whale_tracker import (
-    load_state, save_state, analyze_with_claude, 
+    load_state, save_state, analyze_with_claude,
     send_telegram, build_message, log, MIN_SIZE_USDC,
     is_wash_trader, _is_sport, check_resolutions,
-    is_future_market, _is_past_market
+    is_future_market, _is_past_market, is_market_resolved,
+    build_gamma_resolution_cache
 )
 
 # Configurazione Logging
@@ -29,7 +30,7 @@ async def process_trade(trade_data, state):
         price = float(trade_data.get("price") or 0.5)
         side = trade_data.get("side") or "YES"
         wallet = (trade_data.get("user_address") or trade_data.get("maker") or "").lower()
-        
+
         if not market_title or size < MIN_SIZE_USDC:
             return
 
@@ -37,11 +38,15 @@ async def process_trade(trade_data, state):
         if _is_sport(market_title):
             return
 
-        # 2a. Filtro testuale date passate (fallback se endDate assente nel payload WS)
+        # 2a. Filtro testuale date passate
         if _is_past_market(market_title):
             return
 
-        # 2b. Filtro strutturato su endDate (quando disponibile)
+        # 2b. Filtro risoluzione Gamma API
+        if is_market_resolved(market_title):
+            return
+
+        # 2c. Filtro strutturato su endDate (quando disponibile)
         if not is_future_market(trade_data):
             return
 
@@ -63,25 +68,25 @@ async def process_trade(trade_data, state):
             "whale_trust_score": 50, # Default per nuovi wallet rilevati live
             "whale_username": wallet[:10]
         }
-        
+
         # Arricchisci con trust score se presente in leaderboard
         if wallet in state["leaderboard"]:
             trade_obj["whale_trust_score"] = state["leaderboard"][wallet].get("trust_score", 50)
             trade_obj["whale_username"] = state["leaderboard"][wallet].get("username", wallet[:10])
 
         result = analyze_with_claude(trade_obj, state)
-        
+
         # 4. Notifica se COPY o WATCH
         if result["verdict"] in ["COPY", "WATCH"]:
             log(f"🎯 VERDETTO LIVE: {result['verdict']}! Invio notifiche...", "OK")
             msg = build_message([result], state)
             send_telegram(msg)
-            
+
             # Salva nei watched_markets
             from whale_tracker import update_watched_markets
             update_watched_markets(state, [result])
             save_state(state)
-            
+
     except Exception as e:
         logger.error(f"Errore nel processamento del trade: {e}")
 
@@ -90,10 +95,11 @@ async def main_loop():
     log("POLY LIVE: Monitoraggio H24 avviato")
     log(f"Soglia minima: ${MIN_SIZE_USDC:,.0f}")
     log("=" * 50)
-    
+
     state = load_state()
-    
-    # Esegui un controllo risoluzioni all'avvio
+
+    # Build Gamma resolution cache e controllo risoluzioni all'avvio
+    build_gamma_resolution_cache()
     check_resolutions(state)
     save_state(state)
 
@@ -101,19 +107,19 @@ async def main_loop():
         try:
             async with websockets.connect(WS_URL) as websocket:
                 log(f"Connesso al flusso dati Polymarket ({WS_URL})", "OK")
-                
+
                 async for message in websocket:
                     data = json.loads(message)
-                    
+
                     # Il formato RTDS solitamente invia eventi di tipo 'trade'
                     if data.get("event_type") == "trade" or "usdc_size" in data:
                         await process_trade(data, state)
-                        
+
                     # Ogni ora circa, ricarica lo stato e controlla risoluzioni
                     if datetime.now().minute == 0 and datetime.now().second < 5:
                         check_resolutions(state)
                         save_state(state)
-                        
+
         except Exception as e:
             log(f"Connessione persa: {e}. Riconnessione tra 10 secondi...", "WARN")
             await asyncio.sleep(10)

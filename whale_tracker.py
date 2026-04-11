@@ -266,6 +266,85 @@ def _http_get(url: str, timeout: int = 12, retries: int = 3):
     return None
 
 
+# ── GAMMA RESOLUTION CACHE ────────────────────────────────────────────────────────
+_GAMMA_RESOLUTION_CACHE: dict = {}  # title_lower → market obj, svuotato a ogni run
+
+def build_gamma_resolution_cache() -> dict:
+    """Bulk-fetch mercati da Gamma API e indicizza per question (lowercase).
+    Chiamata una volta per run, riutilizzata da is_market_resolved() e check_resolutions()."""
+    global _GAMMA_RESOLUTION_CACHE
+    _GAMMA_RESOLUTION_CACHE.clear()
+    all_markets = []
+    for offset in [0, 500]:
+        r = _http_get(f"https://gamma-api.polymarket.com/markets?limit=500&offset={offset}")
+        if r and r.status_code == 200:
+            data = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            all_markets.extend(data)
+        time.sleep(0.3)
+    for m in all_markets:
+        q = (m.get("question") or "").lower().strip()
+        if q:
+            _GAMMA_RESOLUTION_CACHE[q] = m
+    log(f"Gamma resolution cache: {len(_GAMMA_RESOLUTION_CACHE)} mercati indicizzati", "OK")
+    return _GAMMA_RESOLUTION_CACHE
+
+
+def is_market_resolved(title: str) -> bool:
+    """Controlla se un mercato è risolto/chiuso usando la cache Gamma.
+    Fallback: ricerca mirata se non nel bulk. Ritorna True = da escludere."""
+    if not title:
+        return False
+    t_lower = title.lower().strip()
+
+    # 1. Match esatto nella cache
+    match = _GAMMA_RESOLUTION_CACHE.get(t_lower)
+
+    # 2. Match parziale (primi 40 char)
+    if not match:
+        key_prefix = t_lower[:40]
+        for cached_q, cached_m in _GAMMA_RESOLUTION_CACHE.items():
+            if key_prefix in cached_q:
+                match = cached_m
+                break
+
+    # 3. Fallback: ricerca mirata su Gamma API
+    if not match:
+        encoded = urllib.parse.quote(title[:80])
+        r = _http_get(
+            f"https://gamma-api.polymarket.com/markets?search={encoded}&limit=5",
+            timeout=8, retries=2,
+        )
+        if r and r.status_code == 200:
+            results = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            for candidate in results:
+                cq = (candidate.get("question") or "").lower().strip()
+                if t_lower[:40] in cq or cq[:40] in t_lower:
+                    match = candidate
+                    _GAMMA_RESOLUTION_CACHE[cq] = candidate
+                    break
+
+    if not match:
+        return False
+
+    # Controlla stato risoluzione
+    if match.get("closed") is True or match.get("isResolved") is True:
+        return True
+
+    # Controlla endDate se presente
+    end_date = match.get("endDate") or match.get("end_date_iso")
+    if end_date:
+        try:
+            end_dt = dateutil.parser.isoparse(str(end_date))
+            if end_dt.tzinfo is None:
+                end_dt = end_dt.replace(tzinfo=timezone.utc)
+            if end_dt < datetime.now(timezone.utc):
+                return True
+        except Exception:
+            pass
+
+    return False
+
+
 # ── CACHE IN-RUN PER ACTIVITY WALLET ────────────────────────────────────────────
 _ACTIVITY_CACHE: dict = {}  # svuotato all'inizio di ogni run()
 
@@ -330,6 +409,7 @@ def fetch_breaking_leaderboard(state: dict):
                     "trust_score": score,
                     "times_seen": existing.get("times_seen", 0),
                     "copy_accuracy": existing.get("copy_accuracy", None),
+                    "recent_bets": existing.get("recent_bets", []),
                     "last_seen": datetime.now(timezone.utc).isoformat(),
                 }
                 updated += 1
@@ -396,7 +476,9 @@ def fetch_whale_trades(state: dict) -> list:
                     continue
                 if _is_sport(title):
                     continue
-                if _is_past_market(title):  # fallback testuale se endDate assente
+                if _is_past_market(title):
+                    continue
+                if is_market_resolved(title):
                     continue
                 if not is_future_market(t):
                     continue
@@ -529,15 +611,10 @@ def check_resolutions(state: dict):
     if removed_stale:
         log(f"Cleanup: rimossi {removed_stale} mercati obsoleti (>30gg)", "OK")
 
-    # 2. Verifica risoluzioni con Gamma API (bulk fetch per efficienza)
-    all_recent = []
-    for offset in [0, 500]:
-        r = _http_get(f"https://gamma-api.polymarket.com/markets?limit=500&offset={offset}")
-        if r and r.status_code == 200:
-            all_recent.extend(r.json() if isinstance(r.json(), list) else r.json().get("data", []))
-        time.sleep(0.3)
-    
-    market_map = {m.get("question", "").lower(): m for m in all_recent}
+    # 2. Usa la Gamma resolution cache (già costruita da build_gamma_resolution_cache())
+    market_map = _GAMMA_RESOLUTION_CACHE if _GAMMA_RESOLUTION_CACHE else {}
+    if not market_map:
+        log("check_resolutions: cache Gamma vuota, skip verifica", "WARN")
     newly_resolved = 0
     
     for key, market in list(watched.items()):
@@ -915,6 +992,7 @@ def fetch_polymarket_whales(min_size, state: dict = None):
         if _sz(t) >= min_size * 0.5  # più permissivo per whale top
         and not _is_sport(t.get("title") or t.get("question") or "")
         and not _is_past_market(t.get("title") or t.get("question") or "")
+        and not is_market_resolved(t.get("title") or t.get("question") or "")
     ]
 
     # ── Arricchisci con trust_score e filtra wash trader ──
@@ -1465,7 +1543,8 @@ def send_email(results, state: dict = None, is_demo=False, best_skip=None):
 
 # ── RUN SINGOLO ─────────────────────────────────────────────────────────────────
 def run():
-    _ACTIVITY_CACHE.clear()  # azzera cache per questo run
+    _ACTIVITY_CACHE.clear()
+    _GAMMA_RESOLUTION_CACHE.clear()
     state = load_state()
     state["run_count"] = state.get("run_count", 0) + 1
     run_n = state["run_count"]
@@ -1474,7 +1553,10 @@ def run():
     log(f"Run #{run_n} | Whale-first auto detection | Max: {MAX_WHALES}")
     log("=" * 60)
 
-    # 1. Controlla resolution dei mercati passati (self-improving)
+    # 1. Build Gamma resolution cache (riusata da is_market_resolved + check_resolutions)
+    build_gamma_resolution_cache()
+
+    # 1b. Controlla resolution dei mercati passati (self-improving)
     check_resolutions(state)
 
     # 2. Aggiorna leaderboard da Polymarket (chi sono le whale?)

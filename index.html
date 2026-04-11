@@ -202,52 +202,6 @@
       margin-bottom: 12px;
     }
 
-    /* ── UMA SECTION ─────────────────────────────────────────────────────── */
-    .uma-section {
-      background: linear-gradient(135deg, rgba(255, 60, 90, 0.1) 0%, rgba(74, 158, 255, 0.1) 100%);
-      border: 2px solid var(--accent-blue);
-      border-radius: 12px;
-      padding: 24px;
-      margin-bottom: 40px;
-    }
-
-    .uma-header {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-bottom: 16px;
-    }
-
-    .uma-logo {
-      width: 32px;
-      height: 32px;
-      background: #ff3c5a;
-      border-radius: 50%;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-weight: bold;
-      color: white;
-    }
-
-    .uma-content {
-      font-size: 0.95rem;
-      line-height: 1.6;
-      color: var(--text-primary);
-    }
-
-    .uma-link {
-      color: var(--accent-cyan);
-      text-decoration: none;
-      font-weight: 600;
-      border-bottom: 1px solid transparent;
-      transition: all 0.2s;
-    }
-
-    .uma-link:hover {
-      border-bottom-color: var(--accent-cyan);
-    }
-
     /* ── SIGNAL CARDS (COPY/WATCH) ────────────────────────────────────────── */
     .signal-grid {
       display: grid;
@@ -388,7 +342,34 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 0.9rem;
-      min-width: 600px;
+      min-width: 850px;
+    }
+
+    .lb-table .bet-line {
+      margin-bottom: 4px;
+      font-size: 0.78rem;
+      line-height: 1.35;
+    }
+    .lb-table .bet-line:last-child { margin-bottom: 0; }
+    .bet-side-yes {
+      display: inline-block;
+      background: var(--accent-green);
+      color: #000;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
+    }
+    .bet-side-no {
+      display: inline-block;
+      background: #ff3c5a;
+      color: #000;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.68rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 3px;
     }
 
     .lb-table th {
@@ -616,19 +597,6 @@
     </div>
   </div>
 
-  <section class="uma-section">
-    <div class="uma-header">
-      <div class="uma-logo">U</div>
-      <h2 style="margin:0; border:0; background:none; -webkit-text-fill-color: var(--accent-blue); color: var(--accent-blue); text-transform: none; letter-spacing: normal;">Cosa ne pensa UMA?</h2>
-    </div>
-    <div class="uma-content">
-      I mercati di Polymarket vengono risolti tramite l'<strong>Optimistic Oracle di UMA</strong>. 
-      Quando un mercato scade, la risoluzione proposta viene sottoposta a un periodo di liveness. 
-      Se non contestata, diventa definitiva. In caso di disputa, il Data Verification Mechanism (DVM) di UMA garantisce una decisione decentralizzata e sicura.
-      <br><br>
-      <a href="https://uma.xyz" target="_blank" class="uma-link">Scopri di più su UMA →</a>
-    </div>
-  </section>
 
 </main>
 
@@ -935,6 +903,29 @@ function render(state) {
       const t = w.trust_score ?? 40;
       const tc = trustColor(t);
       const displayName = w.username || (w.addr ? w.addr.slice(0,6) + '...' + w.addr.slice(-4) : '?');
+      // Build recent bets HTML
+      const bets = w.recent_bets || [];
+      let betsHtml = '';
+      if (bets.length) {
+        betsHtml = bets.slice(0, 3).map(b => {
+          const rawSide = (b.side || 'YES').toUpperCase();
+          const isYes = rawSide.includes('YES') || rawSide.includes('BUY');
+          const sideLabel = isYes ? 'YES' : 'NO';
+          const sideClass = isYes ? 'bet-side-yes' : 'bet-side-no';
+          const titleShort = (b.title || '???').length > 42
+            ? esc(b.title.slice(0, 39)) + '...'
+            : esc(b.title || '???');
+          const sizeStr = b.size ? fmtK(b.size) : '';
+          const priceStr = b.price ? Math.round(parseFloat(b.price) * 100) + '¢' : '';
+          return `<div class="bet-line">
+            <span class="${sideClass}">${sideLabel}</span>
+            <span style="color:var(--text-primary);margin-left:4px;">${titleShort}</span>
+            ${sizeStr ? `<span style="color:var(--text-secondary);font-family:'Fira Code',monospace;margin-left:4px;opacity:0.7;">${sizeStr} @${priceStr}</span>` : ''}
+          </div>`;
+        }).join('');
+      } else {
+        betsHtml = '<span style="color:var(--text-secondary);font-style:italic;font-size:0.78rem;">nessuna</span>';
+      }
       rows += `<tr>
         <td class="rank">#${i+1}</td>
         <td class="whale-name">${esc(displayName)}</td>
@@ -947,12 +938,13 @@ function render(state) {
             <span style="color:${tc};font-family:'Fira Code',monospace;font-weight:600;">${t}</span>
           </div>
         </td>
+        <td style="min-width:220px;max-width:380px;">${betsHtml}</td>
         <td style="color:var(--text-secondary);font-family:'Fira Code',monospace;font-size:0.8rem;">${fmtDate(w.last_seen)}</td>
       </tr>`;
     });
     lbC.innerHTML = `<table class="lb-table">
       <thead><tr>
-        <th>#</th><th>Whale</th><th>Profitto</th><th>Trust</th><th>Visto</th>
+        <th>#</th><th>Whale</th><th>Profitto</th><th>Trust</th><th>Scommesse Recenti</th><th>Visto</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
