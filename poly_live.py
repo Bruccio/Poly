@@ -6,10 +6,11 @@ import os
 import sys
 from datetime import datetime, timezone
 from whale_tracker import (
-    load_state, save_state, analyze_with_claude, 
+    load_state, save_state, analyze_with_claude,
     send_telegram, build_message, log, MIN_SIZE_USDC,
     is_wash_trader, _is_sport, check_resolutions,
-    is_future_market
+    is_future_market, _is_past_market, is_market_resolved,
+    build_gamma_resolution_cache
 )
 
 # Configurazione Logging
@@ -37,7 +38,15 @@ async def process_trade(trade_data, state):
         if _is_sport(market_title):
             return
 
-        # 2. Filtro Mercati Aperti (Time Filter)
+        # 2a. Filtro testuale date passate
+        if _is_past_market(market_title):
+            return
+
+        # 2b. Filtro risoluzione Gamma API
+        if is_market_resolved(market_title):
+            return
+
+        # 2c. Filtro strutturato su endDate (quando disponibile)
         if not is_future_market(trade_data):
             return
 
@@ -88,8 +97,9 @@ async def main_loop():
     log("=" * 50)
     
     state = load_state()
-    
-    # Esegui un controllo risoluzioni all'avvio
+
+    # Build Gamma resolution cache e controllo risoluzioni all'avvio
+    build_gamma_resolution_cache()
     check_resolutions(state)
     save_state(state)
 

@@ -9,7 +9,10 @@ import os
 
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from whale_tracker import _is_sport, _parse_claude, compute_confidence
+from whale_tracker import (
+    _is_sport, _parse_claude, compute_confidence, _is_past_market,
+    is_market_resolved, _GAMMA_RESOLUTION_CACHE,
+)
 
 
 # ─────────────────────────────────────────────────────────────────────────────
@@ -179,3 +182,89 @@ def test_confidence_capped_at_100():
              "userAddress": "0xtopwhale"}
     state = {"leaderboard": {"0xtopwhale": {"total_volume_usd": 5_000_000}}}
     assert compute_confidence(trade, state) <= 100
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# _is_past_market() — titoli con date passate devono essere bloccati
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_past_market_iso_date():
+    """Data ISO esplicitamente passata."""
+    assert _is_past_market("Will X happen on 2026-01-15?") is True
+
+def test_past_market_future_iso_date():
+    """Data ISO nel futuro — non bloccare."""
+    assert _is_past_market("Will X happen on 2026-12-31?") is False
+
+def test_past_market_past_year():
+    """Anno intero passato (2025)."""
+    assert _is_past_market("Will Trump win the 2025 election?") is True
+
+def test_past_market_by_month_year():
+    """'by January 2026' quando siamo in aprile — passato."""
+    assert _is_past_market("Will the Fed cut rates by January 2026?") is True
+
+def test_past_market_future_month_year():
+    """'by December 2026' — futuro — non bloccare."""
+    assert _is_past_market("Will the Fed cut rates by December 2026?") is False
+
+def test_past_market_politics_not_blocked():
+    """Mercato politico senza data — non bloccare."""
+    assert _is_past_market("Will Trump impose 50% tariffs on EU?") is False
+
+def test_past_market_crypto_future():
+    """BTC target futuro — non bloccare."""
+    assert _is_past_market("Will BTC reach $150k before July 2026?") is False
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# is_market_resolved() — uses Gamma resolution cache (no HTTP in tests)
+# ─────────────────────────────────────────────────────────────────────────────
+
+def test_resolved_market_detected():
+    """Mercato chiuso nella cache Gamma — deve essere bloccato."""
+    _GAMMA_RESOLUTION_CACHE.clear()
+    _GAMMA_RESOLUTION_CACHE["will x happen?"] = {"closed": True, "isResolved": True}
+    assert is_market_resolved("Will X happen?") is True
+
+def test_open_market_not_blocked():
+    """Mercato aperto nella cache — non bloccare."""
+    _GAMMA_RESOLUTION_CACHE.clear()
+    _GAMMA_RESOLUTION_CACHE["will y happen?"] = {"closed": False, "isResolved": False}
+    assert is_market_resolved("Will Y happen?") is False
+
+def test_unknown_market_not_blocked():
+    """Mercato non in cache e nessun fallback — non bloccare."""
+    _GAMMA_RESOLUTION_CACHE.clear()
+    # Con cache vuota e nessuna rete, ritorna False (non blocca)
+    assert is_market_resolved("Some completely unknown market xyz") is False
+
+def test_partial_match_resolved():
+    """Match parziale (primi 40 char) — deve bloccare se risolto."""
+    _GAMMA_RESOLUTION_CACHE.clear()
+    _GAMMA_RESOLUTION_CACHE["will the federal reserve cut interest rates in june 2026?"] = {
+        "closed": True, "isResolved": True
+    }
+    assert is_market_resolved("Will the Federal Reserve cut interest rates in June 2026?") is True
+
+def test_partial_match_open():
+    """Match parziale — mercato aperto — non bloccare."""
+    _GAMMA_RESOLUTION_CACHE.clear()
+    _GAMMA_RESOLUTION_CACHE["will btc reach $150k before july 2026?"] = {
+        "closed": False, "isResolved": False
+    }
+    assert is_market_resolved("Will BTC reach $150k before July 2026?") is False
+
+def test_empty_title_not_blocked():
+    """Titolo vuoto — non bloccare."""
+    _GAMMA_RESOLUTION_CACHE.clear()
+    assert is_market_resolved("") is False
+
+def test_resolved_with_end_date_past():
+    """Mercato non esplicitamente chiuso ma con endDate passata."""
+    _GAMMA_RESOLUTION_CACHE.clear()
+    _GAMMA_RESOLUTION_CACHE["will event z occur?"] = {
+        "closed": False, "isResolved": False,
+        "endDate": "2026-01-01T00:00:00Z",
+    }
+    assert is_market_resolved("Will event Z occur?") is True
