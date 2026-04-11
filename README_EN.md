@@ -1,167 +1,163 @@
-# Polymarket Whale Tracker v3
+# Polymarket Whale Tracker
 
-An automated bot that monitors Polymarket prediction markets, analyzes **large-money moves (whale wallets)** using Claude AI, and alerts you via **Telegram** and **Email** when there's a trade worth following.
+An automated bot that monitors [Polymarket](https://polymarket.com) prediction markets, detects **large-money moves (>$100k)** using Claude AI, and alerts you via **Telegram** and **Email** in real time.
 
-Includes a **persistent leaderboard**, **wash trading filter**, **self-improving algorithm**, and a free **hacker-style web dashboard** on GitHub Pages.
+The long-term vision is a full **copy-trading platform for prediction markets**: anomaly detection, insider-trading signals, and automatic order execution via the Polymarket CLOB API.
 
 ---
 
-## How it works
+## How It Works Today
 
 ```
-Every day at 09:00 and 21:00 (Italian time) — fully automatic
+Daily at 09:00 and 21:00 UTC — GitHub Actions scheduled
         ↓
-Downloads the top-trader leaderboard from Polymarket
+Build Gamma resolution cache (1000 active + 500 recently-closed markets)
         ↓
-Fetches recent trades from each top-wallet (whale-first detection)
+Download top-trader leaderboard from Polymarket Data API
         ↓
-Checks resolution of previous COPY signals (self-improving)
+Filter trades: sports / expired dates / resolved markets / wash trading
         ↓
 Claude AI analyzes up to 10 moves with whale context + track record
         ↓
-Updates whale_state.json in the repo (leaderboard + accuracy + signals)
+Telegram + Email notifications only for COPY and WATCH (never SKIP)
         ↓
-Sends Telegram + Email with analysis, leaderboard and track record
+Commit whale_state.json + update GitHub Pages dashboard
 ```
+
+---
+
+## Filter Chain
+
+| Layer | Filter | Detail |
+|-------|--------|--------|
+| 1 | Sport | 100+ keyword blocklist + regex patterns (e.g. "Will X win on YYYY-MM-DD?") |
+| 2a | Expired date (text) | Regex on months/quarters/years in the market title |
+| 2b | Resolved market (Gamma API) | Bulk cache of 1 500 markets, 3-tier lookup (exact → 40-char partial → search) |
+| 2c | Structured end date | `endDate` API field vs today UTC |
+| 3 | Wash trading | Wallets that repeatedly buy and sell the same position are excluded |
 
 ---
 
 ## Setup (one-time)
 
-### Step 1 — Add Secrets to GitHub
-
-Go to **Settings → Secrets and variables → Actions → New repository secret**
+### Step 1 — GitHub Secrets
+Go to **Settings → Secrets and variables → Actions** and add:
 
 | Secret | Value |
 |--------|-------|
 | `ANTHROPIC_API_KEY` | Your Anthropic API key ([console.anthropic.com](https://console.anthropic.com)) |
 | `TELEGRAM_BOT_TOKEN` | Your Telegram bot token |
-| `TELEGRAM_CHAT_ID` | Your Telegram User ID (get it via @userinfobot) |
-| `GMAIL_APP_PASSWORD` | See Step 2 below |
+| `TELEGRAM_CHAT_ID` | Your Telegram User ID (get via @userinfobot) |
+| `GMAIL_APP_PASSWORD` | Gmail App Password (see Step 2) |
+
+### Step 2 — Gmail App Password
+1. [myaccount.google.com](https://myaccount.google.com) → **Security** → enable 2-Step Verification
+2. Search **"App passwords"** → create one (name: "Polymarket Bot")
+3. Copy the 16-char code, add it as `GMAIL_APP_PASSWORD` secret (no spaces)
+
+### Step 3 — Web Dashboard (free)
+1. **Settings → Pages** → Source: **Deploy from branch** → `main` → `/ (root)`
+2. After 1-2 minutes your dashboard is live at `https://<user>.github.io/<repo>`
+
+### Step 4 — Manual Test
+**Actions → "Whale Tracker" → "Run workflow"** — ~2 minutes → Telegram + Email.
 
 ---
 
-### Step 2 — Create a Gmail App Password (for email alerts)
+## Verdict System
 
-1. Go to [myaccount.google.com](https://myaccount.google.com)
-2. **Security** → **2-Step Verification** → enable if not already done
-3. Back in **Security** → search for **"App passwords"**
-4. Create a new app password (name: "Polymarket Bot")
-5. Copy the 16-character code (e.g. `abcd efgh ijkl mnop`)
-6. Add it as the `GMAIL_APP_PASSWORD` secret on GitHub (no spaces)
-
----
-
-### Step 3 — Merge the branch
-
-1. Go to GitHub → **Pull requests**
-2. Open the PR → **"Merge pull request"** → **"Confirm merge"**
-
-Done. The bot runs automatically at 09:00 and 21:00.
-
----
-
-### Step 4 — Enable the Web Dashboard (optional, free)
-
-1. Go to **Settings → Pages**
-2. Source: **Deploy from branch** → branch: `main` → folder: `/ (root)`
-3. Save → after 1-2 minutes the dashboard is live at `https://bruccio.github.io/Poly`
-
-The page updates automatically after each bot run.
-
----
-
-### Step 5 — Manual test (optional)
-
-1. **Actions** → **"Whale Tracker v3"** → **"Run workflow"**
-2. After ~2 minutes you receive Telegram + Email
-3. The file `whale_state.json` is committed to the repo with updated data
-
----
-
-## Features
-
-### Automatic Whale Detection (whale-first)
-No manual threshold needed. The bot downloads the **top-30 trader leaderboard** from Polymarket, then fetches the **recent trades from each wallet**. Only verified high-trust traders are analyzed — no guesswork.
-
-### Whale Tier System
-| Tier | Criteria |
-|------|----------|
-| Top Whale | Historical volume > $1M |
-| Big Whale | Historical volume > $500k |
-| Whale | In the top-50 leaderboard |
-
-### Persistent Leaderboard
-Each run updates `whale_state.json` with a **trust score** (0-100) per wallet based on profit and volume. High-trust wallets get priority in the analysis.
-
-### Wash Trading Filter
-The bot detects wallets that repeatedly buy and sell the same position. Wash traders are automatically excluded from the report.
-
-### Self-Improving Algorithm
-Every market with a COPY verdict is tracked in `whale_state.json`. When the market resolves, the bot updates the **accuracy track record** automatically. Over time, Claude's prompt includes this metric for better-calibrated advice.
-
-### 3-Verdict System
 | Verdict | Meaning |
 |---------|---------|
-| ✅ COPY | Strong opportunity — price looks clearly mispriced |
-| 👁️ WATCH | Interesting — worth monitoring, could become COPY |
-| ⏭️ SKIP | Not interesting, too risky, or sports/entertainment |
+| COPY | Strong signal — price looks clearly mispriced |
+| WATCH | Interesting — monitor for confirmation |
+| SKIP | Not worth it, too risky, or sports/expired market |
 
-### Sport Filter (3 layers)
-- Keyword blocklist (100+ terms: teams, leagues, sports events)
-- Regex patterns (e.g. "Will X win on YYYY-MM-DD?")
-- Claude response flag (if Claude mentions "sport", the verdict is forced to SKIP)
-
-### Reddit Insights
-Every 10 runs the bot checks hot posts on **r/Polymarket** looking for strategies and underpriced markets. Results are included in Claude's analysis context.
-
-### Hacker Dashboard
-Static page on GitHub Pages showing leaderboard, COPY signals with outcome, historical accuracy, and Reddit insights. **Zero extra cost.**
+Only **COPY** and **WATCH** trigger a notification. SKIPs are silent.
 
 ---
 
-## What you receive
+## Architecture (current)
 
-### Telegram
 ```
-🐋 Big Moves on Polymarket
-05/04/2026 09:00
-
-Analyzed 10 non-sport markets.
-📊 Track record: 67% accuracy (3 resolved signals)
-2 markets worth attention. 👇
-
-✅ COPY
-📌 Will the Fed cut rates in June 2026?
-🐋 HorizonSplendidView 🟢 Trust: 95/100
-💡 Top whale with verified track record bets on rate cut
-📖 A $180k bet on YES at 28¢ — strong conviction...
-🟡 Risk: 3/10
-
-─────────────────────
-🏆 Top Whale Tracker
-1. HorizonSplendidView +$4,598,457 (trust 95)
-2. beachboy4 +$3,762,306 (trust 92)
-...
+┌─────────────────────────────────────────────────────────┐
+│  GitHub Actions (cron 09:00 + 21:00 UTC)                │
+│                                                         │
+│  whale_tracker.py                                       │
+│  ├── build_gamma_resolution_cache()  ← Gamma API       │
+│  ├── fetch_breaking_leaderboard()    ← Data API        │
+│  ├── fetch_whale_trades()            ← Data API        │
+│  │   └── filter chain (sport/date/resolved/wash)       │
+│  ├── analyze_with_claude()           ← Anthropic API   │
+│  ├── send_telegram() + send_email()                     │
+│  └── save_state()  →  whale_state.json  →  Pages       │
+└─────────────────────────────────────────────────────────┘
 ```
-
-### Email
-Same analysis in HTML format with leaderboard table, sent to `brunoricciohsl@gmail.com`.
 
 ---
 
-## File structure
+## Planned Architecture (roadmap)
+
+```mermaid
+flowchart LR
+  subgraph On-Chain
+    Polygon[Polygon RPC] -->|CTF events, token transfers| Indexer
+  end
+  subgraph Polymarket API
+    Gamma[Gamma API] --> Ingestion
+    DataAPI[Data API] --> Ingestion
+    CLOB[CLOB API] --> Execution
+  end
+  subgraph Backend Services
+    Ingestion --> TimescaleDB
+    Ingestion --> Processor
+    Processor[Anomaly Engine] --> Alerts
+    Execution[Order Engine] --> Alerts
+    TimescaleDB --> APIGateway
+    Alerts -->|push/email| Frontend
+  end
+  subgraph Frontend
+    Dashboard[Web Dashboard]
+  end
+  Dashboard <--> APIGateway
+```
+
+---
+
+## Roadmap
+
+| Sprint | Focus | Key deliverables |
+|--------|-------|-----------------|
+| **MVP (now)** | Whale detection + AI signals | Claude analysis, filter chain, GitHub Pages dashboard |
+| **Sprint 1** | Data pipeline | TimescaleDB, WebSocket live feed, Polygon RPC sync |
+| **Sprint 2** | Analytics engine | Isolation Forest anomaly detection, wallet clustering (coordinated buys) |
+| **Sprint 3** | Copy trading | CLOB API order execution, proportional sizing, slippage control |
+| **Sprint 4** | Security + UX | AES-256 key management / WalletConnect, immutable audit trail |
+
+---
+
+## API Reference
+
+| API | Purpose | Auth |
+|-----|---------|------|
+| Gamma API | Markets, events, resolution status | Public |
+| Data API | Positions, trades, leaderboard | Public |
+| CLOB API | Order placement / cancellation | API key (future) |
+| Polygon RPC | On-chain event verification (future) | Provider (Alchemy/Infura) |
+
+---
+
+## Project Structure
 
 ```
-whale_tracker.py          Main script (v3)
-whale_state.json          Persistent state — created/updated automatically
+whale_tracker.py          Core logic: leaderboard, Claude analysis, notifications
+poly_live.py              H24 live monitoring via WebSocket (for VPS/server)
+whale_state.json          Persistent state (leaderboard, recent bets, accuracy)
 index.html                Web dashboard (GitHub Pages)
-requirements.txt          Python dependencies (requests only)
-.github/
-  workflows/
-    main.yml              GitHub Actions workflow — cron 09:00 and 21:00
-README.md                 Italian README
-README_EN.md              This file (English)
+tests/
+  test_whale_tracker.py   46 pytest tests (sport filter, date filter, resolution)
+.github/workflows/
+  main.yml                GitHub Actions (cron + manual trigger)
+requirements.txt          Python dependencies
 ```
 
 ---
@@ -171,24 +167,21 @@ README_EN.md              This file (English)
 | Variable | Default | Description |
 |----------|---------|-------------|
 | `MAX_WHALES` | `10` | Markets analyzed per run |
-| `ONLY_NOTIFY_ON_COPY` | `false` | `true` = notify only if there is at least one COPY |
-
-> No manual threshold needed — whale detection is fully automatic.
+| `MIN_SIZE_USDC` | `100000` | Minimum trade size to consider ($) |
 
 ---
 
-## Common issues
+## Troubleshooting
 
 | Problem | Solution |
 |---------|----------|
-| No Telegram message | Check TELEGRAM_BOT_TOKEN and TELEGRAM_CHAT_ID |
-| No email | Check GMAIL_APP_PASSWORD in secrets |
-| Sports bets still showing | The filter is aggressive — if something slips through, open an issue |
-| Dashboard not updating | Wait for the next run — the bot commits whale_state.json after each run |
-| Accuracy always N/A | Normal at first — it populates as COPY markets resolve (weeks/months) |
-| Workflow times out | Rare — default 10 markets is fine |
-| Workflow starts late | GitHub Actions schedules can be delayed up to 15 min — normal |
+| No Telegram message | Check `TELEGRAM_BOT_TOKEN` and `TELEGRAM_CHAT_ID` secrets |
+| No email | Check `GMAIL_APP_PASSWORD` in secrets |
+| Expired market still notified | Open an issue — the multi-layer filter should catch it |
+| Dashboard not updating | Wait for the next scheduled run (it commits `whale_state.json`) |
+| Accuracy always N/A | Normal at first — populates as COPY markets resolve over weeks |
+| Workflow delayed | GitHub Actions cron can be late up to 15 min — expected behavior |
 
 ---
 
-> ⚠️ Trading on Polymarket involves risk. Never invest money you cannot afford to lose. This tool is for informational purposes only — the final decision is always yours.
+> **Disclaimer**: Trading on Polymarket involves significant risk. This tool provides signals based on observable whale activity, but the final decision is always yours. Never invest money you cannot afford to lose.
