@@ -834,76 +834,33 @@ def check_resolutions(state: dict):
     if removed_stale:
         log(f"Cleanup: rimossi {removed_stale} mercati obsoleti (>30gg)", "OK")
 
-    # 2. Usa la Gamma resolution cache + targeted API per mercati non in cache
-    market_map = _GAMMA_RESOLUTION_CACHE if _GAMMA_RESOLUTION_CACHE else {}
-    if not market_map:
+    # 2. Controlla ogni watched market usando is_market_resolved() — unica fonte di verità.
+    #    Quella funzione gestisce: cache bulk → conditionId API → fuzzy title → slug event.
+    #    Dopo che ritorna True, il market object è già in _GAMMA_RESOLUTION_CACHE.
+    if not _GAMMA_RESOLUTION_CACHE:
         log("check_resolutions: cache Gamma vuota, skip verifica", "WARN")
     newly_resolved = 0
 
-    def _fetch_market_status(question: str, cond_id: str) -> dict | None:
-        """Targeted Gamma API call per un singolo mercato non trovato in cache bulk."""
-        # Prova prima per conditionId diretto
-        if cond_id:
-            r = _http_get(
-                f"https://gamma-api.polymarket.com/markets?conditionId={cond_id}&limit=1",
-                timeout=8, retries=2,
-            )
-            if r and r.status_code == 200:
-                items = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
-                if items:
-                    m = items[0]
-                    _GAMMA_RESOLUTION_CACHE[cond_id] = m
-                    q = (m.get("question") or "").lower().strip()
-                    if q:
-                        _GAMMA_RESOLUTION_CACHE[q] = m
-                    return m
-        # Fallback: ricerca per testo
-        if question:
-            encoded = urllib.parse.quote(question[:80])
-            r = _http_get(
-                f"https://gamma-api.polymarket.com/markets?search={encoded}&limit=3",
-                timeout=8, retries=2,
-            )
-            if r and r.status_code == 200:
-                items = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
-                q_lower = question.lower()
-                for candidate in items:
-                    cq = (candidate.get("question") or "").lower().strip()
-                    if q_lower[:40] in cq or cq[:40] in q_lower:
-                        _GAMMA_RESOLUTION_CACHE[cq] = candidate
-                        cid_c = candidate.get("conditionId") or candidate.get("id") or ""
-                        if cid_c:
-                            _GAMMA_RESOLUTION_CACHE[cid_c] = candidate
-                        return candidate
-        return None
-
     for key, market in list(watched.items()):
         question = market.get("question", "")
-        q_lower = question.lower()
-        cond_id = market.get("conditionId") or market.get("condition_id") or ""
+        cond_id  = market.get("conditionId") or market.get("condition_id") or ""
 
-        # Cerca match nella cache bulk: conditionId → titolo esatto → titolo parziale
-        match = (market_map.get(cond_id) if cond_id else None)
-        if not match:
-            match = market_map.get(q_lower)
-        if not match:
-            for m_q, m_obj in market_map.items():
-                if isinstance(m_q, str) and q_lower[:40] in m_q:
-                    match = m_obj
-                    break
+        # Delega tutto il lookup (cache + API ID + fuzzy + search + slug) a is_market_resolved()
+        if not is_market_resolved(question, condition_id=cond_id):
+            continue  # ancora aperto o non trovato
 
-        # Se non trovato nella cache bulk → chiamata API mirata (ogni run, per ogni watched)
+        # Market risolto — recupera l'oggetto dalla cache (è stato popolato da is_market_resolved)
+        q_lower = question.lower().strip()
+        t_clean = q_lower.replace("...", "").replace("\u2026", "").rstrip("?").strip()
+        match = (_GAMMA_RESOLUTION_CACHE.get(cond_id)
+                 or _GAMMA_RESOLUTION_CACHE.get(q_lower)
+                 or _GAMMA_RESOLUTION_CACHE.get(t_clean)
+                 or next((v for k, v in _GAMMA_RESOLUTION_CACHE.items()
+                          if isinstance(k, str) and t_clean[:20] and t_clean[:20] in k), None))
         if not match:
-            log(f"  Resolution: {question[:55]}... non in cache, chiamo API...", "OK")
-            match = _fetch_market_status(question, cond_id)
-            time.sleep(0.3)  # rate limit cortesia
+            # Nessun dato di outcome disponibile — archivia comunque senza outcome
+            match = {}
 
-        if not match:
-            continue  # non trovato da nessuna parte, lascia in watched
-
-        # Controlla resolved/closed + endDate passata
-        if not _resolved_from_cache_entry(match):
-            continue  # ancora aperto
 
         winning = (match.get("winningOutcome") or "").upper()
         if not winning and match.get("closed"):
@@ -1025,6 +982,7 @@ def update_watched_markets(state: dict, results: list):
                 "entry_price": res.get("price", 0),
                 "side": res.get("side", "YES"),
                 "date_flagged": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+                "conditionId": res.get("conditionId", ""),   # per lookup diretto in check_resolutions
                 "resolved": False,
                 "resolution": None,
                 "correct": None,
@@ -1423,8 +1381,13 @@ def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):
             if r.status_code == 200:
                 raw = "".join(b.get("text", "") for b in r.json().get("content", []))
                 log(f"Claude OK ({model})", "OK")
-                return _parse_claude(raw, market, side, price, size, wallet, tier,
-                                     trust_score, whale_name, confidence)
+                result = _parse_claude(raw, market, side, price, size, wallet, tier,
+                                       trust_score, whale_name, confidence)
+                # Salva conditionId per check_resolutions() — lookup diretto per ID
+                result["conditionId"] = (trade.get("conditionId") or
+                                         trade.get("market") or
+                                         trade.get("asset_id") or "")
+                return result
             err = r.json().get("error", {}).get("message", r.text[:100])
             log(f"Claude {r.status_code} ({model}): {err}", "WARN")
             last_err = err
