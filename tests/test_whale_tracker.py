@@ -208,6 +208,26 @@ def test_past_market_future_month_year():
     """'by December 2026' — futuro — non bloccare."""
     assert _is_past_market("Will the Fed cut rates by December 2026?") is False
 
+def test_past_market_month_only_past():
+    """'in January' senza anno — assume anno corrente — passato in aprile."""
+    assert _is_past_market("Fed decision in January?") is True
+
+def test_past_market_month_only_future():
+    """'in December' senza anno — futuro — non bloccare."""
+    assert _is_past_market("Fed decision in December?") is False
+
+def test_past_market_quarter_past():
+    """'Q1 2026' finisce il 31 marzo — passato in aprile."""
+    assert _is_past_market("Will Q1 2026 GDP exceed expectations?") is True
+
+def test_past_market_quarter_future():
+    """'Q4 2026' — futuro — non bloccare."""
+    assert _is_past_market("Will Q4 2026 GDP disappoint?") is False
+
+def test_past_market_bare_month_year():
+    """'January 2026 Fed decision' senza preposizione — passato."""
+    assert _is_past_market("January 2026 Fed decision outcome?") is True
+
 def test_past_market_politics_not_blocked():
     """Mercato politico senza data — non bloccare."""
     assert _is_past_market("Will Trump impose 50% tariffs on EU?") is False
@@ -236,7 +256,6 @@ def test_open_market_not_blocked():
 def test_unknown_market_not_blocked():
     """Mercato non in cache e nessun fallback — non bloccare."""
     _GAMMA_RESOLUTION_CACHE.clear()
-    # Con cache vuota e nessuna rete, ritorna False (non blocca)
     assert is_market_resolved("Some completely unknown market xyz") is False
 
 def test_partial_match_resolved():
