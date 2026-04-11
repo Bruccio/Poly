@@ -315,12 +315,20 @@ def build_gamma_resolution_cache() -> dict:
         q = (m.get("question") or "").lower().strip()
         if q:
             _GAMMA_RESOLUTION_CACHE[q] = m
-        # Indicizza anche per conditionId — lookup diretto, immune a differenze di titolo
+        # conditionId — lookup diretto, immune a differenze di titolo
         cid = m.get("conditionId") or m.get("id") or ""
         if cid:
             _GAMMA_RESOLUTION_CACHE[cid] = m
+        # clobTokenIds — la Data API può restituire il tokenId dell'outcome (YES/NO)
+        # invece del conditionId del market; indicizziamo anche quelli
+        try:
+            for tok in json.loads(m.get("clobTokenIds") or "[]"):
+                if tok:
+                    _GAMMA_RESOLUTION_CACHE[tok] = m
+        except Exception:
+            pass
     log(f"Gamma resolution cache: {len(_GAMMA_RESOLUTION_CACHE)} mercati indicizzati "
-        f"(attivi + chiusi recenti, per titolo + conditionId)", "OK")
+        f"(attivi + chiusi recenti, per titolo + conditionId + tokenId)", "OK")
     return _GAMMA_RESOLUTION_CACHE
 
 
@@ -345,7 +353,8 @@ def is_market_resolved(title: str, condition_id: str = "") -> bool:
     """Controlla se un mercato è risolto/chiuso usando la cache Gamma.
     condition_id (conditionId dalla Data API) permette un lookup diretto e affidabile,
     immune a differenze di titolo tra Data API e Gamma API.
-    Fallback: matching testuale + ricerca mirata. Ritorna True = da escludere."""
+    Gestisce titoli troncati dalla Data API (es. 'US strikes Iran by...?').
+    Ritorna True = da escludere."""
     if not title and not condition_id:
         return False
 
@@ -357,37 +366,99 @@ def is_market_resolved(title: str, condition_id: str = "") -> bool:
 
     if not title:
         return False
+
+    # Rimuovi troncatura "..." dalla Data API — "US strikes Iran by...?" →
+    # "US strikes Iran by" per trovare "Will the US strike Iran by Dec 31?"
+    is_truncated = "..." in title or "\u2026" in title
+    t_clean = (title.replace("...", "").replace("\u2026", "")
+               .rstrip("?").strip())
     t_lower = title.lower().strip()
+    t_clean_lower = t_clean.lower().strip()
 
     # 1. Match esatto per titolo nella cache
     match = _GAMMA_RESOLUTION_CACHE.get(t_lower)
 
-    # 2. Match parziale (primi 40 char) — per titoli leggermente diversi
-    if not match:
-        key_prefix = t_lower[:40]
-        for cached_q, cached_m in _GAMMA_RESOLUTION_CACHE.items():
-            if isinstance(cached_q, str) and key_prefix in cached_q:
-                match = cached_m
-                break
+    # Helper: estrae parole significative (> 2 char, non stopword)
+    _SW = {"will", "the", "and", "that", "this", "are", "for", "not", "have",
+           "with", "from", "into", "than", "more", "been", "their"}
+    def _keywords(s: str) -> list:
+        return [w for w in re.findall(r'[a-z0-9]+', s.lower())
+                if len(w) > 2 and w not in _SW]
 
-    # 3. Fallback: ricerca mirata su Gamma API (solo se non in cache)
+    def _fuzzy_overlap(qa: list, qb: list, min_match: int = 2) -> bool:
+        """True se almeno min_match parole di qa hanno un prefisso comune (5 char)
+        con una parola di qb — gestisce coniugazioni (strikes≈strike, ran≈run)."""
+        matched = 0
+        sb = set(qb)
+        for w in qa:
+            if w in sb or any(w[:5] == cw[:5] for cw in sb if len(cw) >= 5 and len(w) >= 5):
+                matched += 1
+                if matched >= min_match:
+                    return True
+        return False
+
+    # 2. Match parziale — titoli normali: prefisso 40 char;
+    #    titoli troncati: fuzzy overlap su parole chiave (handle: strikes≈strike)
     if not match:
-        encoded = urllib.parse.quote(title[:80])
+        if is_truncated:
+            kw_q = _keywords(t_clean_lower)
+            for cached_q, cached_m in _GAMMA_RESOLUTION_CACHE.items():
+                if isinstance(cached_q, str) and len(kw_q) >= 1:
+                    if _fuzzy_overlap(kw_q, _keywords(cached_q), min_match=2):
+                        match = cached_m
+                        break
+        else:
+            key_prefix = t_lower[:40]
+            for cached_q, cached_m in _GAMMA_RESOLUTION_CACHE.items():
+                if isinstance(cached_q, str) and key_prefix in cached_q:
+                    match = cached_m
+                    break
+
+    # 3. Fallback: ricerca mirata su Gamma API
+    #    Titolo troncato → usa testo pulito (senza "...") come query
+    if not match:
+        search_query = t_clean if is_truncated else title
+        encoded = urllib.parse.quote(search_query[:80])
         r = _http_get(
             f"https://gamma-api.polymarket.com/markets?search={encoded}&limit=5",
             timeout=8, retries=2,
         )
         if r and r.status_code == 200:
             results = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            kw_q = _keywords(t_clean_lower)
             for candidate in results:
                 cq = (candidate.get("question") or "").lower().strip()
-                if t_lower[:40] in cq or cq[:40] in t_lower:
+                is_hit = (is_truncated and _fuzzy_overlap(kw_q, _keywords(cq), 2)
+                          or not is_truncated and (t_lower[:40] in cq or cq[:40] in t_lower))
+                if is_hit:
                     match = candidate
                     _GAMMA_RESOLUTION_CACHE[cq] = candidate
                     cid = candidate.get("conditionId") or candidate.get("id") or ""
                     if cid:
                         _GAMMA_RESOLUTION_CACHE[cid] = candidate
                     break
+
+    # 4. Se il titolo è troncato e non abbiamo trovato niente → cerca anche
+    #    sull'endpoint events (un event può coprire più market con un solo slug)
+    if not match and is_truncated and t_clean:
+        slug_guess = t_clean_lower.replace(" ", "-").replace("?", "")[:60]
+        # Rimuovi articoli e preposizioni comuni per ottenere slug più pulito
+        slug_guess = re.sub(r'\b(will|the|a|an|by|in|on|at|for|of|to|be)\b-?', '', slug_guess)
+        slug_guess = re.sub(r'-+', '-', slug_guess).strip('-')
+        if slug_guess:
+            r = _http_get(
+                f"https://gamma-api.polymarket.com/events?slug={urllib.parse.quote(slug_guess)}&limit=3",
+                timeout=8, retries=2,
+            )
+            if r and r.status_code == 200:
+                events = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+                for ev in events:
+                    # L'evento è chiuso se tutti i suoi market sono chiusi
+                    if ev.get("closed") or ev.get("resolved"):
+                        # Usa dati evento come proxy per il mercato
+                        match = {"closed": True, "isResolved": True,
+                                 "winningOutcome": ev.get("outcome", "")}
+                        break
 
     if not match:
         return False
@@ -528,7 +599,10 @@ def fetch_whale_trades(state: dict) -> list:
                     continue
                 if _is_past_market(title):
                     continue
-                cond_id = t.get("conditionId") or t.get("market") or ""
+                # Prova più chiavi: conditionId, market, asset_id, tokenId
+                # (la Data API può restituire il tokenId dell'outcome invece del conditionId del market)
+                cond_id = (t.get("conditionId") or t.get("market") or
+                           t.get("asset_id") or t.get("tokenId") or "")
                 if is_market_resolved(title, condition_id=cond_id):
                     continue
                 if not is_future_market(t):

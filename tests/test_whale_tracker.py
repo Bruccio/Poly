@@ -318,3 +318,30 @@ def test_condition_id_not_in_cache_falls_back_to_title():
     # conditionId non noto, ma titolo combacia → deve bloccare
     assert is_market_resolved("Will fallback work?",
                                condition_id="0xunknownId") is True
+
+
+def test_truncated_title_matches_full_gamma_question():
+    """Titolo troncato dalla Data API deve matchare la domanda completa in Gamma cache."""
+    _GAMMA_RESOLUTION_CACHE.clear()
+    # Gamma cache ha il titolo completo
+    _GAMMA_RESOLUTION_CACHE["will the us strike iran by december 31, 2025?"] = {
+        "closed": True, "isResolved": True, "winningOutcome": "NO"
+    }
+    # Data API restituisce titolo troncato con "..." — deve comunque bloccare
+    assert is_market_resolved("US strikes Iran by...?") is True
+
+
+def test_truncated_title_open_market_not_blocked():
+    """Titolo troncato ma mercato ancora aperto — non bloccare."""
+    _GAMMA_RESOLUTION_CACHE.clear()
+    _GAMMA_RESOLUTION_CACHE["will the us strike iran by december 31, 2026?"] = {
+        "closed": False, "isResolved": False
+    }
+    assert is_market_resolved("US strikes Iran by...?") is False
+
+
+def test_non_truncated_title_unaffected():
+    """Titoli normali (senza '...') non vengono toccati dalla logica troncatura."""
+    _GAMMA_RESOLUTION_CACHE.clear()
+    _GAMMA_RESOLUTION_CACHE["will btc reach 200k?"] = {"closed": True, "isResolved": True}
+    assert is_market_resolved("Will BTC reach 200k?") is True
