@@ -291,3 +291,30 @@ def test_resolved_with_end_date_past():
         "endDate": "2026-01-01T00:00:00Z",
     }
     assert is_market_resolved("Will event Z occur?") is True
+
+
+def test_condition_id_lookup_resolved():
+    """conditionId nella cache → blocca anche se il titolo non combacia."""
+    _GAMMA_RESOLUTION_CACHE.clear()
+    fake_cid = "0xabc123conditionId"
+    _GAMMA_RESOLUTION_CACHE[fake_cid] = {"closed": True, "isResolved": True}
+    # Titolo volutamente diverso dalla question in cache — solo conditionId combacia
+    assert is_market_resolved("US strikes Iran by December 31?",
+                               condition_id=fake_cid) is True
+
+
+def test_condition_id_lookup_open():
+    """conditionId presente ma mercato aperto — non bloccare."""
+    _GAMMA_RESOLUTION_CACHE.clear()
+    fake_cid = "0xdef456conditionId"
+    _GAMMA_RESOLUTION_CACHE[fake_cid] = {"closed": False, "isResolved": False}
+    assert is_market_resolved("Some market title", condition_id=fake_cid) is False
+
+
+def test_condition_id_not_in_cache_falls_back_to_title():
+    """conditionId non in cache → fallback su titolo."""
+    _GAMMA_RESOLUTION_CACHE.clear()
+    _GAMMA_RESOLUTION_CACHE["will fallback work?"] = {"closed": True, "isResolved": True}
+    # conditionId non noto, ma titolo combacia → deve bloccare
+    assert is_market_resolved("Will fallback work?",
+                               condition_id="0xunknownId") is True

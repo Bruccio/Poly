@@ -309,30 +309,62 @@ def build_gamma_resolution_cache() -> dict:
         q = (m.get("question") or "").lower().strip()
         if q:
             _GAMMA_RESOLUTION_CACHE[q] = m
+        # Indicizza anche per conditionId — lookup diretto, immune a differenze di titolo
+        cid = m.get("conditionId") or m.get("id") or ""
+        if cid:
+            _GAMMA_RESOLUTION_CACHE[cid] = m
     log(f"Gamma resolution cache: {len(_GAMMA_RESOLUTION_CACHE)} mercati indicizzati "
-        f"(attivi + chiusi recenti)", "OK")
+        f"(attivi + chiusi recenti, per titolo + conditionId)", "OK")
     return _GAMMA_RESOLUTION_CACHE
 
 
-def is_market_resolved(title: str) -> bool:
+def _resolved_from_cache_entry(m: dict) -> bool:
+    """Dato un market object Gamma, ritorna True se il mercato è chiuso/risolto."""
+    if m.get("closed") is True or m.get("isResolved") is True:
+        return True
+    end_date = m.get("endDate") or m.get("end_date_iso")
+    if end_date:
+        try:
+            end_dt = dateutil.parser.isoparse(str(end_date))
+            if end_dt.tzinfo is None:
+                end_dt = end_dt.replace(tzinfo=timezone.utc)
+            if end_dt < datetime.now(timezone.utc):
+                return True
+        except Exception:
+            pass
+    return False
+
+
+def is_market_resolved(title: str, condition_id: str = "") -> bool:
     """Controlla se un mercato è risolto/chiuso usando la cache Gamma.
-    Fallback: ricerca mirata se non nel bulk. Ritorna True = da escludere."""
+    condition_id (conditionId dalla Data API) permette un lookup diretto e affidabile,
+    immune a differenze di titolo tra Data API e Gamma API.
+    Fallback: matching testuale + ricerca mirata. Ritorna True = da escludere."""
+    if not title and not condition_id:
+        return False
+
+    # 0. Lookup diretto per conditionId — il modo più affidabile
+    if condition_id:
+        m = _GAMMA_RESOLUTION_CACHE.get(condition_id)
+        if m is not None:
+            return _resolved_from_cache_entry(m)
+
     if not title:
         return False
     t_lower = title.lower().strip()
 
-    # 1. Match esatto nella cache
+    # 1. Match esatto per titolo nella cache
     match = _GAMMA_RESOLUTION_CACHE.get(t_lower)
 
-    # 2. Match parziale (primi 40 char)
+    # 2. Match parziale (primi 40 char) — per titoli leggermente diversi
     if not match:
         key_prefix = t_lower[:40]
         for cached_q, cached_m in _GAMMA_RESOLUTION_CACHE.items():
-            if key_prefix in cached_q:
+            if isinstance(cached_q, str) and key_prefix in cached_q:
                 match = cached_m
                 break
 
-    # 3. Fallback: ricerca mirata su Gamma API
+    # 3. Fallback: ricerca mirata su Gamma API (solo se non in cache)
     if not match:
         encoded = urllib.parse.quote(title[:80])
         r = _http_get(
@@ -346,28 +378,15 @@ def is_market_resolved(title: str) -> bool:
                 if t_lower[:40] in cq or cq[:40] in t_lower:
                     match = candidate
                     _GAMMA_RESOLUTION_CACHE[cq] = candidate
+                    cid = candidate.get("conditionId") or candidate.get("id") or ""
+                    if cid:
+                        _GAMMA_RESOLUTION_CACHE[cid] = candidate
                     break
 
     if not match:
         return False
 
-    # Controlla stato risoluzione
-    if match.get("closed") is True or match.get("isResolved") is True:
-        return True
-
-    # Controlla endDate se presente
-    end_date = match.get("endDate") or match.get("end_date_iso")
-    if end_date:
-        try:
-            end_dt = dateutil.parser.isoparse(str(end_date))
-            if end_dt.tzinfo is None:
-                end_dt = end_dt.replace(tzinfo=timezone.utc)
-            if end_dt < datetime.now(timezone.utc):
-                return True
-        except Exception:
-            pass
-
-    return False
+    return _resolved_from_cache_entry(match)
 
 
 # ── CACHE IN-RUN PER ACTIVITY WALLET ────────────────────────────────────────────
@@ -503,7 +522,8 @@ def fetch_whale_trades(state: dict) -> list:
                     continue
                 if _is_past_market(title):
                     continue
-                if is_market_resolved(title):
+                cond_id = t.get("conditionId") or t.get("market") or ""
+                if is_market_resolved(title, condition_id=cond_id):
                     continue
                 if not is_future_market(t):
                     continue
@@ -1017,7 +1037,10 @@ def fetch_polymarket_whales(min_size, state: dict = None):
         if _sz(t) >= min_size * 0.5  # più permissivo per whale top
         and not _is_sport(t.get("title") or t.get("question") or "")
         and not _is_past_market(t.get("title") or t.get("question") or "")
-        and not is_market_resolved(t.get("title") or t.get("question") or "")
+        and not is_market_resolved(
+            t.get("title") or t.get("question") or "",
+            condition_id=t.get("conditionId") or t.get("market") or "",
+        )
     ]
 
     # ── Arricchisci con trust_score e filtra wash trader ──
