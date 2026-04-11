@@ -56,7 +56,19 @@
       "profiled": false
     }
   },
-  "watched_markets": {},
+  "watched_markets": {
+    "aa991505b798": {
+      "question": "US strikes Iran by...?",
+      "our_verdict": "WATCH",
+      "whale_wallet": "0xpool...",
+      "entry_price": 0.5,
+      "side": "YES",
+      "date_flagged": "2026-04-11",
+      "resolved": false,
+      "resolution": null,
+      "correct": null
+    }
+  },
   "algo_stats": {
     "total_copy_signals": 0,
     "resolved_copies": 0,
@@ -68,5 +80,5 @@
     "last_checked": null,
     "top_strategies": []
   },
-  "run_count": 19
+  "run_count": 20
 }
