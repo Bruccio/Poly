@@ -171,7 +171,7 @@ def _is_past_market(title: str) -> bool:
         mn, yr = _MONTH_MAP.get(m.group(1), 0), int(m.group(2))
         if mn and datetime(yr, mn, 28, tzinfo=timezone.utc) < now:
             return True
-    # "in/by <Mese>" senza anno → assume anno corrente
+    # "in/by <Mese>" senza anno → occorrenza più recente di quel mese
     for m in re.finditer(
         r'\b(?:by|before|in|end of)\s+'
         r'(january|february|march|april|may|june|july|august|september|'
@@ -179,8 +179,19 @@ def _is_past_market(title: str) -> bool:
         r'\b(?!\s+\d)', t
     ):
         mn = _MONTH_MAP.get(m.group(1), 0)
-        if mn and mn < now.month:
+        if not mn:
+            continue
+        if mn < now.month:
+            # Mese già passato nell'anno corrente (es. January in April 2026)
             return True
+        if mn > now.month:
+            # Mese non ancora arrivato: quanti mesi mancano?
+            # Se mancano >= 8 mesi è più probabile che sia un vecchio mercato dell'anno scorso
+            # (es. December in April: 8 mesi → December 2025 era 4 mesi fa → blocca)
+            # Se mancano < 8 mesi è probabilmente un mercato futuro (es. May in April: 1 mese → lascia passare)
+            months_until_next = mn - now.month
+            if months_until_next >= 8:
+                return True
     # Q1-Q4 Anno
     for m in re.finditer(r'\bq([1-4])\s*(\d{4})\b', t):
         em, ed = _QUARTER_END[int(m.group(1))]
@@ -271,21 +282,35 @@ _GAMMA_RESOLUTION_CACHE: dict = {}  # title_lower → market obj, svuotato a ogn
 
 def build_gamma_resolution_cache() -> dict:
     """Bulk-fetch mercati da Gamma API e indicizza per question (lowercase).
+    Include sia mercati attivi che chiusi recenti.
     Chiamata una volta per run, riutilizzata da is_market_resolved() e check_resolutions()."""
     global _GAMMA_RESOLUTION_CACHE
     _GAMMA_RESOLUTION_CACHE.clear()
+    today = datetime.now(timezone.utc)
+    log(f"Data odierna: {today.strftime('%d/%m/%Y')} — costruisco cache Gamma...", "OK")
+
     all_markets = []
+    # 1. Mercati attivi/recenti (top 1000 per volume)
     for offset in [0, 500]:
         r = _http_get(f"https://gamma-api.polymarket.com/markets?limit=500&offset={offset}")
         if r and r.status_code == 200:
             data = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
             all_markets.extend(data)
         time.sleep(0.3)
+    # 2. Mercati chiusi recentemente (ultimi 500 chiusi) — cattura "Fed decision in December?" etc.
+    r = _http_get("https://gamma-api.polymarket.com/markets?limit=500&closed=true"
+                  "&order=closeTime&ascending=false")
+    if r and r.status_code == 200:
+        data = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+        all_markets.extend(data)
+        time.sleep(0.3)
+
     for m in all_markets:
         q = (m.get("question") or "").lower().strip()
         if q:
             _GAMMA_RESOLUTION_CACHE[q] = m
-    log(f"Gamma resolution cache: {len(_GAMMA_RESOLUTION_CACHE)} mercati indicizzati", "OK")
+    log(f"Gamma resolution cache: {len(_GAMMA_RESOLUTION_CACHE)} mercati indicizzati "
+        f"(attivi + chiusi recenti)", "OK")
     return _GAMMA_RESOLUTION_CACHE
 
 
@@ -1541,11 +1566,13 @@ def run():
     state["run_count"] = state.get("run_count", 0) + 1
     run_n = state["run_count"]
 
+    today = datetime.now(timezone.utc)
     log("=" * 60)
-    log(f"Run #{run_n} | Whale-first auto detection | Max: {MAX_WHALES}")
+    log(f"Run #{run_n} | {today.strftime('%d/%m/%Y %H:%M')} UTC | Max: {MAX_WHALES}")
     log("=" * 60)
 
-    # 1. Build Gamma resolution cache (riusata da is_market_resolved + check_resolutions)
+    # 1. Build Gamma resolution cache (include mercati chiusi recenti)
+    # Calcola oggi una volta sola — usata da tutti i filtri date
     build_gamma_resolution_cache()
 
     # 1b. Controlla resolution dei mercati passati (self-improving)

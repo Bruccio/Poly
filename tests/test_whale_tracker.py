@@ -212,9 +212,13 @@ def test_past_market_month_only_past():
     """'in January' senza anno — assume anno corrente — passato in aprile."""
     assert _is_past_market("Fed decision in January?") is True
 
-def test_past_market_month_only_future():
-    """'in December' senza anno — futuro — non bloccare."""
-    assert _is_past_market("Fed decision in December?") is False
+def test_past_market_month_only_december():
+    """'in December' senza anno — December 2025 era 4 mesi fa → bloccare."""
+    assert _is_past_market("Fed decision in December?") is True
+
+def test_past_market_month_only_near_future():
+    """'in May' senza anno — May 2026 è tra 1 mese → non bloccare."""
+    assert _is_past_market("Fed decision in May?") is False
 
 def test_past_market_quarter_past():
     """'Q1 2026' finisce il 31 marzo — passato in aprile."""
