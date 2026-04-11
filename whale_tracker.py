@@ -1347,12 +1347,12 @@ def analyze_batch_claude(trades: list, state: dict, reddit_context: str = "") ->
 
 # ── TELEGRAM ────────────────────────────────────────────────────────────────────
 def build_message(results, state: dict = None, is_demo=False, best_skip=None):
+    # results qui contiene SOLO COPY/WATCH (i SKIP sono già filtrati da run())
     ts  = datetime.now().strftime("%d/%m/%Y %H:%M")
     msg = f"🐋 *Grandi Mosse su Polymarket*{' _(DEMO)_' if is_demo else ''}\n_{ts}_\n\n"
 
     copy_count = sum(1 for t in results if t["verdict"] == "COPY")
     watch_count = sum(1 for t in results if t["verdict"] == "WATCH")
-    msg += f"Analizzati {len(results)} mercati non\\-sportivi da >\\${MIN_SIZE_USDC // 1000}k.\n"
 
     # Track record accuracy
     algo_stats = (state or {}).get("algo_stats", {})
@@ -1361,23 +1361,16 @@ def build_message(results, state: dict = None, is_demo=False, best_skip=None):
     if acc is not None:
         msg += f"📊 Track record: *{acc}%* accuracy \\({resolved} segnali risolti\\)\n"
 
-    if copy_count or watch_count:
-        parts = []
-        if copy_count:
-            parts.append(f"*{copy_count}* COPY")
-        if watch_count:
-            parts.append(f"*{watch_count}* WATCH")
-        msg += f"{', '.join(parts)} — da seguire. 👇\n\n"
-    else:
-        msg += "Nessun COPY/WATCH oggi — ecco il *meno peggio*. 👇\n\n"
+    parts = []
+    if copy_count:
+        parts.append(f"*{copy_count}* COPY")
+    if watch_count:
+        parts.append(f"*{watch_count}* WATCH")
+    msg += f"{', '.join(parts)} — da seguire\\. 👇\n\n"
 
-    # Mostra COPY, poi WATCH, poi meno peggio (mai sport)
+    # Mostra COPY prima, poi WATCH
     to_show = [t for t in results if t["verdict"] == "COPY"]
     to_show += [t for t in results if t["verdict"] == "WATCH"]
-    if not to_show and best_skip:
-        to_show = [best_skip]
-    if not to_show:
-        to_show = results[:3]
 
     for t in to_show:
         m = t["market"][:70] + ("..." if len(t["market"]) > 70 else "")
@@ -1438,11 +1431,11 @@ def send_telegram(message):
 
 # ── EMAIL ───────────────────────────────────────────────────────────────────────
 def build_email_html(results, state: dict = None, is_demo=False, best_skip=None):
+    # results qui contiene SOLO COPY/WATCH (i SKIP sono già filtrati da run())
     ts = datetime.now().strftime("%d/%m/%Y %H:%M")
     copy_count = sum(1 for t in results if t["verdict"] == "COPY")
     watch_count = sum(1 for t in results if t["verdict"] == "WATCH")
-    to_show = [t for t in results if t["verdict"] in ("COPY", "WATCH")] or \
-              ([best_skip] if best_skip else results[:3])
+    to_show = results  # già filtrati
 
     algo_stats = (state or {}).get("algo_stats", {})
     acc = algo_stats.get("accuracy_pct")
@@ -1456,8 +1449,7 @@ def build_email_html(results, state: dict = None, is_demo=False, best_skip=None)
         v = t["verdict"]
         color   = "#1a7a3a" if v == "COPY" else "#2a6dd9" if v == "WATCH" else "#555"
         bg      = "#f0fff4" if v == "COPY" else "#f0f4ff" if v == "WATCH" else "#fafafa"
-        badge   = "✅ COPY — DA VALUTARE" if v == "COPY" else \
-                  "👁️ WATCH — DA SEGUIRE" if v == "WATCH" else "⭐ Il meno peggio di oggi"
+        badge   = "✅ COPY — DA VALUTARE" if v == "COPY" else "👁️ WATCH — DA SEGUIRE"
         risk    = t["risk_score"]
         risk_color = "#2a9d2a" if risk <= 3 else "#e6a817" if risk <= 6 else "#d9534f"
         wname = t.get("whale_name", "")
@@ -1529,7 +1521,7 @@ def send_email(results, state: dict = None, is_demo=False, best_skip=None):
         msg["Subject"] = f"🐋 Polymarket Whale Report {ts} — {copy_count} segnali"
         msg["From"]    = GMAIL_USER
         msg["To"]      = EMAIL_TO
-        msg.attach(MIMEText(build_email_html(results, state, is_demo, best_skip), "html"))
+        msg.attach(MIMEText(build_email_html(results, state, is_demo), "html"))
         with smtplib.SMTP("smtp.gmail.com", 587) as s:
             s.starttls()
             s.login(GMAIL_USER, GMAIL_APP_PASSWORD)
@@ -1658,27 +1650,22 @@ def run():
     # 7. Salva stato persistente
     save_state(state)
 
-    # 8. Notifiche — best_skip esclude sport-flagged e sport nel titolo
-    skips = [r for r in results
-             if r["verdict"] == "SKIP"
-             and not r.get("is_sport_flagged")
-             and not _is_sport(r.get("market", ""))]
-    best_skip = min(skips, key=lambda r: r["risk_score"]) if skips else None
+    # 8. Notifiche — solo se c'è almeno un COPY o WATCH (mai mostrare SKIP)
+    actionable = [r for r in results if r["verdict"] in ("COPY", "WATCH")]
+    copy_count = sum(1 for r in actionable if r["verdict"] == "COPY")
 
-    if results:
-        log("Invio su Telegram...")
+    if actionable:
+        log(f"Invio notifiche: {len(actionable)} segnali actionable...")
         try:
-            if send_telegram(build_message(results, state, is_demo, best_skip)):
+            if send_telegram(build_message(actionable, state, is_demo)):
                 log("Telegram inviato!", "OK")
         except Exception as e:
             log(f"Telegram: {e}", "ERR")
+        send_email(actionable, state, is_demo)
+    else:
+        log(f"Nessun COPY/WATCH — notifiche soppresse (tutti SKIP).", "OK")
 
-        log("Invio per email...")
-        send_email(results, state, is_demo, best_skip)
-
-    copy_count = sum(1 for r in results if r["verdict"] == "COPY")
     log(f"Run #{run_n} completato — {copy_count} COPY su {len(results)} analizzati.")
-    return results
 
 
 # ── LOOP CONTINUO ────────────────────────────────────────────────────────────────
