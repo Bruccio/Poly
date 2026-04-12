@@ -177,7 +177,9 @@ def _is_past_market(title: str) -> bool:
         mn, yr = _MONTH_MAP.get(m.group(1), 0), int(m.group(2))
         if mn and datetime(yr, mn, 28, tzinfo=timezone.utc) < now:
             return True
-    # "in/by <Mese>" senza anno → occorrenza più recente di quel mese
+    # "in/by <Mese>" senza anno → blocca SOLO se il mese è già passato quest'anno.
+    # "December" senza anno potrebbe essere December 2026 → non bloccare.
+    # Gamma API decide se il mercato è risolto; qui gestiamo solo i casi ovvi.
     for m in re.finditer(
         r'\b(?:by|before|in|end of)\s+'
         r'(january|february|march|april|may|june|july|august|september|'
@@ -185,19 +187,11 @@ def _is_past_market(title: str) -> bool:
         r'\b(?!\s+\d)', t
     ):
         mn = _MONTH_MAP.get(m.group(1), 0)
-        if not mn:
-            continue
-        if mn < now.month:
-            # Mese già passato nell'anno corrente (es. January in April 2026)
+        if mn and mn < now.month:
+            # Mese già passato nell'anno corrente (es. "in January" ad Aprile 2026)
             return True
-        if mn > now.month:
-            # Mese non ancora arrivato: quanti mesi mancano?
-            # Se mancano >= 8 mesi è più probabile che sia un vecchio mercato dell'anno scorso
-            # (es. December in April: 8 mesi → December 2025 era 4 mesi fa → blocca)
-            # Se mancano < 8 mesi è probabilmente un mercato futuro (es. May in April: 1 mese → lascia passare)
-            months_until_next = mn - now.month
-            if months_until_next >= 8:
-                return True
+        # mn >= now.month → potrebbe essere futuro (es. "in December" = December 2026)
+        # Non bloccare: lascia decidere a Gamma API / is_market_resolved()
     # Q1-Q4 Anno
     for m in re.finditer(r'\bq([1-4])\s*(\d{4})\b', t):
         em, ed = _QUARTER_END[int(m.group(1))]

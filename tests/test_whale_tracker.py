@@ -213,8 +213,9 @@ def test_past_market_month_only_past():
     assert _is_past_market("Fed decision in January?") is True
 
 def test_past_market_month_only_december():
-    """'in December' senza anno — December 2025 era 4 mesi fa → bloccare."""
-    assert _is_past_market("Fed decision in December?") is True
+    """'in December' senza anno — potrebbe essere December 2026 → NON bloccare.
+    È Gamma API che decide se è risolto, non il text filter."""
+    assert _is_past_market("Fed decision in December?") is False
 
 def test_past_market_month_only_near_future():
     """'in May' senza anno — May 2026 è tra 1 mese → non bloccare."""
