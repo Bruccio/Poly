@@ -342,7 +342,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 0.9rem;
-      min-width: 850px;
+      min-width: 1050px;
     }
 
     .lb-table .bet-line {
@@ -432,6 +432,81 @@
       border-radius: 4px;
       box-shadow: 0 0 8px currentColor;
     }
+
+    /* ── PROBABILITY BAR ─────────────────────────────────────────────────── */
+    .prob-bar-wrap { margin: 6px 0 10px; }
+    .prob-bar-label { font-family: 'Fira Code', monospace; font-size: 0.72rem; color: var(--text-secondary); display:flex; justify-content:space-between; }
+    .prob-bar-track { height: 4px; background: var(--border-dark); border-radius: 2px; margin-top: 4px; }
+    .prob-bar-fill  { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+
+    /* ── TIER BADGE ───────────────────────────────────────────────────────── */
+    .tier-badge {
+      display: inline-block;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .tier-top   { background: rgba(252,238,12,0.15); color: #fcee0c; border: 1px solid #fcee0c; }
+    .tier-big   { background: rgba(0,240,255,0.15);  color: #00f0ff; border: 1px solid #00f0ff; }
+    .tier-whale { background: rgba(160,184,216,0.1); color: #a0b8d8; border: 1px solid #a0b8d8; }
+
+    /* ── WHALE NAME ON CARD ──────────────────────────────────────────────── */
+    .signal-whale { font-size: 0.78rem; color: var(--accent-green); font-family: 'Fira Code', monospace; margin-bottom: 6px; }
+
+    /* ── ARCHIVE ROWS ─────────────────────────────────────────────────────── */
+    .archive-list { overflow: hidden; }
+    .archive-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-dark);
+      font-size: 0.82rem;
+      flex-wrap: wrap;
+      line-height: 1.45;
+    }
+    .archive-row:last-child { border-bottom: none; }
+    .archive-row.correct { border-left: 3px solid var(--accent-green); }
+    .archive-row.wrong   { border-left: 3px solid var(--accent-red); }
+    .archive-row.unknown { border-left: 3px solid var(--border-light); }
+    .archive-verdict { font-family: 'Fira Code', monospace; font-size: 0.68rem; font-weight: 700; min-width: 70px; }
+    .archive-q { flex: 1; color: var(--text-primary); min-width: 180px; }
+    .archive-meta { color: var(--text-secondary); font-family: 'Fira Code', monospace; font-size: 0.74rem; white-space: nowrap; }
+
+    /* ── REDDIT FEED ──────────────────────────────────────────────────────── */
+    .reddit-item {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-dark);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+    .reddit-item:last-child { border-bottom: none; }
+    .reddit-bullet { color: var(--accent-cyan); margin-right: 6px; }
+
+    /* ── GITHUB REPO ROW ──────────────────────────────────────────────────── */
+    .gh-repo {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-dark);
+    }
+    .gh-repo:last-child { border-bottom: none; }
+    .gh-snippet { color: var(--text-secondary); font-size: 0.78rem; margin-top: 4px; line-height: 1.5; }
+
+    /* ── GENERIC BOX ──────────────────────────────────────────────────────── */
+    .box {
+      background: var(--bg-secondary);
+      border: 1.5px solid var(--border-light);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+    .box:hover { border-color: var(--accent-cyan); }
 
     /* ── LOADING & EMPTY STATES ────────────────────────────────────────────── */
     #loading {
@@ -531,7 +606,8 @@
 <header>
   <h1>🐋 WHALE INTELLIGENCE TERMINAL <small style="font-size:0.6em;color:var(--text-secondary);">v3</small></h1>
   <div class="header-status">
-    <div class="live-badge"><span class="live-dot"></span> 4x DAILY</div>
+    <div class="live-badge"><span class="live-dot"></span> 2× DAILY</div>
+    <span id="live-date" style="font-family:'Fira Code',monospace;font-size:0.78rem;color:var(--text-secondary);"></span>
     <div id="last-update" style="font-size:0.85rem;">LAST_RUN: —</div>
   </div>
 </header>
@@ -553,6 +629,14 @@
     <div class="stat-card">
       <div class="label">Accuracy</div>
       <div class="value" id="stat-accuracy">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Risolti</div>
+      <div class="value" id="stat-resolved">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Win Rate COPY</div>
+      <div class="value" id="stat-winrate">—</div>
     </div>
   </div>
 
@@ -578,6 +662,12 @@
           <canvas id="signalsChart"></canvas>
         </div>
       </div>
+      <div class="chart-container">
+        <div class="chart-title">🗂 Categorie Mercati</div>
+        <div class="chart-canvas">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -597,10 +687,26 @@
     </div>
   </div>
 
+  <!-- STORICO SEGNALI -->
+  <div class="section">
+    <h2>📜 Storico Segnali</h2>
+    <div class="box" id="archive-container">
+      <div class="empty">// nessun segnale risolto ancora</div>
+    </div>
+  </div>
+
+  <!-- REDDIT INSIGHTS -->
+  <div class="section">
+    <h2>💬 Reddit Insights</h2>
+    <div class="box" id="reddit-container">
+      <div class="empty">// reddit insights in raccolta (ogni 10 run)</div>
+    </div>
+  </div>
+
   <!-- GITHUB ALGORITHM SCOUT -->
   <div class="section">
     <h2>⎔ GitHub Algorithm Scout</h2>
-    <div id="github-insights">
+    <div class="box" id="github-insights">
       <div class="empty">// scout GitHub in corso al prossimo run</div>
     </div>
   </div>
@@ -611,7 +717,7 @@
 
 <script>
 // ── CHART INSTANCES ──────────────────────────────────────────────────────────
-let profitsChart, trustVsProfitChart, signalsChart;
+let profitsChart, trustVsProfitChart, signalsChart, categoryChart;
 
 // ── UTILITIES ────────────────────────────────────────────────────────────────
 function fmt$(n) {
@@ -817,7 +923,8 @@ function renderCharts(state) {
   const stats = state.algo_stats || {};
   const resolved = stats.resolved_copies || 0;
   const copy = (stats.total_copy_signals || 0) - resolved;
-  
+  const watchCount = Object.values(state.watched_markets||{}).filter(m => m.our_verdict === 'WATCH').length;
+
   const signalsCtx = document.getElementById('signalsChart').getContext('2d');
   if (signalsChart) signalsChart.destroy();
   signalsChart = new Chart(signalsCtx, {
@@ -825,7 +932,7 @@ function renderCharts(state) {
     data: {
       labels: ['COPY Attivi', 'Risolti', 'WATCH'],
       datasets: [{
-        data: [copy, resolved, 0],
+        data: [copy, resolved, watchCount],
         backgroundColor: [
           'rgba(0, 255, 159, 0.4)',
           'rgba(74, 158, 255, 0.4)',
@@ -864,12 +971,59 @@ function renderCharts(state) {
       }
     }
   });
+
+  // ── Category Breakdown Chart
+  function categorize(title) {
+    if (!title) return 'Other';
+    const t = title.toLowerCase();
+    if (/trump|elect|presid|senat|congress|politic|government|vote|ballot|democrat|republican/i.test(t)) return 'Politics';
+    if (/btc|eth|crypto|bitcoin|ethereum|sol|defi|nft|token|blockchain/i.test(t)) return 'Crypto';
+    if (/fed|rate|gdp|inflation|recession|market|stock|dollar|euro|economy|bank/i.test(t)) return 'Finance';
+    return 'Other';
+  }
+  const allMarkets = [
+    ...Object.values(state.watched_markets||{}),
+    ...(state.resolved_archive||[])
+  ];
+  const cats = {Politics:0, Crypto:0, Finance:0, Other:0};
+  allMarkets.forEach(m => { cats[categorize(m.question||'')] += 1; });
+
+  const catCtx = document.getElementById('categoryChart').getContext('2d');
+  if (categoryChart) categoryChart.destroy();
+  categoryChart = new Chart(catCtx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(cats),
+      datasets: [{
+        label: 'Mercati',
+        data: Object.values(cats),
+        backgroundColor: ['rgba(74,158,255,0.4)','rgba(252,238,12,0.4)','rgba(0,255,159,0.4)','rgba(160,184,216,0.4)'],
+        borderColor:     ['#4a9eff','#fcee0c','#00ff9f','#a0b8d8'],
+        borderWidth: 2,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: 'rgba(10,14,26,0.95)', titleColor: '#00f0ff',
+        bodyColor: '#e8f1ff', borderColor: '#00f0ff', borderWidth: 1, padding: 12, displayColors: false
+      }},
+      scales: {
+        y: { beginAtZero: true, ticks: { color: '#a0b8d8', font: { family: "'Fira Code'" }, stepSize: 1 }, grid: { color: 'rgba(42,63,95,0.2)' } },
+        x: { ticks: { color: '#a0b8d8', font: { family: "'Fira Code'" } }, grid: { display: false } }
+      }
+    }
+  });
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────
 function render(state) {
   document.getElementById('loading').style.display = 'none';
   document.getElementById('app').style.display = '';
+
+  // Live date
+  document.getElementById('live-date').textContent = new Date().toLocaleDateString('it-IT', {weekday:'short', day:'2-digit', month:'short', year:'numeric'});
 
   const stats = state.algo_stats || {};
   const lastUpd = state.last_run
@@ -889,6 +1043,21 @@ function render(state) {
   } else {
     accEl.textContent = 'N/D';
     accEl.style.color = '#a0b8d8';
+  }
+
+  // Resolved + Win Rate from resolved_archive
+  const archive = state.resolved_archive || [];
+  document.getElementById('stat-resolved').textContent = archive.length || '—';
+  const copiesInArchive = archive.filter(m => m.our_verdict === 'COPY');
+  const correctCopies = copiesInArchive.filter(m => m.correct === true);
+  const wrEl = document.getElementById('stat-winrate');
+  if (copiesInArchive.length >= 3) {
+    const wr = Math.round(correctCopies.length / copiesInArchive.length * 100);
+    wrEl.textContent = wr + '%';
+    wrEl.style.color = wr >= 60 ? '#00ff9f' : wr >= 40 ? '#fcee0c' : '#ff3c5a';
+  } else {
+    wrEl.textContent = 'N/D';
+    wrEl.style.color = '#a0b8d8';
   }
 
   // ── Render Charts
@@ -933,10 +1102,13 @@ function render(state) {
       } else {
         betsHtml = '<span style="color:var(--text-secondary);font-style:italic;font-size:0.78rem;">nessuna</span>';
       }
+      const vol = w.total_volume_usd ? fmtK(w.total_volume_usd) : '—';
+      const timesSeen = w.times_seen || 0;
       rows += `<tr>
         <td class="rank">#${i+1}</td>
         <td class="whale-name">${esc(displayName)}</td>
         <td class="profit">${fmt$(w.total_profit_usd)}</td>
+        <td style="font-family:'Fira Code',monospace;color:var(--accent-cyan);font-size:0.85rem;">${vol}</td>
         <td>
           <div class="trust-bar-wrap">
             <div class="trust-bar">
@@ -945,13 +1117,14 @@ function render(state) {
             <span style="color:${tc};font-family:'Fira Code',monospace;font-weight:600;">${t}</span>
           </div>
         </td>
-        <td style="min-width:220px;max-width:380px;">${betsHtml}</td>
+        <td style="text-align:center;font-family:'Fira Code',monospace;color:${timesSeen>0?'var(--accent-yellow)':'var(--text-secondary)'};">${timesSeen > 0 ? timesSeen : '—'}</td>
+        <td style="min-width:220px;max-width:340px;">${betsHtml}</td>
         <td style="color:var(--text-secondary);font-family:'Fira Code',monospace;font-size:0.8rem;">${fmtDate(w.last_seen)}</td>
       </tr>`;
     });
     lbC.innerHTML = `<table class="lb-table">
       <thead><tr>
-        <th>#</th><th>Whale</th><th>Profitto</th><th>Trust</th><th>Scommesse Recenti</th><th>Visto</th>
+        <th>#</th><th>Whale</th><th>Profitto</th><th>Vol Storico</th><th>Trust</th><th>#Visto</th><th>Scommesse Recenti</th><th>Ultimo</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
@@ -963,7 +1136,8 @@ function render(state) {
     .sort((a,b) => (b.date_flagged||'').localeCompare(a.date_flagged||''));
   const wC = document.getElementById('watched-container');
   if (!watched.length) {
-    wC.innerHTML = '<div class="empty">// nessun segnale ancora — primo run in attesa</div>';
+    const msg = archive.length ? '// Tutti i segnali risolti ✓ — attendi il prossimo run per nuovi COPY/WATCH' : '// nessun segnale ancora — primo run in attesa';
+    wC.innerHTML = `<div class="empty">${msg}</div>`;
   } else {
     wC.innerHTML = watched.map(m => {
       let cls, badgeCls, badgeTxt;
@@ -977,23 +1151,91 @@ function render(state) {
         badgeCls = v === 'COPY' ? 'badge-copy' : 'badge-watch';
         badgeTxt = v === 'COPY' ? '▶ COPY' : '◉ WATCH';
       }
-      const pr = m.entry_price ? (parseFloat(m.entry_price)*100).toFixed(0)+'%' : '—';
+      const prFloat = m.entry_price ? parseFloat(m.entry_price) : null;
+      const pr = prFloat !== null ? (prFloat*100).toFixed(0)+'%' : '—';
       const side = (m.side || 'YES').toUpperCase();
       const sideClass = side === 'YES' || side.includes('YES') ? 'yes-tag' : 'no-tag';
+      const probColor = prFloat !== null ? (prFloat < 0.3 ? '#00ff9f' : prFloat < 0.6 ? '#fcee0c' : '#ff3c5a') : '#a0b8d8';
+      const tierCls = (m.tier||'').includes('Top') ? 'tier-top' : (m.tier||'').includes('Big') ? 'tier-big' : 'tier-whale';
+      const tierLabel = m.tier || 'Whale';
+      const whaleName = m.whale_name ? `<div class="signal-whale">⬡ ${esc(m.whale_name)}<span class="tier-badge ${tierCls}">${esc(tierLabel)}</span></div>` : '';
+      const confBadge = m.confidence ? `<span style="font-family:'Fira Code',monospace;font-size:0.72rem;color:var(--text-secondary);">conf ${m.confidence}/100</span>` : '';
+      const probBar = prFloat !== null ? `<div class="prob-bar-wrap">
+        <div class="prob-bar-label"><span>Probabilità implicita</span><span style="color:${probColor};font-weight:600;">${pr}</span></div>
+        <div class="prob-bar-track"><div class="prob-bar-fill" style="width:${(prFloat*100).toFixed(0)}%;background:${probColor};"></div></div>
+      </div>` : '';
       return `<div class="signal-card ${cls}">
         <span class="signal-badge ${badgeCls}">${badgeTxt}</span>
+        ${whaleName}
         <div class="signal-title">${esc(m.question||'???')}</div>
+        ${probBar}
         <div class="signal-meta">
           <span class="${sideClass}">${side} @ ${pr}</span>
           <span>${m.date_flagged ? new Date(m.date_flagged).toLocaleDateString('it-IT') : '—'}</span>
+          ${confBadge}
           ${m.resolution ? `<span>EXIT: ${esc(m.resolution)}</span>` : ''}
         </div>
       </div>`;
     }).join('');
   }
 
+  // ── Storico Segnali
+  renderArchive(state);
+
+  // ── Reddit Insights
+  renderReddit(state);
+
   // ── GitHub insights
   renderGithubInsights(state);
+}
+
+// ── ARCHIVE ──────────────────────────────────────────────────────────
+function renderArchive(state) {
+  const el = document.getElementById('archive-container');
+  if (!el) return;
+  const archive = (state.resolved_archive || []).slice().reverse().slice(0, 10);
+  if (!archive.length) {
+    el.innerHTML = '<div class="empty">// nessun segnale risolto ancora</div>';
+    return;
+  }
+  el.innerHTML = '<div class="archive-list">' + archive.map(m => {
+    const isCorrect = m.correct === true;
+    const isWrong   = m.correct === false;
+    const rowCls    = isCorrect ? 'correct' : isWrong ? 'wrong' : 'unknown';
+    const icon      = isCorrect ? '✓' : isWrong ? '✗' : '·';
+    const iconColor = isCorrect ? 'var(--accent-green)' : isWrong ? 'var(--accent-red)' : 'var(--text-secondary)';
+    const v = m.our_verdict || 'COPY';
+    const verdictColor = v === 'COPY' ? 'var(--accent-green)' : 'var(--accent-yellow)';
+    const pr = m.entry_price ? (parseFloat(m.entry_price)*100).toFixed(0)+'%' : '—';
+    const side = (m.side || 'YES').toUpperCase();
+    const resDate = m.resolution_date ? new Date(m.resolution_date).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}) : '—';
+    const outcome = m.resolution ? `→ ${esc(m.resolution)}` : '';
+    const resultLabel = isCorrect ? '<span style="color:var(--accent-green)">✓ corretto</span>' : isWrong ? '<span style="color:var(--accent-red)">✗ sbagliato</span>' : '<span style="color:var(--text-secondary)">—</span>';
+    return `<div class="archive-row ${rowCls}">
+      <span style="color:${iconColor};font-size:1rem;min-width:14px;">${icon}</span>
+      <span class="archive-verdict" style="color:${verdictColor};">${v}</span>
+      <span class="archive-q">${esc(m.question||'???')}</span>
+      <span class="archive-meta">${side} @ ${pr}</span>
+      ${outcome ? `<span class="archive-meta">${outcome} ${resultLabel}</span>` : ''}
+      <span class="archive-meta">${resDate}</span>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+// ── REDDIT INSIGHTS ───────────────────────────────────────────────────
+function renderReddit(state) {
+  const el = document.getElementById('reddit-container');
+  if (!el) return;
+  const cache = state.reddit_cache || {};
+  const strategies = cache.top_strategies || [];
+  const ts = cache.last_checked ? new Date(cache.last_checked).toLocaleDateString('it-IT') : null;
+  if (!strategies.length) {
+    el.innerHTML = '<div class="empty">// reddit insights in raccolta (aggiornati ogni 10 run)</div>';
+    return;
+  }
+  el.innerHTML = `<div style="font-size:0.78rem;color:var(--text-secondary);padding:10px 16px 4px;font-family:'Fira Code',monospace;">
+    r/Polymarket · ultimo aggiornamento: ${ts || '—'}</div>` +
+    strategies.slice(0, 8).map(s => `<div class="reddit-item"><span class="reddit-bullet">•</span>${esc(s)}</div>`).join('');
 }
 
 // ── GITHUB INSIGHTS ──────────────────────────────────────────────────
@@ -1003,18 +1245,24 @@ function renderGithubInsights(state) {
   if (!el) return;
   const repos = cache.repos || [];
   const ts = cache.last_checked ? new Date(cache.last_checked).toLocaleDateString('it-IT') : null;
-  if (!repos.length) {
+  if (!repos.length && !cache.insights) {
     el.innerHTML = '<div class="empty">// nessun dato GitHub ancora — attendi il prossimo run</div>';
     return;
   }
-  el.innerHTML = `
-    <div style="font-size:0.8rem;color:#6a8aaa;margin-bottom:8px;">
-      Ultimo scout: ${ts || '—'} · ${repos.length} repo analizzati
-    </div>
-    ${repos.map(r => `<div style="font-family:monospace;font-size:0.82rem;color:#a0b8d8;padding:3px 0;">
-      <a href="https://github.com/${esc(r)}" target="_blank"
-         style="color:#56b6ff;text-decoration:none;">⎔ ${esc(r)}</a>
-    </div>`).join('')}`;
+  const header = `<div style="font-size:0.78rem;color:var(--text-secondary);padding:10px 16px 4px;font-family:'Fira Code',monospace;">
+    Ultimo scout: ${ts || '—'} · ${repos.length} repo analizzati</div>`;
+  const repoRows = repos.map(r => {
+    const name = typeof r === 'object' ? (r.full_name || r.name || String(r)) : String(r);
+    const desc = typeof r === 'object' ? (r.description || '') : '';
+    const stars = (typeof r === 'object' && r.stars) ? `<span style="font-size:0.75rem;color:var(--accent-yellow);margin-left:10px;">⭐ ${r.stars}</span>` : '';
+    const snippet = (typeof r === 'object' && r.readme_snippet) ? `<div class="gh-snippet">${esc(r.readme_snippet.slice(0,160))}…</div>` : '';
+    return `<div class="gh-repo">
+      <a href="https://github.com/${esc(name)}" target="_blank"
+         style="color:var(--accent-blue);text-decoration:none;font-family:'Fira Code',monospace;font-size:0.85rem;font-weight:600;">⎔ ${esc(name)}</a>${stars}
+      ${desc ? `<div class="gh-snippet">${esc(desc)}</div>` : ''}${snippet}
+    </div>`;
+  }).join('');
+  el.innerHTML = header + (repoRows || '<div class="empty">// nessun repo disponibile</div>');
 }
 
 // ── LOAD ──────────────────────────────────────────────────────────────

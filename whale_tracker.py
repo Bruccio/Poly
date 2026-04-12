@@ -973,6 +973,9 @@ def update_watched_markets(state: dict, results: list):
                 "question": res["market"],
                 "our_verdict": res.get("verdict", "COPY"),
                 "whale_wallet": res.get("wallet", ""),
+                "whale_name": res.get("whale_name", ""),
+                "tier": res.get("tier", "Whale"),
+                "confidence": res.get("confidence", 0),
                 "entry_price": res.get("price", 0),
                 "side": res.get("side", "YES"),
                 "date_flagged": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
@@ -981,6 +984,13 @@ def update_watched_markets(state: dict, results: list):
                 "resolution": None,
                 "correct": None,
             }
+            # Incrementa times_seen nella leaderboard per questa whale
+            wf = res.get("wallet_full", "")
+            if wf:
+                for addr, entry in state.get("leaderboard", {}).items():
+                    if addr[:8] == wf[:8]:
+                        entry["times_seen"] = entry.get("times_seen", 0) + 1
+                        break
 
 
 # ── WHALE PROFILING (ispirato da collectmarkets2) ────────────────────────────────
@@ -1381,6 +1391,7 @@ def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):
                 result["conditionId"] = (trade.get("conditionId") or
                                          trade.get("market") or
                                          trade.get("asset_id") or "")
+                result["wallet_full"] = wallet_full
                 return result
             err = r.json().get("error", {}).get("message", r.text[:100])
             log(f"Claude {r.status_code} ({model}): {err}", "WARN")
