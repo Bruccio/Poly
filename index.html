@@ -1262,7 +1262,7 @@ function renderReddit(state) {
   const strategies = cache.top_strategies || [];
   const ts = cache.last_checked ? new Date(cache.last_checked).toLocaleDateString('it-IT') : null;
   if (!strategies.length) {
-    el.innerHTML = '<div class="empty">// reddit insights in raccolta (aggiornati ogni 10 run)</div>';
+    el.innerHTML = '<div class="empty">// reddit insights in raccolta — attendi il prossimo run</div>';
     return;
   }
   el.innerHTML = `<div style="font-size:0.78rem;color:var(--text-secondary);padding:10px 16px 4px;font-family:'Fira Code',monospace;">

@@ -5,7 +5,7 @@ Polymarket Whale Tracker v2 → Telegram + Email
 - Leaderboard persistente con trust score aggiornato ogni run
 - Filtro wash trading automatico
 - Self-improving: traccia previsioni e verifica resolutions
-- Reddit insights ogni 10 run
+- Reddit insights ogni run
 """
 
 import os
@@ -725,11 +725,8 @@ def is_wash_trader(wallet: str) -> bool:
 
 # ── REDDIT INSIGHTS ─────────────────────────────────────────────────────────────
 def fetch_reddit_insights(state: dict) -> str:
-    """Ogni 10 run, scarica i top post di r/Polymarket e cerca strategie."""
-    run_count = state.get("run_count", 0)
+    """Ogni run scarica i top post di r/Polymarket e cerca strategie."""
     cache = state.get("reddit_cache", {})
-    if run_count % 10 != 1 and cache.get("top_strategies"):
-        return cache["top_strategies"][0] if cache["top_strategies"] else ""
     try:
         r = requests.get(
             "https://www.reddit.com/r/Polymarket/hot.json?limit=10",
@@ -1850,7 +1847,7 @@ def run():
     # 2. Aggiorna leaderboard da Polymarket (chi sono le whale?)
     fetch_breaking_leaderboard(state)
 
-    # 3. Reddit insights (ogni 10 run) + GitHub algorithm scout (ogni run)
+    # 3. Reddit insights (ogni run) + GitHub algorithm scout (ogni run)
     reddit_context = fetch_reddit_insights(state)
     github_context = fetch_github_insights(state)
     extra_context = "\n\n".join(filter(None, [reddit_context, github_context]))
