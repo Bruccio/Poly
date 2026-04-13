@@ -297,12 +297,14 @@ def build_gamma_resolution_cache() -> dict:
             data = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
             all_markets.extend(data)
         time.sleep(0.3)
-    # 2. Mercati chiusi recentemente (ultimi 500 chiusi) — cattura "Fed decision in December?" etc.
-    r = _http_get("https://gamma-api.polymarket.com/markets?limit=500&closed=true"
-                  "&order=closeTime&ascending=false")
-    if r and r.status_code == 200:
-        data = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
-        all_markets.extend(data)
+    # 2. Mercati chiusi recentemente — 1000 chiusi (2 pagine da 500)
+    #    Cattura elezioni, decisioni Fed, eventi risolti negli ultimi 6-12 mesi
+    for offset in [0, 500]:
+        r = _http_get(f"https://gamma-api.polymarket.com/markets?limit=500&offset={offset}"
+                      f"&closed=true&order=closeTime&ascending=false")
+        if r and r.status_code == 200:
+            data = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            all_markets.extend(data)
         time.sleep(0.3)
 
     for m in all_markets:
@@ -1335,12 +1337,18 @@ def _build_system_prompt() -> str:
     today = datetime.now(timezone.utc).strftime("%d %B %Y")
     today_iso = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     return (
-        f"Oggi è {today} ({today_iso}). "
-        "Sei un analista aggressivo di mercati predittivi (Polymarket). Il tuo obiettivo: "
-        "identificare trade da seguire, non evitarli.\n\n"
-        "REGOLA N°0 — MERCATO SCADUTO → SKIP IMMEDIATO (priorità assoluta):\n"
-        f"Se il titolo fa riferimento a un evento con deadline PRIMA di oggi ({today_iso}) "
-        "(es: 'by January 2026', 'in March 2026', 'Q1 2026' quando siamo in aprile) → SKIP.\n\n"
+        f"Oggi è {today} ({today_iso}). Usa questa data come riferimento assoluto.\n\n"
+        "REGOLA N°0 — MERCATO GIÀ RISOLTO → SKIP IMMEDIATO (priorità massima assoluta):\n"
+        "Devi fare SKIP se UNA delle seguenti condizioni è vera:\n"
+        "  a) La deadline del mercato è PRIMA di oggi (es: 'by January 2026', 'Q1 2026' siamo in aprile 2026)\n"
+        "  b) L'evento descritto è già ACCADUTO o il risultato è già NOTO — usa la tua conoscenza del mondo:\n"
+        "     • Elezioni già svolte (es: NYC Mayor 2025 → Mamdani ha vinto, già sindaco)\n"
+        "     • Decisioni Fed già annunciate (es: 'Fed decision in December?' → dicembre 2025 è passato)\n"
+        "     • Risultati sportivi/politici/economici già noti\n"
+        "     • Qualsiasi mercato dove il risultato è già un fatto storico\n"
+        "  c) Il titolo contiene '...' o è troncato e non riesci a determinare la deadline\n"
+        "ATTENZIONE: un volume alto ($100M+) su un mercato già risolto indica wash trading o "
+        "liquidità residua — NON è un segnale di insider trading. SKIP senza eccezioni.\n\n"
         "REGOLA N°1 — SPORT/ENTERTAINMENT → SKIP IMMEDIATO (nessuna analisi):\n"
         "Calcio, basket, tennis, F1, NFL, NBA, Oscar, Grammy, Eurovision → SKIP.\n\n"
         "REGOLA N°2 — COPY DI DEFAULT (la più importante):\n"
@@ -1422,7 +1430,7 @@ def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):
                 json={
                     "model": model,
                     "max_tokens": 500,
-                    "system": SYSTEM_PROMPT,
+                    "system": _build_system_prompt(),  # ricostruito con la data odierna
                     "messages": [{"role": "user", "content": f"Analizza:\n\n{text}"}],
                 },
                 timeout=30,
