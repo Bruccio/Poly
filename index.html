@@ -498,6 +498,31 @@
     .gh-repo:last-child { border-bottom: none; }
     .gh-snippet { color: var(--text-secondary); font-size: 0.78rem; margin-top: 4px; line-height: 1.5; }
 
+    /* ── POLYMARKET LINK BUTTON ─────────────────────────────────────────── */
+    .poly-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      text-decoration: none;
+      border: 1px solid rgba(0,240,255,0.4);
+      padding: 5px 12px;
+      border-radius: 6px;
+      background: rgba(0,240,255,0.06);
+      transition: all 0.2s ease;
+      letter-spacing: 0.04em;
+    }
+    .poly-link:hover {
+      background: rgba(0,240,255,0.18);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0,240,255,0.25);
+      color: #fff;
+    }
+
     /* ── GENERIC BOX ──────────────────────────────────────────────────────── */
     .box {
       background: var(--bg-secondary);
@@ -1166,6 +1191,10 @@ function render(state) {
         <div class="prob-bar-label"><span>Probabilità implicita</span><span style="color:${probColor};font-weight:600;">${pr}</span></div>
         <div class="prob-bar-track"><div class="prob-bar-fill" style="width:${(prFloat*100).toFixed(0)}%;background:${probColor};"></div></div>
       </div>` : '';
+      const polyUrl = m.poly_url || '';
+      const polyBtn = polyUrl
+        ? `<a href="${esc(polyUrl)}" target="_blank" rel="noopener noreferrer" class="poly-link">📊 Vedi su Polymarket ↗</a>`
+        : `<a href="https://polymarket.com/search?q=${encodeURIComponent(m.question||'')}" target="_blank" rel="noopener noreferrer" class="poly-link" style="opacity:0.6;">🔍 Cerca su Polymarket ↗</a>`;
       return `<div class="signal-card ${cls}">
         <span class="signal-badge ${badgeCls}">${badgeTxt}</span>
         ${whaleName}
@@ -1177,6 +1206,7 @@ function render(state) {
           ${confBadge}
           ${m.resolution ? `<span>EXIT: ${esc(m.resolution)}</span>` : ''}
         </div>
+        ${polyBtn}
       </div>`;
     }).join('');
   }

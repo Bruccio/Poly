@@ -491,6 +491,29 @@ def is_market_resolved(title: str, condition_id: str = "") -> bool:
     return _resolved_from_cache_entry(match)
 
 
+def _get_poly_url(condition_id: str, title: str = "") -> str:
+    """Costruisce l'URL Polymarket per un market cercandolo nella Gamma cache.
+    URL formato: https://polymarket.com/event/{groupSlug}/{slug}
+    Fallback: https://polymarket.com/search?q={titolo}"""
+    m = None
+    if condition_id:
+        m = _GAMMA_RESOLUTION_CACHE.get(condition_id)
+    if not m and title:
+        m = _GAMMA_RESOLUTION_CACHE.get(title.lower().strip())
+    if m:
+        slug = m.get("slug") or ""
+        group_slug = (m.get("groupSlug") or m.get("group_slug") or
+                      m.get("eventSlug") or m.get("event_slug") or "")
+        if slug and group_slug:
+            return f"https://polymarket.com/event/{group_slug}/{slug}"
+        if slug:
+            return f"https://polymarket.com/event/{slug}"
+    # Fallback: cerca per titolo su Polymarket
+    if title:
+        return f"https://polymarket.com/search?q={urllib.parse.quote(title[:80])}"
+    return ""
+
+
 # ── CACHE IN-RUN PER ACTIVITY WALLET ────────────────────────────────────────────
 _ACTIVITY_CACHE: dict = {}  # svuotato all'inizio di ogni run()
 
@@ -994,6 +1017,7 @@ def update_watched_markets(state: dict, results: list):
                 "side": res.get("side", "YES"),
                 "date_flagged": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
                 "conditionId": res.get("conditionId", ""),   # per lookup diretto in check_resolutions
+                "poly_url": res.get("poly_url", ""),         # link diretto al mercato su Polymarket
                 "resolved": False,
                 "resolution": None,
                 "correct": None,
@@ -1402,10 +1426,12 @@ def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):
                 result = _parse_claude(raw, market, side, price, size, wallet, tier,
                                        trust_score, whale_name, confidence)
                 # Salva conditionId per check_resolutions() — lookup diretto per ID
-                result["conditionId"] = (trade.get("conditionId") or
-                                         trade.get("market") or
-                                         trade.get("asset_id") or "")
+                cond_id = (trade.get("conditionId") or
+                           trade.get("market") or
+                           trade.get("asset_id") or "")
+                result["conditionId"] = cond_id
                 result["wallet_full"] = wallet_full
+                result["poly_url"] = _get_poly_url(cond_id, market)
                 return result
             err = r.json().get("error", {}).get("message", r.text[:100])
             log(f"Claude {r.status_code} ({model}): {err}", "WARN")
