@@ -660,9 +660,13 @@ def fetch_whale_trades(state: dict) -> list:
                 if _is_past_market(title):
                     continue
                 # Prova più chiavi: conditionId, market, asset_id, tokenId
-                # (la Data API può restituire il tokenId dell'outcome invece del conditionId del market)
                 cond_id = (t.get("conditionId") or t.get("market") or
                            t.get("asset_id") or t.get("tokenId") or "")
+                # Se il trade non ha endDate, prova a ottenerla dalla Gamma cache
+                if not t.get("endDate") and cond_id:
+                    cached = _GAMMA_RESOLUTION_CACHE.get(cond_id)
+                    if cached and cached.get("endDate"):
+                        t["endDate"] = cached["endDate"]
                 if is_market_resolved(title, condition_id=cond_id):
                     continue
                 if not is_future_market(t):
@@ -1234,7 +1238,7 @@ def fetch_polymarket_whales(min_size, state: dict = None):
             "subgraphs/id/Bx1W4S7kDVxs9gC3s2G6DS8kdNBJx2sYUiABH4RvGN46",
             data='{"query":"{ orderFilledEvents(first:200,orderBy:matchedAmount,orderDirection:desc)'
                  '{matchedAmount price maker order{market{question}}} }"}',
-            headers={**H, "Content-Type": "application/json"},
+            headers={**_H, "Content-Type": "application/json"},
             timeout=15)
         if r.status_code == 200:
             events = r.json().get("data", {}).get("orderFilledEvents", [])
