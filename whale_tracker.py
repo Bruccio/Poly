@@ -348,9 +348,13 @@ def is_market_resolved(title: str, condition_id: str = "") -> bool:
     condition_id (conditionId dalla Data API) permette un lookup diretto e affidabile,
     immune a differenze di titolo tra Data API e Gamma API.
     Gestisce titoli troncati dalla Data API (es. 'US strikes Iran by...?').
-    Ritorna True = da escludere."""
+    Ritorna True = da escludere.
+    Policy per titoli troncati: se non verificabile → blocca per sicurezza."""
     if not title and not condition_id:
         return False
+
+    # Determina troncatura subito — usato in più punti della funzione
+    is_truncated = bool(title) and ("..." in title or "\u2026" in title)
 
     # 0. Lookup per conditionId — SEMPRE prioritario sul text matching
     if condition_id:
@@ -372,15 +376,18 @@ def is_market_resolved(title: str, condition_id: str = "") -> bool:
                 if q:
                     _GAMMA_RESOLUTION_CACHE[q] = m
                 return _resolved_from_cache_entry(m)
-            # ID trovato ma lista vuota → mercato non esiste o rimosso, skip sicuro
-            # (non blocchiamo per sicurezza, lasciamo passare al text matching)
+            # ID presente ma Gamma non ha questo market → rimosso/risolto molto tempo fa.
+            # Per titoli troncati non abbiamo altro modo per verificare → blocca.
+            if is_truncated:
+                log(f"Titolo troncato + conditionId non in Gamma → blocco: {title[:60]}", "WARN")
+                return True
 
     if not title:
         return False
 
     # Rimuovi troncatura "..." dalla Data API — "US strikes Iran by...?" →
     # "US strikes Iran by" per trovare "Will the US strike Iran by Dec 31?"
-    is_truncated = "..." in title or "\u2026" in title
+    # (is_truncated è già calcolato sopra, non riassegnare)
     t_clean = (title.replace("...", "").replace("\u2026", "")
                .rstrip("?").strip())
     t_lower = title.lower().strip()
@@ -472,6 +479,13 @@ def is_market_resolved(title: str, condition_id: str = "") -> bool:
                         break
 
     if not match:
+        # Policy: titolo troncato non verificabile da nessun endpoint Gamma
+        # → blocca per sicurezza. Un mercato attivo e liquido sarebbe nella cache bulk.
+        # Se non lo troviamo da nessuna parte (cache + API ID + text search + slug),
+        # quasi certamente è risolto/rimosso da tempo (es. "US strikes Iran by...?").
+        if is_truncated:
+            log(f"Titolo troncato non verificabile in Gamma → blocco: {title[:60]}", "WARN")
+            return True
         return False
 
     return _resolved_from_cache_entry(match)

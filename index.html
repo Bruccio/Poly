@@ -1152,15 +1152,17 @@ function render(state) {
         badgeTxt = v === 'COPY' ? '▶ COPY' : '◉ WATCH';
       }
       const prFloat = m.entry_price ? parseFloat(m.entry_price) : null;
-      const pr = prFloat !== null ? (prFloat*100).toFixed(0)+'%' : '—';
+      // 0.5 è il fallback di default — non mostrare come dato reale
+      const prIsReal = prFloat !== null && Math.abs(prFloat - 0.5) > 0.01;
+      const pr = prIsReal ? (prFloat*100).toFixed(0)+'%' : '—';
       const side = (m.side || 'YES').toUpperCase();
       const sideClass = side === 'YES' || side.includes('YES') ? 'yes-tag' : 'no-tag';
-      const probColor = prFloat !== null ? (prFloat < 0.3 ? '#00ff9f' : prFloat < 0.6 ? '#fcee0c' : '#ff3c5a') : '#a0b8d8';
+      const probColor = prIsReal ? (prFloat < 0.3 ? '#00ff9f' : prFloat < 0.6 ? '#fcee0c' : '#ff3c5a') : '#a0b8d8';
       const tierCls = (m.tier||'').includes('Top') ? 'tier-top' : (m.tier||'').includes('Big') ? 'tier-big' : 'tier-whale';
       const tierLabel = m.tier || 'Whale';
       const whaleName = m.whale_name ? `<div class="signal-whale">⬡ ${esc(m.whale_name)}<span class="tier-badge ${tierCls}">${esc(tierLabel)}</span></div>` : '';
       const confBadge = m.confidence ? `<span style="font-family:'Fira Code',monospace;font-size:0.72rem;color:var(--text-secondary);">conf ${m.confidence}/100</span>` : '';
-      const probBar = prFloat !== null ? `<div class="prob-bar-wrap">
+      const probBar = prIsReal ? `<div class="prob-bar-wrap">
         <div class="prob-bar-label"><span>Probabilità implicita</span><span style="color:${probColor};font-weight:600;">${pr}</span></div>
         <div class="prob-bar-track"><div class="prob-bar-fill" style="width:${(prFloat*100).toFixed(0)}%;background:${probColor};"></div></div>
       </div>` : '';
@@ -1170,7 +1172,7 @@ function render(state) {
         <div class="signal-title">${esc(m.question||'???')}</div>
         ${probBar}
         <div class="signal-meta">
-          <span class="${sideClass}">${side} @ ${pr}</span>
+          <span class="${sideClass}">${side}${prIsReal ? ' @ ' + pr : ''}</span>
           <span>${m.date_flagged ? new Date(m.date_flagged).toLocaleDateString('it-IT') : '—'}</span>
           ${confBadge}
           ${m.resolution ? `<span>EXIT: ${esc(m.resolution)}</span>` : ''}
