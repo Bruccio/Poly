@@ -623,10 +623,20 @@ def fetch_whale_trades(state: dict) -> list:
             trades = _cached_activity(wallet, limit=20)
             added = 0
             wallet_bets: list = []  # per recent_bets di questo wallet
+            # Aggiorna last_seen ogni volta che scarico l'attività della whale
+            if wallet_key in state.get("leaderboard", {}):
+                state["leaderboard"][wallet_key]["last_seen"] = datetime.now(timezone.utc).isoformat()
             for t in trades:
-                title = (t.get("title") or t.get("question") or
-                         t.get("market") or "").strip()
-                if not title:
+                raw_title = (t.get("title") or t.get("question") or "").strip()
+                market_id  = (t.get("conditionId") or t.get("market") or
+                              t.get("asset_id") or t.get("tokenId") or "")
+                # Se il titolo è un hex conditionId o manca, prova dalla Gamma cache
+                if not raw_title or raw_title.startswith("0x"):
+                    cached = _GAMMA_RESOLUTION_CACHE.get(market_id) if market_id else None
+                    if cached:
+                        raw_title = cached.get("question") or cached.get("title") or raw_title
+                title = raw_title.strip()
+                if not title or title.startswith("0x"):
                     continue
                 size = float(t.get("usdcSize") or t.get("size") or
                              t.get("amount") or 0)

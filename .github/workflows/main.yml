@@ -54,7 +54,9 @@ jobs:
           git config user.email "whale-bot@github-actions.local"
           git add whale_state.json index.html || true
           git diff --cached --quiet || git commit -m "chore: aggiorna whale_state run #$(date +%Y%m%d-%H%M) [skip ci]"
-          git push || echo "Push fallito (nessuna modifica?)"
+          # Pull con rebase per gestire commit di codice arrivati nel frattempo
+          git pull --rebase origin main || true
+          git push origin main || (sleep 4 && git pull --rebase origin main && git push origin main) || echo "Push fallito dopo retry"
 
       - name: Salva log come artifact
         if: always()
