@@ -5,7 +5,7 @@ Polymarket Whale Tracker v2 → Telegram + Email
 - Leaderboard persistente con trust score aggiornato ogni run
 - Filtro wash trading automatico
 - Self-improving: traccia previsioni e verifica resolutions
-- Reddit insights ogni 10 run
+- Reddit insights ogni run
 """
 
 import os
@@ -35,6 +35,7 @@ MIN_SIZE_USDC          = int(os.environ.get("MIN_WHALE_SIZE", "100000"))
 MAX_WHALES             = int(os.environ.get("MAX_WHALES", "10"))
 CHECK_INTERVAL_MINUTES = int(os.environ.get("CHECK_INTERVAL_MINUTES", "30"))
 ONLY_NOTIFY_ON_COPY    = os.environ.get("ONLY_NOTIFY_ON_COPY", "true").lower() != "false"
+MAX_TRADE_AGE_HOURS    = 24   # scarta trade/mercati più vecchi di 24h
 
 # ── STATO PERSISTENTE ────────────────────────────────────────────────────────────
 STATE_FILE = "whale_state.json"
@@ -43,6 +44,7 @@ def _empty_state() -> dict:
     return {
         "leaderboard": {},
         "watched_markets": {},
+        "resolved_archive": [],          # mercati risolti (rimossi da watched_markets)
         "algo_stats": {
             "total_copy_signals": 0,
             "resolved_copies": 0,
@@ -53,6 +55,11 @@ def _empty_state() -> dict:
         "reddit_cache": {
             "last_checked": None,
             "top_strategies": [],
+        },
+        "github_cache": {
+            "last_checked": None,
+            "insights": "",
+            "repos": [],
         },
         "run_count": 0,
     }
@@ -171,7 +178,9 @@ def _is_past_market(title: str) -> bool:
         mn, yr = _MONTH_MAP.get(m.group(1), 0), int(m.group(2))
         if mn and datetime(yr, mn, 28, tzinfo=timezone.utc) < now:
             return True
-    # "in/by <Mese>" senza anno → assume anno corrente
+    # "in/by <Mese>" senza anno → blocca SOLO se il mese è già passato quest'anno.
+    # "December" senza anno potrebbe essere December 2026 → non bloccare.
+    # Gamma API decide se il mercato è risolto; qui gestiamo solo i casi ovvi.
     for m in re.finditer(
         r'\b(?:by|before|in|end of)\s+'
         r'(january|february|march|april|may|june|july|august|september|'
@@ -180,7 +189,10 @@ def _is_past_market(title: str) -> bool:
     ):
         mn = _MONTH_MAP.get(m.group(1), 0)
         if mn and mn < now.month:
+            # Mese già passato nell'anno corrente (es. "in January" ad Aprile 2026)
             return True
+        # mn >= now.month → potrebbe essere futuro (es. "in December" = December 2026)
+        # Non bloccare: lascia decidere a Gamma API / is_market_resolved()
     # Q1-Q4 Anno
     for m in re.finditer(r'\bq([1-4])\s*(\d{4})\b', t):
         em, ed = _QUARTER_END[int(m.group(1))]
@@ -271,67 +283,57 @@ _GAMMA_RESOLUTION_CACHE: dict = {}  # title_lower → market obj, svuotato a ogn
 
 def build_gamma_resolution_cache() -> dict:
     """Bulk-fetch mercati da Gamma API e indicizza per question (lowercase).
+    Include sia mercati attivi che chiusi recenti.
     Chiamata una volta per run, riutilizzata da is_market_resolved() e check_resolutions()."""
     global _GAMMA_RESOLUTION_CACHE
     _GAMMA_RESOLUTION_CACHE.clear()
+    today = datetime.now(timezone.utc)
+    log(f"Data odierna: {today.strftime('%d/%m/%Y')} — costruisco cache Gamma...", "OK")
+
     all_markets = []
+    # 1. Mercati attivi/recenti (top 1000 per volume)
     for offset in [0, 500]:
         r = _http_get(f"https://gamma-api.polymarket.com/markets?limit=500&offset={offset}")
         if r and r.status_code == 200:
             data = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
             all_markets.extend(data)
         time.sleep(0.3)
+    # 2. Mercati chiusi recentemente — 1000 chiusi (2 pagine da 500)
+    #    Cattura elezioni, decisioni Fed, eventi risolti negli ultimi 6-12 mesi
+    for offset in [0, 500]:
+        r = _http_get(f"https://gamma-api.polymarket.com/markets?limit=500&offset={offset}"
+                      f"&closed=true&order=closeTime&ascending=false")
+        if r and r.status_code == 200:
+            data = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            all_markets.extend(data)
+        time.sleep(0.3)
+
     for m in all_markets:
         q = (m.get("question") or "").lower().strip()
         if q:
             _GAMMA_RESOLUTION_CACHE[q] = m
-    log(f"Gamma resolution cache: {len(_GAMMA_RESOLUTION_CACHE)} mercati indicizzati", "OK")
+        # conditionId — lookup diretto, immune a differenze di titolo
+        cid = m.get("conditionId") or m.get("id") or ""
+        if cid:
+            _GAMMA_RESOLUTION_CACHE[cid] = m
+        # clobTokenIds — la Data API può restituire il tokenId dell'outcome (YES/NO)
+        # invece del conditionId del market; indicizziamo anche quelli
+        try:
+            for tok in json.loads(m.get("clobTokenIds") or "[]"):
+                if tok:
+                    _GAMMA_RESOLUTION_CACHE[tok] = m
+        except Exception:
+            pass
+    log(f"Gamma resolution cache: {len(_GAMMA_RESOLUTION_CACHE)} mercati indicizzati "
+        f"(attivi + chiusi recenti, per titolo + conditionId + tokenId)", "OK")
     return _GAMMA_RESOLUTION_CACHE
 
 
-def is_market_resolved(title: str) -> bool:
-    """Controlla se un mercato è risolto/chiuso usando la cache Gamma.
-    Fallback: ricerca mirata se non nel bulk. Ritorna True = da escludere."""
-    if not title:
-        return False
-    t_lower = title.lower().strip()
-
-    # 1. Match esatto nella cache
-    match = _GAMMA_RESOLUTION_CACHE.get(t_lower)
-
-    # 2. Match parziale (primi 40 char)
-    if not match:
-        key_prefix = t_lower[:40]
-        for cached_q, cached_m in _GAMMA_RESOLUTION_CACHE.items():
-            if key_prefix in cached_q:
-                match = cached_m
-                break
-
-    # 3. Fallback: ricerca mirata su Gamma API
-    if not match:
-        encoded = urllib.parse.quote(title[:80])
-        r = _http_get(
-            f"https://gamma-api.polymarket.com/markets?search={encoded}&limit=5",
-            timeout=8, retries=2,
-        )
-        if r and r.status_code == 200:
-            results = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
-            for candidate in results:
-                cq = (candidate.get("question") or "").lower().strip()
-                if t_lower[:40] in cq or cq[:40] in t_lower:
-                    match = candidate
-                    _GAMMA_RESOLUTION_CACHE[cq] = candidate
-                    break
-
-    if not match:
-        return False
-
-    # Controlla stato risoluzione
-    if match.get("closed") is True or match.get("isResolved") is True:
+def _resolved_from_cache_entry(m: dict) -> bool:
+    """Dato un market object Gamma, ritorna True se il mercato è chiuso/risolto."""
+    if m.get("closed") is True or m.get("isResolved") is True:
         return True
-
-    # Controlla endDate se presente
-    end_date = match.get("endDate") or match.get("end_date_iso")
+    end_date = m.get("endDate") or m.get("end_date_iso")
     if end_date:
         try:
             end_dt = dateutil.parser.isoparse(str(end_date))
@@ -341,8 +343,178 @@ def is_market_resolved(title: str) -> bool:
                 return True
         except Exception:
             pass
-
     return False
+
+
+def is_market_resolved(title: str, condition_id: str = "") -> bool:
+    """Controlla se un mercato è risolto/chiuso usando la cache Gamma.
+    condition_id (conditionId dalla Data API) permette un lookup diretto e affidabile,
+    immune a differenze di titolo tra Data API e Gamma API.
+    Gestisce titoli troncati dalla Data API (es. 'US strikes Iran by...?').
+    Ritorna True = da escludere.
+    Policy per titoli troncati: se non verificabile → blocca per sicurezza."""
+    if not title and not condition_id:
+        return False
+
+    # Determina troncatura subito — usato in più punti della funzione
+    is_truncated = bool(title) and ("..." in title or "\u2026" in title)
+
+    # 0. Lookup per conditionId — SEMPRE prioritario sul text matching
+    if condition_id:
+        m = _GAMMA_RESOLUTION_CACHE.get(condition_id)
+        if m is not None:
+            return _resolved_from_cache_entry(m)
+        # Non è nella cache bulk → chiama Gamma API direttamente per ID
+        # Questo è il fix definitivo: ID-based lookup non dipende dal formato del titolo
+        r = _http_get(
+            f"https://gamma-api.polymarket.com/markets?conditionId={condition_id}&limit=1",
+            timeout=8, retries=2,
+        )
+        if r and r.status_code == 200:
+            items = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            if items:
+                m = items[0]
+                _GAMMA_RESOLUTION_CACHE[condition_id] = m
+                q = (m.get("question") or "").lower().strip()
+                if q:
+                    _GAMMA_RESOLUTION_CACHE[q] = m
+                return _resolved_from_cache_entry(m)
+            # ID presente ma Gamma non ha questo market → rimosso/risolto molto tempo fa.
+            # Per titoli troncati non abbiamo altro modo per verificare → blocca.
+            if is_truncated:
+                log(f"Titolo troncato + conditionId non in Gamma → blocco: {title[:60]}", "WARN")
+                return True
+
+    if not title:
+        return False
+
+    # Rimuovi troncatura "..." dalla Data API — "US strikes Iran by...?" →
+    # "US strikes Iran by" per trovare "Will the US strike Iran by Dec 31?"
+    # (is_truncated è già calcolato sopra, non riassegnare)
+    t_clean = (title.replace("...", "").replace("\u2026", "")
+               .rstrip("?").strip())
+    t_lower = title.lower().strip()
+    t_clean_lower = t_clean.lower().strip()
+
+    # 1. Match esatto per titolo nella cache
+    match = _GAMMA_RESOLUTION_CACHE.get(t_lower)
+
+    # Helper: estrae parole significative (> 2 char, non stopword)
+    _SW = {"will", "the", "and", "that", "this", "are", "for", "not", "have",
+           "with", "from", "into", "than", "more", "been", "their"}
+    def _keywords(s: str) -> list:
+        return [w for w in re.findall(r'[a-z0-9]+', s.lower())
+                if len(w) > 2 and w not in _SW]
+
+    def _fuzzy_overlap(qa: list, qb: list, min_match: int = 2) -> bool:
+        """True se almeno min_match parole di qa hanno un prefisso comune (5 char)
+        con una parola di qb — gestisce coniugazioni (strikes≈strike, ran≈run)."""
+        matched = 0
+        sb = set(qb)
+        for w in qa:
+            if w in sb or any(w[:5] == cw[:5] for cw in sb if len(cw) >= 5 and len(w) >= 5):
+                matched += 1
+                if matched >= min_match:
+                    return True
+        return False
+
+    # 2. Match parziale — titoli normali: prefisso 40 char;
+    #    titoli troncati: fuzzy overlap su parole chiave (handle: strikes≈strike)
+    if not match:
+        if is_truncated:
+            kw_q = _keywords(t_clean_lower)
+            for cached_q, cached_m in _GAMMA_RESOLUTION_CACHE.items():
+                if isinstance(cached_q, str) and len(kw_q) >= 1:
+                    if _fuzzy_overlap(kw_q, _keywords(cached_q), min_match=2):
+                        match = cached_m
+                        break
+        else:
+            key_prefix = t_lower[:40]
+            for cached_q, cached_m in _GAMMA_RESOLUTION_CACHE.items():
+                if isinstance(cached_q, str) and key_prefix in cached_q:
+                    match = cached_m
+                    break
+
+    # 3. Fallback: ricerca mirata su Gamma API
+    #    Titolo troncato → usa testo pulito (senza "...") come query
+    if not match:
+        search_query = t_clean if is_truncated else title
+        encoded = urllib.parse.quote(search_query[:80])
+        r = _http_get(
+            f"https://gamma-api.polymarket.com/markets?search={encoded}&limit=5",
+            timeout=8, retries=2,
+        )
+        if r and r.status_code == 200:
+            results = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            kw_q = _keywords(t_clean_lower)
+            for candidate in results:
+                cq = (candidate.get("question") or "").lower().strip()
+                is_hit = (is_truncated and _fuzzy_overlap(kw_q, _keywords(cq), 2)
+                          or not is_truncated and (t_lower[:40] in cq or cq[:40] in t_lower))
+                if is_hit:
+                    match = candidate
+                    _GAMMA_RESOLUTION_CACHE[cq] = candidate
+                    cid = candidate.get("conditionId") or candidate.get("id") or ""
+                    if cid:
+                        _GAMMA_RESOLUTION_CACHE[cid] = candidate
+                    break
+
+    # 4. Se il titolo è troncato e non abbiamo trovato niente → cerca anche
+    #    sull'endpoint events (un event può coprire più market con un solo slug)
+    if not match and is_truncated and t_clean:
+        slug_guess = t_clean_lower.replace(" ", "-").replace("?", "")[:60]
+        # Rimuovi articoli e preposizioni comuni per ottenere slug più pulito
+        slug_guess = re.sub(r'\b(will|the|a|an|by|in|on|at|for|of|to|be)\b-?', '', slug_guess)
+        slug_guess = re.sub(r'-+', '-', slug_guess).strip('-')
+        if slug_guess:
+            r = _http_get(
+                f"https://gamma-api.polymarket.com/events?slug={urllib.parse.quote(slug_guess)}&limit=3",
+                timeout=8, retries=2,
+            )
+            if r and r.status_code == 200:
+                events = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+                for ev in events:
+                    # L'evento è chiuso se tutti i suoi market sono chiusi
+                    if ev.get("closed") or ev.get("resolved"):
+                        # Usa dati evento come proxy per il mercato
+                        match = {"closed": True, "isResolved": True,
+                                 "winningOutcome": ev.get("outcome", "")}
+                        break
+
+    if not match:
+        # Policy: titolo troncato non verificabile da nessun endpoint Gamma
+        # → blocca per sicurezza. Un mercato attivo e liquido sarebbe nella cache bulk.
+        # Se non lo troviamo da nessuna parte (cache + API ID + text search + slug),
+        # quasi certamente è risolto/rimosso da tempo (es. "US strikes Iran by...?").
+        if is_truncated:
+            log(f"Titolo troncato non verificabile in Gamma → blocco: {title[:60]}", "WARN")
+            return True
+        return False
+
+    return _resolved_from_cache_entry(match)
+
+
+def _get_poly_url(condition_id: str, title: str = "") -> str:
+    """Costruisce l'URL Polymarket per un market cercandolo nella Gamma cache.
+    URL formato: https://polymarket.com/event/{groupSlug}/{slug}
+    Fallback: https://polymarket.com/search?q={titolo}"""
+    m = None
+    if condition_id:
+        m = _GAMMA_RESOLUTION_CACHE.get(condition_id)
+    if not m and title:
+        m = _GAMMA_RESOLUTION_CACHE.get(title.lower().strip())
+    if m:
+        slug = m.get("slug") or ""
+        group_slug = (m.get("groupSlug") or m.get("group_slug") or
+                      m.get("eventSlug") or m.get("event_slug") or "")
+        if slug and group_slug:
+            return f"https://polymarket.com/event/{group_slug}/{slug}"
+        if slug:
+            return f"https://polymarket.com/event/{slug}"
+    # Fallback: cerca per titolo su Polymarket
+    if title:
+        return f"https://polymarket.com/search?q={urllib.parse.quote(title[:80])}"
+    return ""
 
 
 # ── CACHE IN-RUN PER ACTIVITY WALLET ────────────────────────────────────────────
@@ -454,10 +626,20 @@ def fetch_whale_trades(state: dict) -> list:
             trades = _cached_activity(wallet, limit=20)
             added = 0
             wallet_bets: list = []  # per recent_bets di questo wallet
+            # Aggiorna last_seen ogni volta che scarico l'attività della whale
+            if wallet_key in state.get("leaderboard", {}):
+                state["leaderboard"][wallet_key]["last_seen"] = datetime.now(timezone.utc).isoformat()
             for t in trades:
-                title = (t.get("title") or t.get("question") or
-                         t.get("market") or "").strip()
-                if not title:
+                raw_title = (t.get("title") or t.get("question") or "").strip()
+                market_id  = (t.get("conditionId") or t.get("market") or
+                              t.get("asset_id") or t.get("tokenId") or "")
+                # Se il titolo è un hex conditionId o manca, prova dalla Gamma cache
+                if not raw_title or raw_title.startswith("0x"):
+                    cached = _GAMMA_RESOLUTION_CACHE.get(market_id) if market_id else None
+                    if cached:
+                        raw_title = cached.get("question") or cached.get("title") or raw_title
+                title = raw_title.strip()
+                if not title or title.startswith("0x"):
                     continue
                 size = float(t.get("usdcSize") or t.get("size") or
                              t.get("amount") or 0)
@@ -478,7 +660,15 @@ def fetch_whale_trades(state: dict) -> list:
                     continue
                 if _is_past_market(title):
                     continue
-                if is_market_resolved(title):
+                # Prova più chiavi: conditionId, market, asset_id, tokenId
+                cond_id = (t.get("conditionId") or t.get("market") or
+                           t.get("asset_id") or t.get("tokenId") or "")
+                # Se il trade non ha endDate, prova a ottenerla dalla Gamma cache
+                if not t.get("endDate") and cond_id:
+                    cached = _GAMMA_RESOLUTION_CACHE.get(cond_id)
+                    if cached and cached.get("endDate"):
+                        t["endDate"] = cached["endDate"]
+                if is_market_resolved(title, condition_id=cond_id):
                     continue
                 if not is_future_market(t):
                     continue
@@ -552,11 +742,8 @@ def is_wash_trader(wallet: str) -> bool:
 
 # ── REDDIT INSIGHTS ─────────────────────────────────────────────────────────────
 def fetch_reddit_insights(state: dict) -> str:
-    """Ogni 10 run, scarica i top post di r/Polymarket e cerca strategie."""
-    run_count = state.get("run_count", 0)
+    """Ogni run scarica i top post di r/Polymarket e cerca strategie."""
     cache = state.get("reddit_cache", {})
-    if run_count % 10 != 1 and cache.get("top_strategies"):
-        return cache["top_strategies"][0] if cache["top_strategies"] else ""
     try:
         r = requests.get(
             "https://www.reddit.com/r/Polymarket/hot.json?limit=10",
@@ -587,19 +774,100 @@ def fetch_reddit_insights(state: dict) -> str:
         return ""
 
 
+# ── GITHUB ALGORITHM SCOUT ──────────────────────────────────────────────────────
+def fetch_github_insights(state: dict) -> str:
+    """Ogni run cerca su GitHub i repo Polymarket/prediction-market più aggiornati.
+    Estrae pattern algoritmici dai README e li passa come contesto a Claude.
+    Usa GITHUB_TOKEN (disponibile in GitHub Actions) per evitare rate limit."""
+    token = os.environ.get("GITHUB_TOKEN", "")
+    hdrs = {"Accept": "application/vnd.github+json", "User-Agent": "PolyWhaleBot/3.0"}
+    if token:
+        hdrs["Authorization"] = f"Bearer {token}"
+
+    queries = [
+        "polymarket whale tracker language:python",
+        "polymarket analytics prediction market",
+        "prediction market insider trading detection",
+    ]
+
+    repos: dict = {}
+    for q in queries:
+        try:
+            url = (f"https://api.github.com/search/repositories"
+                   f"?q={urllib.parse.quote(q)}&sort=updated&order=desc&per_page=5")
+            r = requests.get(url, headers=hdrs, timeout=10)
+            if r.status_code == 403:
+                log("GitHub API rate limit", "WARN")
+                break
+            if r.status_code != 200:
+                continue
+            for item in r.json().get("items", [])[:5]:
+                name = item.get("full_name", "")
+                if name and name not in repos:
+                    repos[name] = {
+                        "stars": item.get("stargazers_count", 0),
+                        "desc": (item.get("description") or "")[:150],
+                        "updated": (item.get("updated_at") or "")[:10],
+                        "url": item.get("html_url", ""),
+                    }
+        except Exception as e:
+            log(f"GitHub search: {e}", "WARN")
+        time.sleep(0.8)
+
+    if not repos:
+        return state.get("github_cache", {}).get("insights", "")
+
+    # Top 4 repo per stars — leggi README per estrarre pattern
+    top = sorted(repos.items(), key=lambda x: x[1]["stars"], reverse=True)[:4]
+    parts = []
+    for name, meta in top:
+        snippet = ""
+        for branch in ("main", "master"):
+            try:
+                raw = f"https://raw.githubusercontent.com/{name}/{branch}/README.md"
+                rr = requests.get(raw, timeout=6, headers={"User-Agent": "PolyWhaleBot/3.0"})
+                if rr.status_code == 200:
+                    # Estrai le prime 600 char del README (di solito contengono la descrizione algo)
+                    snippet = rr.text[:600].replace("\n", " ").strip()
+                    break
+            except Exception:
+                pass
+        line = f"• {name} ({meta['stars']}★, {meta['updated']}): {meta['desc']}"
+        if snippet:
+            line += f"\n  README: {snippet[:300]}"
+        parts.append(line)
+        time.sleep(0.3)
+
+    summary = "Repo GitHub Polymarket/Prediction-Market (aggiornati oggi):\n" + "\n\n".join(parts)
+    state["github_cache"] = {
+        "last_checked": datetime.now(timezone.utc).isoformat(),
+        "insights": summary,
+        "repos": [n for n, _ in top],
+    }
+    log(f"GitHub scout: {len(repos)} repo trovati, {len(top)} analizzati", "OK")
+    return summary
+
+
 # ── SELF-IMPROVING: CONTROLLA RESOLUTION ────────────────────────────────────────
 def check_resolutions(state: dict):
-    """Controlla se i mercati watched hanno avuto una resolution e aggiorna stats."""
+    """Controlla se i mercati watched hanno avuto una resolution.
+    I mercati risolti vengono spostati in resolved_archive e rimossi da watched_markets
+    (così non compaiono più nella dashboard).
+    """
     watched = state.get("watched_markets", {})
-    if not watched:
-        return
-    
-    # 1. Pulizia mercati obsoleti (stale) > 30 giorni non risolti
+    archive = state.setdefault("resolved_archive", [])
     now = datetime.now(timezone.utc)
-    removed_stale = 0
+
+    # 0. Migrazione one-shot: se ci sono mercati già risolti in watched (da vecchie versioni),
+    #    spostali subito in archive
     for key, market in list(watched.items()):
         if market.get("resolved"):
-            continue
+            archive.append(market)
+            del watched[key]
+
+    # 1. Pulizia mercati obsoleti (stale) > 30 giorni non risolti
+    removed_stale = 0
+    for key, market in list(watched.items()):
         df_str = market.get("date_flagged")
         if df_str:
             try:
@@ -611,60 +879,77 @@ def check_resolutions(state: dict):
     if removed_stale:
         log(f"Cleanup: rimossi {removed_stale} mercati obsoleti (>30gg)", "OK")
 
-    # 2. Usa la Gamma resolution cache (già costruita da build_gamma_resolution_cache())
-    market_map = _GAMMA_RESOLUTION_CACHE if _GAMMA_RESOLUTION_CACHE else {}
-    if not market_map:
+    # 2. Controlla ogni watched market usando is_market_resolved() — unica fonte di verità.
+    #    Quella funzione gestisce: cache bulk → conditionId API → fuzzy title → slug event.
+    #    Dopo che ritorna True, il market object è già in _GAMMA_RESOLUTION_CACHE.
+    if not _GAMMA_RESOLUTION_CACHE:
         log("check_resolutions: cache Gamma vuota, skip verifica", "WARN")
     newly_resolved = 0
-    
-    for key, market in list(watched.items()):
-        if market.get("resolved"):
-            continue
-        question = market.get("question", "")
-        q_lower = question.lower()
-        
-        # Cerca match (esatto o parziale)
-        match = market_map.get(q_lower)
-        if not match:
-            for m_q, m_obj in market_map.items():
-                if q_lower[:40] in m_q:
-                    match = m_obj
-                    break
-        
-        if match and (match.get("closed") or match.get("isResolved")):
-            winning = (match.get("winningOutcome") or "").upper()
-            # Fallback se winningOutcome è vuoto ma closed è true (controlla prezzi)
-            if not winning and match.get("closed"):
-                try:
-                    prices = json.loads(match.get("outcomePrices", "[]"))
-                    if prices and any(float(p) > 0.98 for p in prices):
-                        idx = [float(p) > 0.98 for p in prices].index(True)
-                        outcomes = json.loads(match.get("outcomes", "[]"))
-                        winning = outcomes[idx].upper() if idx < len(outcomes) else ""
-                except: pass
-            
-            if winning:
-                our_side = market.get("side", "YES").upper()
-                correct = (winning == our_side or
-                           (winning in ("YES", "1") and our_side == "YES") or
-                           (winning in ("NO", "0") and our_side == "NO"))
-                market.update({"resolved": True, "resolution": winning, "correct": correct, 
-                               "resolution_date": datetime.now(timezone.utc).isoformat()})
-                newly_resolved += 1
 
-    # 3. Ricalcola algo_stats
-    all_resolved = [m for m in watched.values() if m.get("resolved") and m.get("correct") is not None]
-    correct = sum(1 for m in all_resolved if m.get("correct"))
-    total_copies = sum(1 for m in watched.values() if m.get("our_verdict") == "COPY")
+    for key, market in list(watched.items()):
+        question = market.get("question", "")
+        cond_id  = market.get("conditionId") or market.get("condition_id") or ""
+
+        # Delega tutto il lookup (cache + API ID + fuzzy + search + slug) a is_market_resolved()
+        if not is_market_resolved(question, condition_id=cond_id):
+            continue  # ancora aperto o non trovato
+
+        # Market risolto — recupera l'oggetto dalla cache (è stato popolato da is_market_resolved)
+        q_lower = question.lower().strip()
+        t_clean = q_lower.replace("...", "").replace("\u2026", "").rstrip("?").strip()
+        match = (_GAMMA_RESOLUTION_CACHE.get(cond_id)
+                 or _GAMMA_RESOLUTION_CACHE.get(q_lower)
+                 or _GAMMA_RESOLUTION_CACHE.get(t_clean)
+                 or next((v for k, v in _GAMMA_RESOLUTION_CACHE.items()
+                          if isinstance(k, str) and t_clean[:20] and t_clean[:20] in k), None))
+        if not match:
+            # Nessun dato di outcome disponibile — archivia comunque senza outcome
+            match = {}
+
+
+        winning = (match.get("winningOutcome") or "").upper()
+        if not winning and match.get("closed"):
+            try:
+                prices = json.loads(match.get("outcomePrices", "[]"))
+                if prices and any(float(p) > 0.98 for p in prices):
+                    idx = [float(p) > 0.98 for p in prices].index(True)
+                    outcomes = json.loads(match.get("outcomes", "[]"))
+                    winning = outcomes[idx].upper() if idx < len(outcomes) else ""
+            except: pass
+
+        our_side = market.get("side", "YES").upper()
+        correct = (winning == our_side or
+                   (winning in ("YES", "1") and our_side == "YES") or
+                   (winning in ("NO", "0") and our_side == "NO")) if winning else None
+        market.update({"resolved": True, "resolution": winning or "?", "correct": correct,
+                       "resolution_date": now.isoformat()})
+        # Sposta in archive, rimuovi da watched → non compare più in dashboard
+        archive.append(market)
+        del watched[key]
+        newly_resolved += 1
+        log(f"  ✓ Risolto: {question[:55]}... → {winning or '?'} "
+            f"({'✓' if correct else '✗' if correct is False else '?'})", "OK")
+
+    # 3. Limita archive a 200 voci (le più recenti)
+    state["resolved_archive"] = archive[-200:]
+
+    # 4. Ricalcola algo_stats dall'archive (tutti i mercati risolti storicamente)
+    all_resolved = [m for m in state["resolved_archive"]
+                    if m.get("correct") is not None]
+    correct_count = sum(1 for m in all_resolved if m.get("correct"))
+    # total_copy_signals = segnali COPY attivi + archiviati
+    active_copies = sum(1 for m in watched.values() if m.get("our_verdict") == "COPY")
+    archived_copies = sum(1 for m in state["resolved_archive"] if m.get("our_verdict") == "COPY")
     state["algo_stats"] = {
-        "total_copy_signals": total_copies,
+        "total_copy_signals": active_copies + archived_copies,
         "resolved_copies": len(all_resolved),
-        "correct_copies": correct,
-        "accuracy_pct": round(correct / len(all_resolved) * 100, 1) if all_resolved else None,
-        "last_updated": datetime.now(timezone.utc).isoformat(),
+        "correct_copies": correct_count,
+        "accuracy_pct": round(correct_count / len(all_resolved) * 100, 1) if all_resolved else None,
+        "last_updated": now.isoformat(),
     }
     if newly_resolved:
-        log(f"Resolution: {newly_resolved} mercati risolti, accuracy: {state['algo_stats']['accuracy_pct']}%", "OK")
+        log(f"Resolution: {newly_resolved} mercati risolti e rimossi dalla dashboard, "
+            f"accuracy: {state['algo_stats']['accuracy_pct']}%", "OK")
 
 
 # ── SPORT TAG FILTER (Gamma API) ─────────────────────────────────────────────────
@@ -739,13 +1024,26 @@ def update_watched_markets(state: dict, results: list):
                 "question": res["market"],
                 "our_verdict": res.get("verdict", "COPY"),
                 "whale_wallet": res.get("wallet", ""),
+                "whale_name": res.get("whale_name", ""),
+                "tier": res.get("tier", "Whale"),
+                "confidence": res.get("confidence", 0),
                 "entry_price": res.get("price", 0),
                 "side": res.get("side", "YES"),
                 "date_flagged": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
+                "conditionId": res.get("conditionId", ""),   # per lookup diretto in check_resolutions
+                "poly_url": res.get("poly_url", ""),         # link diretto al mercato su Polymarket
+                "why_snippet": (res.get("vale_pena") or "")[:80],  # micro-ragionamento per la card
                 "resolved": False,
                 "resolution": None,
                 "correct": None,
             }
+            # Incrementa times_seen nella leaderboard per questa whale
+            wf = res.get("wallet_full", "")
+            if wf:
+                for addr, entry in state.get("leaderboard", {}).items():
+                    if addr[:8] == wf[:8]:
+                        entry["times_seen"] = entry.get("times_seen", 0) + 1
+                        break
 
 
 # ── WHALE PROFILING (ispirato da collectmarkets2) ────────────────────────────────
@@ -842,6 +1140,82 @@ def _sz(t):
     return 0.0
 
 
+def _is_stale_trade(trade: dict) -> bool:
+    """True se il trade è più vecchio di MAX_TRADE_AGE_HOURS.
+    Controlla campi timestamp standard dalla Data API / Gamma API."""
+    ts_raw = (trade.get("createdAt") or trade.get("timestamp") or
+              trade.get("created_at") or trade.get("updatedAt") or
+              trade.get("transactionHash") and None)  # transactionHash non è un timestamp
+    if not ts_raw:
+        return False  # nessun timestamp disponibile → non scartare
+    try:
+        ts = dateutil.parser.isoparse(str(ts_raw))
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+        age_hours = (datetime.now(timezone.utc) - ts).total_seconds() / 3600
+        if age_hours > MAX_TRADE_AGE_HOURS:
+            log(f"Scartato trade obsoleto (età: {age_hours:.1f}h): "
+                f"{(trade.get('title') or trade.get('question') or '')[:50]}", "DEBUG")
+            return True
+    except Exception:
+        pass
+    return False
+
+
+# Cache in-run per verifica real-time mercati (evita chiamate duplicate)
+_VERIFIED_OPEN_CACHE: dict = {}  # conditionId → True=aperto, False=chiuso
+
+
+def _verify_market_open(condition_id: str, title: str = "") -> bool:
+    """Verifica real-time che un mercato sia ancora aperto via Gamma API.
+    Controlla: closed=false, resolved=false, nessun winnerIndex assegnato.
+    Cache per run per evitare rate limiting (un mercato verificato non si richiama)."""
+    if not condition_id:
+        return True  # senza ID non possiamo verificare, lascia passare
+    if condition_id in _VERIFIED_OPEN_CACHE:
+        return _VERIFIED_OPEN_CACHE[condition_id]
+
+    # Controlla prima la cache bulk già costruita
+    cached = _GAMMA_RESOLUTION_CACHE.get(condition_id)
+    if cached is not None:
+        is_open = not _resolved_from_cache_entry(cached)
+        _VERIFIED_OPEN_CACHE[condition_id] = is_open
+        return is_open
+
+    # Chiamata API diretta per questo conditionId specifico
+    try:
+        r = _http_get(
+            f"https://gamma-api.polymarket.com/markets?conditionId={condition_id}&limit=1",
+            timeout=6, retries=1,
+        )
+        if r and r.status_code == 200:
+            items = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            if items:
+                m = items[0]
+                _GAMMA_RESOLUTION_CACHE[condition_id] = m
+                closed = bool(m.get("closed") or m.get("isResolved"))
+                # Controlla anche winnerIndex assegnato nei tokens
+                tokens = m.get("tokens") or m.get("outcomes") or []
+                has_winner = any(t.get("winnerIndex") is not None
+                                 or t.get("winner") is True
+                                 for t in (tokens if isinstance(tokens, list) else []))
+                is_open = not closed and not has_winner
+                if not is_open:
+                    log(f"Mercato STALE (closed/resolved/winner): {title[:60] or condition_id[:14]}", "WARN")
+                _VERIFIED_OPEN_CACHE[condition_id] = is_open
+                return is_open
+            else:
+                # conditionId non trovato in Gamma → rimosso/risolto
+                log(f"Mercato non trovato in Gamma (STALE): {title[:60] or condition_id[:14]}", "WARN")
+                _VERIFIED_OPEN_CACHE[condition_id] = False
+                return False
+    except Exception as e:
+        log(f"_verify_market_open {condition_id[:14]}: {e}", "WARN")
+
+    _VERIFIED_OPEN_CACHE[condition_id] = True  # in caso di errore rete, lascia passare
+    return True
+
+
 def fetch_polymarket_whales(min_size, state: dict = None):
     """
     Multi-source crawling: aggrega dati da TUTTI gli endpoint Polymarket disponibili.
@@ -862,59 +1236,86 @@ def fetch_polymarket_whales(min_size, state: dict = None):
         if added:
             log(f"  {source}: +{added} mercati", "OK")
 
-    # ── Source 1: Gamma API Markets (volume 24h) ──
+    # ── Source 1: Gamma API Markets (volume 24h) — solo mercati aperti ──
     try:
-        r = _http_get("https://gamma-api.polymarket.com/markets?limit=100&active=true&order=volume24hr&ascending=false")
+        r = _http_get("https://gamma-api.polymarket.com/markets?limit=100"
+                      "&active=true&closed=false&order=volume24hr&ascending=false")
         if r and r.status_code == 200:
             mlist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
-            _add_items([{
-                "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
-                "price":       str(m.get("bestAsk") or m.get("lastTradePrice") or 0.5),
-                "side":        "YES",
-                "title":       m.get("question") or m.get("title") or "Mercato",
-                "userAddress": "0xpool",
-                "conditionId": m.get("conditionId") or "",
-            } for m in mlist
-              if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size
-              and not _has_sport_tag(m)],
-            "gamma-markets")
-    except Exception as e:
-        log(f"  gamma-markets: {str(e)[:80]}", "WARN")
-
-    # ── Source 2: Gamma API Events (volume totale) ──
-    try:
-        r = _http_get("https://gamma-api.polymarket.com/events?limit=80&active=true&order=volume&ascending=false")
-        if r and r.status_code == 200:
-            elist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
-            _add_items([{
-                "usdcSize":    str(float(ev.get("volume") or ev.get("volumeNum") or 0)),
-                "price":       "0.5",
-                "side":        "YES",
-                "title":       ev.get("title") or ev.get("question") or "Evento",
-                "userAddress": "0xpool",
-            } for ev in elist
-              if float(ev.get("volume") or ev.get("volumeNum") or 0) >= min_size
-              and not _has_sport_tag(ev)],
-            "gamma-events")
-    except Exception as e:
-        log(f"  gamma-events: {str(e)[:80]}", "WARN")
-
-    # ── Source 3: Gamma API Trending/Popular markets ──
-    for tag in ["trending", "popular"]:
-        try:
-            r = _http_get(f"https://gamma-api.polymarket.com/markets?limit=50&active=true&tag={tag}")
-            if r and r.status_code == 200:
-                mlist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
-                _add_items([{
+            candidates = []
+            for m in mlist:
+                if float(m.get("volume24hr") or m.get("volume") or 0) < min_size:
+                    continue
+                if _has_sport_tag(m):
+                    continue
+                cid = m.get("conditionId") or ""
+                # Scudo anti-latenza: verifica real-time per ogni mercato
+                if not _verify_market_open(cid, m.get("question") or ""):
+                    continue
+                candidates.append({
                     "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
                     "price":       str(m.get("bestAsk") or m.get("lastTradePrice") or 0.5),
                     "side":        "YES",
                     "title":       m.get("question") or m.get("title") or "Mercato",
                     "userAddress": "0xpool",
-                } for m in mlist
-                  if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size
-                  and not _has_sport_tag(m)],
-                f"gamma-{tag}")
+                    "conditionId": cid,
+                })
+            _add_items(candidates, "gamma-markets")
+    except Exception as e:
+        log(f"  gamma-markets: {str(e)[:80]}", "WARN")
+
+    # ── Source 2: Gamma API Events (volume totale) — solo eventi aperti ──
+    try:
+        r = _http_get("https://gamma-api.polymarket.com/events?limit=80"
+                      "&active=true&closed=false&order=volume&ascending=false")
+        if r and r.status_code == 200:
+            elist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            candidates = []
+            for ev in elist:
+                if float(ev.get("volume") or ev.get("volumeNum") or 0) < min_size:
+                    continue
+                if _has_sport_tag(ev):
+                    continue
+                # Gli eventi non hanno conditionId — usa closed/resolved del campo evento
+                if ev.get("closed") or ev.get("resolved"):
+                    log(f"Evento chiuso scartato: {str(ev.get('title',''))[:50]}", "WARN")
+                    continue
+                candidates.append({
+                    "usdcSize":    str(float(ev.get("volume") or ev.get("volumeNum") or 0)),
+                    "price":       "0.5",
+                    "side":        "YES",
+                    "title":       ev.get("title") or ev.get("question") or "Evento",
+                    "userAddress": "0xpool",
+                })
+            _add_items(candidates, "gamma-events")
+    except Exception as e:
+        log(f"  gamma-events: {str(e)[:80]}", "WARN")
+
+    # ── Source 3: Gamma API Trending/Popular markets — solo mercati aperti ──
+    for tag in ["trending", "popular"]:
+        try:
+            r = _http_get(f"https://gamma-api.polymarket.com/markets?limit=50"
+                          f"&active=true&closed=false&tag={tag}")
+            if r and r.status_code == 200:
+                mlist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+                candidates = []
+                for m in mlist:
+                    if float(m.get("volume24hr") or m.get("volume") or 0) < min_size:
+                        continue
+                    if _has_sport_tag(m):
+                        continue
+                    cid = m.get("conditionId") or ""
+                    if not _verify_market_open(cid, m.get("question") or ""):
+                        continue
+                    candidates.append({
+                        "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
+                        "price":       str(m.get("bestAsk") or m.get("lastTradePrice") or 0.5),
+                        "side":        "YES",
+                        "title":       m.get("question") or m.get("title") or "Mercato",
+                        "userAddress": "0xpool",
+                        "conditionId": cid,
+                    })
+                _add_items(candidates, f"gamma-{tag}")
         except Exception as e:
             log(f"  gamma-{tag}: {str(e)[:80]}", "WARN")
 
@@ -929,8 +1330,10 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                 "side":        t.get("side") or "YES",
                 "title":       t.get("title") or t.get("question") or "Trade",
                 "userAddress": t.get("user") or t.get("proxyWallet") or "0x???",
+                "createdAt":   t.get("createdAt") or t.get("timestamp") or "",
             } for t in trades
-              if float(t.get("usdcSize") or t.get("amount") or 0) >= min_size],
+              if float(t.get("usdcSize") or t.get("amount") or 0) >= min_size
+              and not _is_stale_trade(t)],
             "data-api-activity")
     except Exception as e:
         log(f"  data-api-activity: {str(e)[:80]}", "WARN")
@@ -942,7 +1345,7 @@ def fetch_polymarket_whales(min_size, state: dict = None):
             "subgraphs/id/Bx1W4S7kDVxs9gC3s2G6DS8kdNBJx2sYUiABH4RvGN46",
             data='{"query":"{ orderFilledEvents(first:200,orderBy:matchedAmount,orderDirection:desc)'
                  '{matchedAmount price maker order{market{question}}} }"}',
-            headers={**H, "Content-Type": "application/json"},
+            headers={**_H, "Content-Type": "application/json"},
             timeout=15)
         if r.status_code == 200:
             events = r.json().get("data", {}).get("orderFilledEvents", [])
@@ -974,8 +1377,10 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                     "side":        t.get("side") or "YES",
                     "title":       t.get("title") or t.get("question") or "Trade",
                     "userAddress": wallet_addr,
+                    "createdAt":   t.get("createdAt") or t.get("timestamp") or "",
                 } for t in trades
-                  if float(t.get("usdcSize") or t.get("amount") or 0) >= min_size * 0.5],
+                  if float(t.get("usdcSize") or t.get("amount") or 0) >= min_size * 0.5
+                  and not _is_stale_trade(t)],
                 f"whale-{wdata.get('username', wallet_addr[:8])}")
             time.sleep(0.3)
         except Exception as e:
@@ -992,7 +1397,10 @@ def fetch_polymarket_whales(min_size, state: dict = None):
         if _sz(t) >= min_size * 0.5  # più permissivo per whale top
         and not _is_sport(t.get("title") or t.get("question") or "")
         and not _is_past_market(t.get("title") or t.get("question") or "")
-        and not is_market_resolved(t.get("title") or t.get("question") or "")
+        and not is_market_resolved(
+            t.get("title") or t.get("question") or "",
+            condition_id=t.get("conditionId") or t.get("market") or "",
+        )
     ]
 
     # ── Arricchisci con trust_score e filtra wash trader ──
@@ -1042,12 +1450,18 @@ def _build_system_prompt() -> str:
     today = datetime.now(timezone.utc).strftime("%d %B %Y")
     today_iso = datetime.now(timezone.utc).strftime("%Y-%m-%d")
     return (
-        f"Oggi è {today} ({today_iso}). "
-        "Sei un analista aggressivo di mercati predittivi (Polymarket). Il tuo obiettivo: "
-        "identificare trade da seguire, non evitarli.\n\n"
-        "REGOLA N°0 — MERCATO SCADUTO → SKIP IMMEDIATO (priorità assoluta):\n"
-        f"Se il titolo fa riferimento a un evento con deadline PRIMA di oggi ({today_iso}) "
-        "(es: 'by January 2026', 'in March 2026', 'Q1 2026' quando siamo in aprile) → SKIP.\n\n"
+        f"Oggi è {today} ({today_iso}). Usa questa data come riferimento assoluto.\n\n"
+        "REGOLA N°0 — MERCATO GIÀ RISOLTO → SKIP IMMEDIATO (priorità massima assoluta):\n"
+        "Devi fare SKIP se UNA delle seguenti condizioni è vera:\n"
+        "  a) La deadline del mercato è PRIMA di oggi (es: 'by January 2026', 'Q1 2026' siamo in aprile 2026)\n"
+        "  b) L'evento descritto è già ACCADUTO o il risultato è già NOTO — usa la tua conoscenza del mondo:\n"
+        "     • Elezioni già svolte (es: NYC Mayor 2025 → Mamdani ha vinto, già sindaco)\n"
+        "     • Decisioni Fed già annunciate (es: 'Fed decision in December?' → dicembre 2025 è passato)\n"
+        "     • Risultati sportivi/politici/economici già noti\n"
+        "     • Qualsiasi mercato dove il risultato è già un fatto storico\n"
+        "  c) Il titolo contiene '...' o è troncato e non riesci a determinare la deadline\n"
+        "ATTENZIONE: un volume alto ($100M+) su un mercato già risolto indica wash trading o "
+        "liquidità residua — NON è un segnale di insider trading. SKIP senza eccezioni.\n\n"
         "REGOLA N°1 — SPORT/ENTERTAINMENT → SKIP IMMEDIATO (nessuna analisi):\n"
         "Calcio, basket, tennis, F1, NFL, NBA, Oscar, Grammy, Eurovision → SKIP.\n\n"
         "REGOLA N°2 — COPY DI DEFAULT (la più importante):\n"
@@ -1129,7 +1543,7 @@ def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):
                 json={
                     "model": model,
                     "max_tokens": 500,
-                    "system": SYSTEM_PROMPT,
+                    "system": _build_system_prompt(),  # ricostruito con la data odierna
                     "messages": [{"role": "user", "content": f"Analizza:\n\n{text}"}],
                 },
                 timeout=30,
@@ -1137,8 +1551,16 @@ def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):
             if r.status_code == 200:
                 raw = "".join(b.get("text", "") for b in r.json().get("content", []))
                 log(f"Claude OK ({model})", "OK")
-                return _parse_claude(raw, market, side, price, size, wallet, tier,
-                                     trust_score, whale_name, confidence)
+                result = _parse_claude(raw, market, side, price, size, wallet, tier,
+                                       trust_score, whale_name, confidence)
+                # Salva conditionId per check_resolutions() — lookup diretto per ID
+                cond_id = (trade.get("conditionId") or
+                           trade.get("market") or
+                           trade.get("asset_id") or "")
+                result["conditionId"] = cond_id
+                result["wallet_full"] = wallet_full
+                result["poly_url"] = _get_poly_url(cond_id, market)
+                return result
             err = r.json().get("error", {}).get("message", r.text[:100])
             log(f"Claude {r.status_code} ({model}): {err}", "WARN")
             last_err = err
@@ -1347,12 +1769,12 @@ def analyze_batch_claude(trades: list, state: dict, reddit_context: str = "") ->
 
 # ── TELEGRAM ────────────────────────────────────────────────────────────────────
 def build_message(results, state: dict = None, is_demo=False, best_skip=None):
+    # results qui contiene SOLO COPY/WATCH (i SKIP sono già filtrati da run())
     ts  = datetime.now().strftime("%d/%m/%Y %H:%M")
     msg = f"🐋 *Grandi Mosse su Polymarket*{' _(DEMO)_' if is_demo else ''}\n_{ts}_\n\n"
 
     copy_count = sum(1 for t in results if t["verdict"] == "COPY")
     watch_count = sum(1 for t in results if t["verdict"] == "WATCH")
-    msg += f"Analizzati {len(results)} mercati non\\-sportivi da >\\${MIN_SIZE_USDC // 1000}k.\n"
 
     # Track record accuracy
     algo_stats = (state or {}).get("algo_stats", {})
@@ -1361,23 +1783,16 @@ def build_message(results, state: dict = None, is_demo=False, best_skip=None):
     if acc is not None:
         msg += f"📊 Track record: *{acc}%* accuracy \\({resolved} segnali risolti\\)\n"
 
-    if copy_count or watch_count:
-        parts = []
-        if copy_count:
-            parts.append(f"*{copy_count}* COPY")
-        if watch_count:
-            parts.append(f"*{watch_count}* WATCH")
-        msg += f"{', '.join(parts)} — da seguire. 👇\n\n"
-    else:
-        msg += "Nessun COPY/WATCH oggi — ecco il *meno peggio*. 👇\n\n"
+    parts = []
+    if copy_count:
+        parts.append(f"*{copy_count}* COPY")
+    if watch_count:
+        parts.append(f"*{watch_count}* WATCH")
+    msg += f"{', '.join(parts)} — da seguire\\. 👇\n\n"
 
-    # Mostra COPY, poi WATCH, poi meno peggio (mai sport)
+    # Mostra COPY prima, poi WATCH
     to_show = [t for t in results if t["verdict"] == "COPY"]
     to_show += [t for t in results if t["verdict"] == "WATCH"]
-    if not to_show and best_skip:
-        to_show = [best_skip]
-    if not to_show:
-        to_show = results[:3]
 
     for t in to_show:
         m = t["market"][:70] + ("..." if len(t["market"]) > 70 else "")
@@ -1438,11 +1853,11 @@ def send_telegram(message):
 
 # ── EMAIL ───────────────────────────────────────────────────────────────────────
 def build_email_html(results, state: dict = None, is_demo=False, best_skip=None):
+    # results qui contiene SOLO COPY/WATCH (i SKIP sono già filtrati da run())
     ts = datetime.now().strftime("%d/%m/%Y %H:%M")
     copy_count = sum(1 for t in results if t["verdict"] == "COPY")
     watch_count = sum(1 for t in results if t["verdict"] == "WATCH")
-    to_show = [t for t in results if t["verdict"] in ("COPY", "WATCH")] or \
-              ([best_skip] if best_skip else results[:3])
+    to_show = results  # già filtrati
 
     algo_stats = (state or {}).get("algo_stats", {})
     acc = algo_stats.get("accuracy_pct")
@@ -1456,8 +1871,7 @@ def build_email_html(results, state: dict = None, is_demo=False, best_skip=None)
         v = t["verdict"]
         color   = "#1a7a3a" if v == "COPY" else "#2a6dd9" if v == "WATCH" else "#555"
         bg      = "#f0fff4" if v == "COPY" else "#f0f4ff" if v == "WATCH" else "#fafafa"
-        badge   = "✅ COPY — DA VALUTARE" if v == "COPY" else \
-                  "👁️ WATCH — DA SEGUIRE" if v == "WATCH" else "⭐ Il meno peggio di oggi"
+        badge   = "✅ COPY — DA VALUTARE" if v == "COPY" else "👁️ WATCH — DA SEGUIRE"
         risk    = t["risk_score"]
         risk_color = "#2a9d2a" if risk <= 3 else "#e6a817" if risk <= 6 else "#d9534f"
         wname = t.get("whale_name", "")
@@ -1529,7 +1943,7 @@ def send_email(results, state: dict = None, is_demo=False, best_skip=None):
         msg["Subject"] = f"🐋 Polymarket Whale Report {ts} — {copy_count} segnali"
         msg["From"]    = GMAIL_USER
         msg["To"]      = EMAIL_TO
-        msg.attach(MIMEText(build_email_html(results, state, is_demo, best_skip), "html"))
+        msg.attach(MIMEText(build_email_html(results, state, is_demo), "html"))
         with smtplib.SMTP("smtp.gmail.com", 587) as s:
             s.starttls()
             s.login(GMAIL_USER, GMAIL_APP_PASSWORD)
@@ -1545,15 +1959,18 @@ def send_email(results, state: dict = None, is_demo=False, best_skip=None):
 def run():
     _ACTIVITY_CACHE.clear()
     _GAMMA_RESOLUTION_CACHE.clear()
+    _VERIFIED_OPEN_CACHE.clear()
     state = load_state()
     state["run_count"] = state.get("run_count", 0) + 1
     run_n = state["run_count"]
 
+    today = datetime.now(timezone.utc)
     log("=" * 60)
-    log(f"Run #{run_n} | Whale-first auto detection | Max: {MAX_WHALES}")
+    log(f"Run #{run_n} | {today.strftime('%d/%m/%Y %H:%M')} UTC | Max: {MAX_WHALES}")
     log("=" * 60)
 
-    # 1. Build Gamma resolution cache (riusata da is_market_resolved + check_resolutions)
+    # 1. Build Gamma resolution cache (include mercati chiusi recenti)
+    # Calcola oggi una volta sola — usata da tutti i filtri date
     build_gamma_resolution_cache()
 
     # 1b. Controlla resolution dei mercati passati (self-improving)
@@ -1562,8 +1979,10 @@ def run():
     # 2. Aggiorna leaderboard da Polymarket (chi sono le whale?)
     fetch_breaking_leaderboard(state)
 
-    # 3. Reddit insights (ogni 10 run)
+    # 3. Reddit insights (ogni run) + GitHub algorithm scout (ogni run)
     reddit_context = fetch_reddit_insights(state)
+    github_context = fetch_github_insights(state)
+    extra_context = "\n\n".join(filter(None, [reddit_context, github_context]))
 
     # 4. Whale-first: prendi i trade recenti dei top wallet
     log("Scarico trade recenti delle top whale...")
@@ -1597,7 +2016,7 @@ def run():
 
     # 5a. Batch (top 5) — 1 call invece di 5, include news context
     log(f"Analisi batch top 5 mercati (1 chiamata Claude)...")
-    batch_results = analyze_batch_claude(to_analyze[:5], state, reddit_context)
+    batch_results = analyze_batch_claude(to_analyze[:5], state, extra_context)
     if batch_results:
         results.extend(batch_results)
     else:
@@ -1607,7 +2026,7 @@ def run():
             log(f"Analisi singola fallback: {name[:55]}...")
             try:
                 news = fetch_market_context(name)
-                result = analyze_with_claude(trade, state, reddit_context + (f" | News: {news}" if news else ""))
+                result = analyze_with_claude(trade, state, extra_context + (f" | News: {news}" if news else ""))
                 results.append(result)
             except Exception as e:
                 log(f"Errore analisi: {e}", "ERR")
@@ -1627,7 +2046,7 @@ def run():
             news = fetch_market_context(name)
             result = analyze_with_claude(
                 trade, state,
-                reddit_context + (f" | News: {news}" if news else "")
+                extra_context + (f" | News: {news}" if news else "")
             )
             results.append(result)
             log(f"→ {result['verdict']} | R{result['risk_score']}/10 | "
@@ -1658,27 +2077,22 @@ def run():
     # 7. Salva stato persistente
     save_state(state)
 
-    # 8. Notifiche — best_skip esclude sport-flagged e sport nel titolo
-    skips = [r for r in results
-             if r["verdict"] == "SKIP"
-             and not r.get("is_sport_flagged")
-             and not _is_sport(r.get("market", ""))]
-    best_skip = min(skips, key=lambda r: r["risk_score"]) if skips else None
+    # 8. Notifiche — solo se c'è almeno un COPY o WATCH (mai mostrare SKIP)
+    actionable = [r for r in results if r["verdict"] in ("COPY", "WATCH")]
+    copy_count = sum(1 for r in actionable if r["verdict"] == "COPY")
 
-    if results:
-        log("Invio su Telegram...")
+    if actionable:
+        log(f"Invio notifiche: {len(actionable)} segnali actionable...")
         try:
-            if send_telegram(build_message(results, state, is_demo, best_skip)):
+            if send_telegram(build_message(actionable, state, is_demo)):
                 log("Telegram inviato!", "OK")
         except Exception as e:
             log(f"Telegram: {e}", "ERR")
+        send_email(actionable, state, is_demo)
+    else:
+        log(f"Nessun COPY/WATCH — notifiche soppresse (tutti SKIP).", "OK")
 
-        log("Invio per email...")
-        send_email(results, state, is_demo, best_skip)
-
-    copy_count = sum(1 for r in results if r["verdict"] == "COPY")
     log(f"Run #{run_n} completato — {copy_count} COPY su {len(results)} analizzati.")
-    return results
 
 
 # ── LOOP CONTINUO ────────────────────────────────────────────────────────────────

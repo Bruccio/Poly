@@ -342,7 +342,7 @@
       width: 100%;
       border-collapse: collapse;
       font-size: 0.9rem;
-      min-width: 850px;
+      min-width: 1050px;
     }
 
     .lb-table .bet-line {
@@ -433,6 +433,106 @@
       box-shadow: 0 0 8px currentColor;
     }
 
+    /* ── PROBABILITY BAR ─────────────────────────────────────────────────── */
+    .prob-bar-wrap { margin: 6px 0 10px; }
+    .prob-bar-label { font-family: 'Fira Code', monospace; font-size: 0.72rem; color: var(--text-secondary); display:flex; justify-content:space-between; }
+    .prob-bar-track { height: 4px; background: var(--border-dark); border-radius: 2px; margin-top: 4px; }
+    .prob-bar-fill  { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+
+    /* ── TIER BADGE ───────────────────────────────────────────────────────── */
+    .tier-badge {
+      display: inline-block;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+    }
+    .tier-top   { background: rgba(252,238,12,0.15); color: #fcee0c; border: 1px solid #fcee0c; }
+    .tier-big   { background: rgba(0,240,255,0.15);  color: #00f0ff; border: 1px solid #00f0ff; }
+    .tier-whale { background: rgba(160,184,216,0.1); color: #a0b8d8; border: 1px solid #a0b8d8; }
+
+    /* ── WHALE NAME ON CARD ──────────────────────────────────────────────── */
+    .signal-whale { font-size: 0.78rem; color: var(--accent-green); font-family: 'Fira Code', monospace; margin-bottom: 6px; }
+
+    /* ── ARCHIVE ROWS ─────────────────────────────────────────────────────── */
+    .archive-list { overflow: hidden; }
+    .archive-row {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-dark);
+      font-size: 0.82rem;
+      flex-wrap: wrap;
+      line-height: 1.45;
+    }
+    .archive-row:last-child { border-bottom: none; }
+    .archive-row.correct { border-left: 3px solid var(--accent-green); }
+    .archive-row.wrong   { border-left: 3px solid var(--accent-red); }
+    .archive-row.unknown { border-left: 3px solid var(--border-light); }
+    .archive-verdict { font-family: 'Fira Code', monospace; font-size: 0.68rem; font-weight: 700; min-width: 70px; }
+    .archive-q { flex: 1; color: var(--text-primary); min-width: 180px; }
+    .archive-meta { color: var(--text-secondary); font-family: 'Fira Code', monospace; font-size: 0.74rem; white-space: nowrap; }
+
+    /* ── REDDIT FEED ──────────────────────────────────────────────────────── */
+    .reddit-item {
+      padding: 10px 16px;
+      border-bottom: 1px solid var(--border-dark);
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.55;
+    }
+    .reddit-item:last-child { border-bottom: none; }
+    .reddit-bullet { color: var(--accent-cyan); margin-right: 6px; }
+
+    /* ── GITHUB REPO ROW ──────────────────────────────────────────────────── */
+    .gh-repo {
+      padding: 12px 16px;
+      border-bottom: 1px solid var(--border-dark);
+    }
+    .gh-repo:last-child { border-bottom: none; }
+    .gh-snippet { color: var(--text-secondary); font-size: 0.78rem; margin-top: 4px; line-height: 1.5; }
+
+    /* ── POLYMARKET LINK BUTTON ─────────────────────────────────────────── */
+    .poly-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      margin-top: 10px;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--accent-cyan);
+      text-decoration: none;
+      border: 1px solid rgba(0,240,255,0.4);
+      padding: 5px 12px;
+      border-radius: 6px;
+      background: rgba(0,240,255,0.06);
+      transition: all 0.2s ease;
+      letter-spacing: 0.04em;
+    }
+    .poly-link:hover {
+      background: rgba(0,240,255,0.18);
+      border-color: var(--accent-cyan);
+      box-shadow: 0 0 12px rgba(0,240,255,0.25);
+      color: #fff;
+    }
+
+    /* ── GENERIC BOX ──────────────────────────────────────────────────────── */
+    .box {
+      background: var(--bg-secondary);
+      border: 1.5px solid var(--border-light);
+      border-radius: 12px;
+      overflow: hidden;
+      transition: border-color 0.3s;
+    }
+    .box:hover { border-color: var(--accent-cyan); }
+
     /* ── LOADING & EMPTY STATES ────────────────────────────────────────────── */
     #loading {
       display: flex;
@@ -477,6 +577,131 @@
       text-align: center;
       padding: 40px;
       font-style: italic;
+    }
+
+    /* ── MARKET SENTIMENT GAUGE ─────────────────────────────────────────── */
+    .sentiment-bar-wrap {
+      background: var(--bg-secondary);
+      border: 1.5px solid var(--border-light);
+      border-radius: 12px;
+      padding: 18px 24px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      transition: border-color 0.3s;
+    }
+    .sentiment-bar-wrap:hover { border-color: var(--accent-cyan); }
+    .sentiment-label {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      min-width: 130px;
+    }
+    .sentiment-track {
+      flex: 1;
+      height: 12px;
+      background: linear-gradient(90deg, #ff3c5a 0%, #fcee0c 50%, #00ff9f 100%);
+      border-radius: 6px;
+      position: relative;
+      max-width: 400px;
+    }
+    .sentiment-needle {
+      position: absolute;
+      top: -4px;
+      width: 4px;
+      height: 20px;
+      background: #fff;
+      border-radius: 2px;
+      box-shadow: 0 0 8px rgba(255,255,255,0.8);
+      transform: translateX(-50%);
+      transition: left 0.8s ease;
+    }
+    .sentiment-value {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      min-width: 110px;
+    }
+    .sentiment-sub {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+
+    /* ── FILTER TABS ─────────────────────────────────────────────────────── */
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-tab {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border-light);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.05em;
+    }
+    .filter-tab:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+    .filter-tab.active {
+      background: rgba(0,240,255,0.15);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      text-shadow: 0 0 8px rgba(0,240,255,0.5);
+    }
+
+    /* ── CONFIDENCE BAR ─────────────────────────────────────────────────── */
+    .conf-bar-wrap { display: flex; align-items: center; gap: 8px; margin: 6px 0 0; }
+    .conf-bar-track { flex: 1; height: 3px; background: var(--border-dark); border-radius: 2px; overflow: hidden; max-width: 80px; }
+    .conf-bar-fill  { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+    .conf-val { font-family: 'Fira Code', monospace; font-size: 0.68rem; color: var(--text-secondary); }
+
+    /* ── WHY SNIPPET ─────────────────────────────────────────────────────── */
+    .why-snippet {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      font-style: italic;
+      margin: 6px 0 2px;
+      line-height: 1.4;
+      border-left: 2px solid var(--accent-cyan);
+      padding-left: 8px;
+    }
+
+    /* ── WIN RATE BADGE ON LEADERBOARD ──────────────────────────────────── */
+    .wr-badge {
+      display: inline-block;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .wr-badge-green { background: rgba(0,255,159,0.15); color: #00ff9f; border: 1px solid #00ff9f; }
+    .wr-badge-amber { background: rgba(252,238,12,0.15); color: #fcee0c; border: 1px solid #fcee0c; }
+
+    /* ── INSIDER ALERT BORDER ─────────────────────────────────────────── */
+    .insider-alert { outline: 2px solid var(--accent-red); outline-offset: -2px; }
+    .insider-icon {
+      font-size: 0.7rem;
+      background: rgba(255,60,90,0.2);
+      color: #ff3c5a;
+      border: 1px solid #ff3c5a;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: 'Fira Code', monospace;
+      margin-left: 6px;
     }
 
     /* ── FOOTER ────────────────────────────────────────────────────────────── */
@@ -531,12 +756,25 @@
 <header>
   <h1>🐋 WHALE INTELLIGENCE TERMINAL <small style="font-size:0.6em;color:var(--text-secondary);">v3</small></h1>
   <div class="header-status">
-    <div class="live-badge"><span class="live-dot"></span> 4x DAILY</div>
+    <div class="live-badge"><span class="live-dot"></span> 2× DAILY</div>
+    <span id="live-date" style="font-family:'Fira Code',monospace;font-size:0.78rem;color:var(--text-secondary);"></span>
     <div id="last-update" style="font-size:0.85rem;">LAST_RUN: —</div>
   </div>
 </header>
 
 <main>
+  <!-- MARKET SENTIMENT GAUGE -->
+  <div class="sentiment-bar-wrap" id="sentiment-wrap">
+    <span class="sentiment-label">⚡ Whale Sentiment</span>
+    <div class="sentiment-track">
+      <div class="sentiment-needle" id="sentiment-needle" style="left:50%"></div>
+    </div>
+    <div>
+      <div class="sentiment-value" id="sentiment-value" style="color:var(--text-secondary);">—</div>
+      <div class="sentiment-sub" id="sentiment-sub">in attesa dati...</div>
+    </div>
+  </div>
+
   <div class="stats-row">
     <div class="stat-card">
       <div class="label">Run Totali</div>
@@ -553,6 +791,14 @@
     <div class="stat-card">
       <div class="label">Accuracy</div>
       <div class="value" id="stat-accuracy">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Risolti</div>
+      <div class="value" id="stat-resolved">—</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Win Rate COPY</div>
+      <div class="value" id="stat-winrate">—</div>
     </div>
   </div>
 
@@ -578,6 +824,12 @@
           <canvas id="signalsChart"></canvas>
         </div>
       </div>
+      <div class="chart-container">
+        <div class="chart-title">🗂 Categorie Mercati</div>
+        <div class="chart-canvas">
+          <canvas id="categoryChart"></canvas>
+        </div>
+      </div>
     </div>
   </div>
 
@@ -591,12 +843,41 @@
 
   <!-- SEGNALI COPY/WATCH -->
   <div class="section">
-    <h2>🎯 Segnali Attivi & Risolti</h2>
+    <h2>🎯 Segnali Attivi</h2>
+    <div class="filter-tabs" id="signal-filter-tabs">
+      <button class="filter-tab active" data-filter="all">Tutti</button>
+      <button class="filter-tab" data-filter="copy">Solo COPY</button>
+      <button class="filter-tab" data-filter="watch">Solo WATCH</button>
+      <button class="filter-tab" data-filter="high">High Liquidity</button>
+    </div>
     <div class="signal-grid" id="watched-container">
       <div class="empty">// nessun segnale ancora — primo run in attesa</div>
     </div>
   </div>
 
+  <!-- STORICO SEGNALI -->
+  <div class="section">
+    <h2>📜 Storico Segnali</h2>
+    <div class="box" id="archive-container">
+      <div class="empty">// nessun segnale risolto ancora</div>
+    </div>
+  </div>
+
+  <!-- REDDIT INSIGHTS -->
+  <div class="section">
+    <h2>💬 Reddit Insights</h2>
+    <div class="box" id="reddit-container">
+      <div class="empty">// reddit insights in raccolta — attendi il prossimo run</div>
+    </div>
+  </div>
+
+  <!-- GITHUB ALGORITHM SCOUT -->
+  <div class="section">
+    <h2>⎔ GitHub Algorithm Scout</h2>
+    <div class="box" id="github-insights">
+      <div class="empty">// scout GitHub in corso al prossimo run</div>
+    </div>
+  </div>
 
 </main>
 
@@ -604,7 +885,7 @@
 
 <script>
 // ── CHART INSTANCES ──────────────────────────────────────────────────────────
-let profitsChart, trustVsProfitChart, signalsChart;
+let profitsChart, trustVsProfitChart, signalsChart, categoryChart;
 
 // ── UTILITIES ────────────────────────────────────────────────────────────────
 function fmt$(n) {
@@ -635,6 +916,47 @@ function fmtDate(iso) {
   try {
     return new Date(iso).toLocaleDateString('it-IT', {day:'2-digit',month:'short'});
   } catch { return '—'; }
+}
+
+function timeAgo(iso) {
+  if (!iso) return '—';
+  try {
+    const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (diff < 60) return Math.round(diff) + 's fa';
+    if (diff < 3600) return Math.round(diff/60) + 'min fa';
+    if (diff < 86400) return Math.round(diff/3600) + 'h fa';
+    if (diff < 86400*7) return Math.round(diff/86400) + 'g fa';
+    return fmtDate(iso);
+  } catch { return '—'; }
+}
+
+function computeSentiment(state) {
+  const signals = [
+    ...Object.values(state.watched_markets || {}),
+    ...(state.resolved_archive || [])
+  ].slice(-20);
+  if (!signals.length) return null;
+  const copyW = signals.filter(s => s.our_verdict === 'COPY').length;
+  const watchW = signals.filter(s => s.our_verdict === 'WATCH').length;
+  const bullish = (copyW * 1 + watchW * 0.5) / signals.length;
+  return { bullish, total: signals.length, copy: copyW, watch: watchW };
+}
+
+function renderSentiment(state) {
+  const s = computeSentiment(state);
+  const needle = document.getElementById('sentiment-needle');
+  const valEl  = document.getElementById('sentiment-value');
+  const subEl  = document.getElementById('sentiment-sub');
+  if (!s) return;
+  const pct = Math.round(s.bullish * 100);
+  needle.style.left = pct + '%';
+  let label, color;
+  if (pct >= 70) { label = '📈 BULLISH ON WHALES'; color = '#00ff9f'; }
+  else if (pct >= 40) { label = '⚖ NEUTRAL'; color = '#fcee0c'; }
+  else { label = '📉 BEARISH SIGNAL'; color = '#ff3c5a'; }
+  valEl.textContent = label;
+  valEl.style.color = color;
+  subEl.textContent = `Ultimi ${s.total} segnali · COPY ${s.copy} · WATCH ${s.watch}`;
 }
 
 function esc(s) {
@@ -810,7 +1132,8 @@ function renderCharts(state) {
   const stats = state.algo_stats || {};
   const resolved = stats.resolved_copies || 0;
   const copy = (stats.total_copy_signals || 0) - resolved;
-  
+  const watchCount = Object.values(state.watched_markets||{}).filter(m => m.our_verdict === 'WATCH').length;
+
   const signalsCtx = document.getElementById('signalsChart').getContext('2d');
   if (signalsChart) signalsChart.destroy();
   signalsChart = new Chart(signalsCtx, {
@@ -818,7 +1141,7 @@ function renderCharts(state) {
     data: {
       labels: ['COPY Attivi', 'Risolti', 'WATCH'],
       datasets: [{
-        data: [copy, resolved, 0],
+        data: [copy, resolved, watchCount],
         backgroundColor: [
           'rgba(0, 255, 159, 0.4)',
           'rgba(74, 158, 255, 0.4)',
@@ -857,12 +1180,59 @@ function renderCharts(state) {
       }
     }
   });
+
+  // ── Category Breakdown Chart
+  function categorize(title) {
+    if (!title) return 'Other';
+    const t = title.toLowerCase();
+    if (/trump|elect|presid|senat|congress|politic|government|vote|ballot|democrat|republican/i.test(t)) return 'Politics';
+    if (/btc|eth|crypto|bitcoin|ethereum|sol|defi|nft|token|blockchain/i.test(t)) return 'Crypto';
+    if (/fed|rate|gdp|inflation|recession|market|stock|dollar|euro|economy|bank/i.test(t)) return 'Finance';
+    return 'Other';
+  }
+  const allMarkets = [
+    ...Object.values(state.watched_markets||{}),
+    ...(state.resolved_archive||[])
+  ];
+  const cats = {Politics:0, Crypto:0, Finance:0, Other:0};
+  allMarkets.forEach(m => { cats[categorize(m.question||'')] += 1; });
+
+  const catCtx = document.getElementById('categoryChart').getContext('2d');
+  if (categoryChart) categoryChart.destroy();
+  categoryChart = new Chart(catCtx, {
+    type: 'bar',
+    data: {
+      labels: Object.keys(cats),
+      datasets: [{
+        label: 'Mercati',
+        data: Object.values(cats),
+        backgroundColor: ['rgba(74,158,255,0.4)','rgba(252,238,12,0.4)','rgba(0,255,159,0.4)','rgba(160,184,216,0.4)'],
+        borderColor:     ['#4a9eff','#fcee0c','#00ff9f','#a0b8d8'],
+        borderWidth: 2,
+        borderRadius: 6,
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false }, tooltip: {
+        backgroundColor: 'rgba(10,14,26,0.95)', titleColor: '#00f0ff',
+        bodyColor: '#e8f1ff', borderColor: '#00f0ff', borderWidth: 1, padding: 12, displayColors: false
+      }},
+      scales: {
+        y: { beginAtZero: true, ticks: { color: '#a0b8d8', font: { family: "'Fira Code'" }, stepSize: 1 }, grid: { color: 'rgba(42,63,95,0.2)' } },
+        x: { ticks: { color: '#a0b8d8', font: { family: "'Fira Code'" } }, grid: { display: false } }
+      }
+    }
+  });
 }
 
 // ── RENDER ────────────────────────────────────────────────────────────────
 function render(state) {
   document.getElementById('loading').style.display = 'none';
   document.getElementById('app').style.display = '';
+
+  // Live date
+  document.getElementById('live-date').textContent = new Date().toLocaleDateString('it-IT', {weekday:'short', day:'2-digit', month:'short', year:'numeric'});
 
   const stats = state.algo_stats || {};
   const lastUpd = state.last_run
@@ -884,6 +1254,24 @@ function render(state) {
     accEl.style.color = '#a0b8d8';
   }
 
+  // Resolved + Win Rate from resolved_archive
+  const archive = state.resolved_archive || [];
+  document.getElementById('stat-resolved').textContent = archive.length || '—';
+  const copiesInArchive = archive.filter(m => m.our_verdict === 'COPY');
+  const correctCopies = copiesInArchive.filter(m => m.correct === true);
+  const wrEl = document.getElementById('stat-winrate');
+  if (copiesInArchive.length >= 3) {
+    const wr = Math.round(correctCopies.length / copiesInArchive.length * 100);
+    wrEl.textContent = wr + '%';
+    wrEl.style.color = wr >= 60 ? '#00ff9f' : wr >= 40 ? '#fcee0c' : '#ff3c5a';
+  } else {
+    wrEl.textContent = 'N/D';
+    wrEl.style.color = '#a0b8d8';
+  }
+
+  // ── Sentiment Gauge
+  renderSentiment(state);
+
   // ── Render Charts
   renderCharts(state);
 
@@ -903,6 +1291,17 @@ function render(state) {
       const t = w.trust_score ?? 40;
       const tc = trustColor(t);
       const displayName = w.username || (w.addr ? w.addr.slice(0,6) + '...' + w.addr.slice(-4) : '?');
+      // Win-Rate badge
+      const wr = w.copy_accuracy;
+      const wrBadge = (wr != null && wr >= 40)
+        ? `<span class="wr-badge ${wr >= 60 ? 'wr-badge-green' : 'wr-badge-amber'}">${Math.round(wr)}% WR</span>`
+        : '';
+      // Insider Alert: small wallet (low volume history) moving big money on niche market
+      const isInsider = (w.total_volume_usd || 0) < 500000
+        && (w.trust_score || 0) < 35
+        && (w.times_seen || 0) <= 1
+        && (w.total_profit_usd || 0) > 0;
+      const insiderTag = isInsider ? '<span class="insider-icon">⚠ INSIDER?</span>' : '';
       // Build recent bets HTML
       const bets = w.recent_bets || [];
       let betsHtml = '';
@@ -926,10 +1325,13 @@ function render(state) {
       } else {
         betsHtml = '<span style="color:var(--text-secondary);font-style:italic;font-size:0.78rem;">nessuna</span>';
       }
-      rows += `<tr>
+      const vol = w.total_volume_usd ? fmtK(w.total_volume_usd) : '—';
+      const timesSeen = w.times_seen || 0;
+      rows += `<tr class="${isInsider ? 'insider-alert' : ''}">
         <td class="rank">#${i+1}</td>
-        <td class="whale-name">${esc(displayName)}</td>
+        <td class="whale-name">${esc(displayName)}${wrBadge}${insiderTag}</td>
         <td class="profit">${fmt$(w.total_profit_usd)}</td>
+        <td style="font-family:'Fira Code',monospace;color:var(--accent-cyan);font-size:0.85rem;">${vol}</td>
         <td>
           <div class="trust-bar-wrap">
             <div class="trust-bar">
@@ -938,25 +1340,27 @@ function render(state) {
             <span style="color:${tc};font-family:'Fira Code',monospace;font-weight:600;">${t}</span>
           </div>
         </td>
-        <td style="min-width:220px;max-width:380px;">${betsHtml}</td>
+        <td style="text-align:center;font-family:'Fira Code',monospace;color:${timesSeen>0?'var(--accent-yellow)':'var(--text-secondary)'};">${timesSeen > 0 ? timesSeen : '—'}</td>
+        <td style="min-width:220px;max-width:340px;">${betsHtml}</td>
         <td style="color:var(--text-secondary);font-family:'Fira Code',monospace;font-size:0.8rem;">${fmtDate(w.last_seen)}</td>
       </tr>`;
     });
     lbC.innerHTML = `<table class="lb-table">
       <thead><tr>
-        <th>#</th><th>Whale</th><th>Profitto</th><th>Trust</th><th>Scommesse Recenti</th><th>Visto</th>
+        <th>#</th><th>Whale</th><th>Profitto</th><th>Vol Storico</th><th>Trust</th><th>#Visto</th><th>Scommesse Recenti</th><th>Ultimo</th>
       </tr></thead>
       <tbody>${rows}</tbody>
     </table>`;
   }
 
-  // ── Watched markets — esclude i mercati con date già passate (non risolti)
+  // ── Watched markets — solo mercati ATTIVI (i resolved vengono rimossi dal backend)
   const watched = Object.values(state.watched_markets || {})
-    .filter(m => m.resolved || !isPastMarket(m.question))
+    .filter(m => !m.resolved && !isPastMarket(m.question))
     .sort((a,b) => (b.date_flagged||'').localeCompare(a.date_flagged||''));
   const wC = document.getElementById('watched-container');
   if (!watched.length) {
-    wC.innerHTML = '<div class="empty">// nessun segnale ancora — primo run in attesa</div>';
+    const msg = archive.length ? '// Tutti i segnali risolti ✓ — attendi il prossimo run per nuovi COPY/WATCH' : '// nessun segnale ancora — primo run in attesa';
+    wC.innerHTML = `<div class="empty">${msg}</div>`;
   } else {
     wC.innerHTML = watched.map(m => {
       let cls, badgeCls, badgeTxt;
@@ -970,20 +1374,136 @@ function render(state) {
         badgeCls = v === 'COPY' ? 'badge-copy' : 'badge-watch';
         badgeTxt = v === 'COPY' ? '▶ COPY' : '◉ WATCH';
       }
-      const pr = m.entry_price ? (parseFloat(m.entry_price)*100).toFixed(0)+'%' : '—';
+      const prFloat = m.entry_price ? parseFloat(m.entry_price) : null;
+      // 0.5 è il fallback di default — non mostrare come dato reale
+      const prIsReal = prFloat !== null && Math.abs(prFloat - 0.5) > 0.01;
+      const pr = prIsReal ? (prFloat*100).toFixed(0)+'%' : '—';
       const side = (m.side || 'YES').toUpperCase();
       const sideClass = side === 'YES' || side.includes('YES') ? 'yes-tag' : 'no-tag';
-      return `<div class="signal-card ${cls}">
-        <span class="signal-badge ${badgeCls}">${badgeTxt}</span>
+      const probColor = prIsReal ? (prFloat < 0.3 ? '#00ff9f' : prFloat < 0.6 ? '#fcee0c' : '#ff3c5a') : '#a0b8d8';
+      const tierCls = (m.tier||'').includes('Top') ? 'tier-top' : (m.tier||'').includes('Big') ? 'tier-big' : 'tier-whale';
+      const tierLabel = m.tier || 'Whale';
+      const whaleName = m.whale_name ? `<div class="signal-whale">⬡ ${esc(m.whale_name)}<span class="tier-badge ${tierCls}">${esc(tierLabel)}</span></div>` : '';
+      // Confidence bar visual
+      const conf = m.confidence || 0;
+      const confColor = conf >= 70 ? '#00ff9f' : conf >= 50 ? '#fcee0c' : '#ff9900';
+      const confBar = conf ? `<div class="conf-bar-wrap">
+        <div class="conf-bar-track"><div class="conf-bar-fill" style="width:${conf}%;background:${confColor};"></div></div>
+        <span class="conf-val">${conf}/100</span>
+      </div>` : '';
+      const probBar = prIsReal ? `<div class="prob-bar-wrap">
+        <div class="prob-bar-label"><span>Probabilità implicita</span><span style="color:${probColor};font-weight:600;">${pr}</span></div>
+        <div class="prob-bar-track"><div class="prob-bar-fill" style="width:${(prFloat*100).toFixed(0)}%;background:${probColor};"></div></div>
+      </div>` : '';
+      const whySnippet = m.why_snippet ? `<div class="why-snippet">${esc(m.why_snippet)}</div>` : '';
+      const polyUrl = m.poly_url || '';
+      const polyBtn = polyUrl
+        ? `<a href="${esc(polyUrl)}" target="_blank" rel="noopener noreferrer" class="poly-link">📊 Vedi su Polymarket ↗</a>`
+        : `<a href="https://polymarket.com/search?q=${encodeURIComponent(m.question||'')}" target="_blank" rel="noopener noreferrer" class="poly-link" style="opacity:0.6;">🔍 Cerca su Polymarket ↗</a>`;
+      const relTime = timeAgo(m.date_flagged);
+      return `<div class="signal-card ${cls}" data-verdict="${m.our_verdict||'COPY'}" data-size="${m.entry_price||0}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span class="signal-badge ${badgeCls}" style="margin-bottom:0;">${badgeTxt}</span>
+          ${confBar}
+        </div>
+        ${whaleName}
         <div class="signal-title">${esc(m.question||'???')}</div>
+        ${whySnippet}
+        ${probBar}
         <div class="signal-meta">
-          <span class="${sideClass}">${side} @ ${pr}</span>
-          <span>${m.date_flagged ? new Date(m.date_flagged).toLocaleDateString('it-IT') : '—'}</span>
+          <span class="${sideClass}">${side}${prIsReal ? ' @ ' + pr : ''}</span>
+          <span title="${m.date_flagged||''}" style="cursor:default;">${relTime}</span>
           ${m.resolution ? `<span>EXIT: ${esc(m.resolution)}</span>` : ''}
         </div>
+        ${polyBtn}
       </div>`;
     }).join('');
   }
+
+  // ── Storico Segnali
+  renderArchive(state);
+
+  // ── Reddit Insights
+  renderReddit(state);
+
+  // ── GitHub insights
+  renderGithubInsights(state);
+}
+
+// ── ARCHIVE ──────────────────────────────────────────────────────────
+function renderArchive(state) {
+  const el = document.getElementById('archive-container');
+  if (!el) return;
+  const archive = (state.resolved_archive || []).slice().reverse().slice(0, 10);
+  if (!archive.length) {
+    el.innerHTML = '<div class="empty">// nessun segnale risolto ancora</div>';
+    return;
+  }
+  el.innerHTML = '<div class="archive-list">' + archive.map(m => {
+    const isCorrect = m.correct === true;
+    const isWrong   = m.correct === false;
+    const rowCls    = isCorrect ? 'correct' : isWrong ? 'wrong' : 'unknown';
+    const icon      = isCorrect ? '✓' : isWrong ? '✗' : '·';
+    const iconColor = isCorrect ? 'var(--accent-green)' : isWrong ? 'var(--accent-red)' : 'var(--text-secondary)';
+    const v = m.our_verdict || 'COPY';
+    const verdictColor = v === 'COPY' ? 'var(--accent-green)' : 'var(--accent-yellow)';
+    const pr = m.entry_price ? (parseFloat(m.entry_price)*100).toFixed(0)+'%' : '—';
+    const side = (m.side || 'YES').toUpperCase();
+    const resDate = m.resolution_date ? new Date(m.resolution_date).toLocaleDateString('it-IT',{day:'2-digit',month:'short'}) : '—';
+    const outcome = m.resolution ? `→ ${esc(m.resolution)}` : '';
+    const resultLabel = isCorrect ? '<span style="color:var(--accent-green)">✓ corretto</span>' : isWrong ? '<span style="color:var(--accent-red)">✗ sbagliato</span>' : '<span style="color:var(--text-secondary)">—</span>';
+    return `<div class="archive-row ${rowCls}">
+      <span style="color:${iconColor};font-size:1rem;min-width:14px;">${icon}</span>
+      <span class="archive-verdict" style="color:${verdictColor};">${v}</span>
+      <span class="archive-q">${esc(m.question||'???')}</span>
+      <span class="archive-meta">${side} @ ${pr}</span>
+      ${outcome ? `<span class="archive-meta">${outcome} ${resultLabel}</span>` : ''}
+      <span class="archive-meta">${resDate}</span>
+    </div>`;
+  }).join('') + '</div>';
+}
+
+// ── REDDIT INSIGHTS ───────────────────────────────────────────────────
+function renderReddit(state) {
+  const el = document.getElementById('reddit-container');
+  if (!el) return;
+  const cache = state.reddit_cache || {};
+  const strategies = cache.top_strategies || [];
+  const ts = cache.last_checked ? new Date(cache.last_checked).toLocaleDateString('it-IT') : null;
+  if (!strategies.length) {
+    el.innerHTML = '<div class="empty">// reddit insights in raccolta — attendi il prossimo run</div>';
+    return;
+  }
+  el.innerHTML = `<div style="font-size:0.78rem;color:var(--text-secondary);padding:10px 16px 4px;font-family:'Fira Code',monospace;">
+    r/Polymarket · ultimo aggiornamento: ${ts || '—'}</div>` +
+    strategies.slice(0, 8).map(s => `<div class="reddit-item"><span class="reddit-bullet">•</span>${esc(s)}</div>`).join('');
+}
+
+// ── GITHUB INSIGHTS ──────────────────────────────────────────────────
+function renderGithubInsights(state) {
+  const cache = state.github_cache || {};
+  const el = document.getElementById('github-insights');
+  if (!el) return;
+  const repos = cache.repos || [];
+  const ts = cache.last_checked ? new Date(cache.last_checked).toLocaleDateString('it-IT') : null;
+  if (!repos.length && !cache.insights) {
+    el.innerHTML = '<div class="empty">// nessun dato GitHub ancora — attendi il prossimo run</div>';
+    return;
+  }
+  const header = `<div style="font-size:0.78rem;color:var(--text-secondary);padding:10px 16px 4px;font-family:'Fira Code',monospace;">
+    Ultimo scout: ${ts || '—'} · ${repos.length} repo analizzati</div>`;
+  const repoRows = repos.map(r => {
+    const name = typeof r === 'object' ? (r.full_name || r.name || String(r)) : String(r);
+    const desc = typeof r === 'object' ? (r.description || '') : '';
+    const stars = (typeof r === 'object' && r.stars) ? `<span style="font-size:0.75rem;color:var(--accent-yellow);margin-left:10px;">⭐ ${r.stars}</span>` : '';
+    const snippet = (typeof r === 'object' && r.readme_snippet) ? `<div class="gh-snippet">${esc(r.readme_snippet.slice(0,160))}…</div>` : '';
+    return `<div class="gh-repo">
+      <a href="https://github.com/${esc(name)}" target="_blank"
+         style="color:var(--accent-blue);text-decoration:none;font-family:'Fira Code',monospace;font-size:0.85rem;font-weight:600;">⎔ ${esc(name)}</a>${stars}
+      ${desc ? `<div class="gh-snippet">${esc(desc)}</div>` : ''}${snippet}
+    </div>`;
+  }).join('');
+  el.innerHTML = header + (repoRows || '<div class="empty">// nessun repo disponibile</div>');
 }
 
 // ── LOAD ──────────────────────────────────────────────────────────────
@@ -1003,6 +1523,25 @@ async function loadState() {
     '<span style="color:#a0b8d8;font-size:0.9rem;">Il bot deve eseguire almeno un run prima.</span></div>';
   return null;
 }
+
+// ── FILTER TABS ───────────────────────────────────────────────────────
+let _currentFilter = 'all';
+document.addEventListener('click', function(e) {
+  if (!e.target.matches('.filter-tab')) return;
+  _currentFilter = e.target.dataset.filter;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  e.target.classList.add('active');
+  const cards = document.querySelectorAll('.signal-grid .signal-card');
+  cards.forEach(card => {
+    const verdict = (card.dataset.verdict || '').toUpperCase();
+    const size = parseFloat(card.dataset.size || 0);
+    let show = true;
+    if (_currentFilter === 'copy')  show = verdict === 'COPY';
+    if (_currentFilter === 'watch') show = verdict === 'WATCH';
+    if (_currentFilter === 'high')  show = size >= 0.7 || size <= 0.3; // strong conviction
+    card.style.display = show ? '' : 'none';
+  });
+});
 
 loadState().then(d => { if (d) setTimeout(() => render(d), 600); });
 </script>
