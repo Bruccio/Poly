@@ -1127,6 +1127,40 @@ def compute_confidence(trade: dict, state: dict) -> int:
 
 
 # ── POLYMARKET ──────────────────────────────────────────────────────────────────
+def _gamma_price(m: dict) -> str:
+    """Estrae il miglior prezzo disponibile da un oggetto Gamma market/event.
+    Prova: bestAsk → lastTradePrice → outcomePrices[0] → tokens[0].price
+    Ritorna "" se non trovato (mai 0.5 hardcoded — il chiamante decide)."""
+    for key in ("bestAsk", "lastTradePrice"):
+        v = m.get(key)
+        if v is not None:
+            try:
+                f = float(v)
+                if 0.01 < f < 0.99:   # scarta 0 e 1 (dati garbage)
+                    return str(f)
+            except (ValueError, TypeError):
+                pass
+    # outcomePrices: ["0.65", "0.35"] — usa YES (indice 0)
+    op = m.get("outcomePrices")
+    if isinstance(op, list) and op:
+        try:
+            f = float(op[0])
+            if 0.01 < f < 0.99:
+                return str(f)
+        except (ValueError, TypeError):
+            pass
+    # tokens: [{"price": "0.65"}, ...]
+    tokens = m.get("tokens")
+    if isinstance(tokens, list) and tokens:
+        try:
+            f = float(tokens[0].get("price") or 0)
+            if 0.01 < f < 0.99:
+                return str(f)
+        except (ValueError, TypeError):
+            pass
+    return ""   # no price found
+
+
 def _sz(t):
     """Estrae la size in USDC dal dict trade/mercato."""
     for k in ("usdcSize", "size", "amount", "tradeSize", "amountUSD",
@@ -1252,9 +1286,10 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                 # Scudo anti-latenza: verifica real-time per ogni mercato
                 if not _verify_market_open(cid, m.get("question") or ""):
                     continue
+                price_str = _gamma_price(m) or "0.5"
                 candidates.append({
                     "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
-                    "price":       str(m.get("bestAsk") or m.get("lastTradePrice") or 0.5),
+                    "price":       price_str,
                     "side":        "YES",
                     "title":       m.get("question") or m.get("title") or "Mercato",
                     "userAddress": "0xpool",
@@ -1280,12 +1315,20 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                 if ev.get("closed") or ev.get("resolved"):
                     log(f"Evento chiuso scartato: {str(ev.get('title',''))[:50]}", "WARN")
                     continue
+                # Prova a ottenere il prezzo dal primo mercato dell'evento
+                ev_markets = ev.get("markets") or []
+                ev_price = ""
+                for em in (ev_markets if isinstance(ev_markets, list) else []):
+                    ev_price = _gamma_price(em)
+                    if ev_price:
+                        break
                 candidates.append({
                     "usdcSize":    str(float(ev.get("volume") or ev.get("volumeNum") or 0)),
-                    "price":       "0.5",
+                    "price":       ev_price or "0.5",
                     "side":        "YES",
                     "title":       ev.get("title") or ev.get("question") or "Evento",
                     "userAddress": "0xpool",
+                    "conditionId": (ev_markets[0].get("conditionId") or "") if ev_markets else "",
                 })
             _add_items(candidates, "gamma-events")
     except Exception as e:
@@ -1307,9 +1350,10 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                     cid = m.get("conditionId") or ""
                     if not _verify_market_open(cid, m.get("question") or ""):
                         continue
+                    price_str = _gamma_price(m) or "0.5"
                     candidates.append({
                         "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
-                        "price":       str(m.get("bestAsk") or m.get("lastTradePrice") or 0.5),
+                        "price":       price_str,
                         "side":        "YES",
                         "title":       m.get("question") or m.get("title") or "Mercato",
                         "userAddress": "0xpool",
