@@ -1899,46 +1899,66 @@ def build_message(results, state: dict = None, is_demo=False, best_skip=None):
     acc = algo_stats.get("accuracy_pct")
     resolved = algo_stats.get("resolved_copies", 0)
     if acc is not None:
-        msg += f"📊 Track record: *{acc}%* accuracy \\({resolved} segnali risolti\\)\n"
+        msg += f"📊 Track record: *{acc}%* accuracy ({resolved} segnali risolti)\n"
 
     parts = []
     if copy_count:
         parts.append(f"*{copy_count}* COPY")
     if watch_count:
         parts.append(f"*{watch_count}* WATCH")
-    msg += f"{', '.join(parts)} — da seguire\\. 👇\n\n"
+    msg += f"{', '.join(parts)} — da seguire 👇\n\n"
 
     # Mostra COPY prima, poi WATCH
     to_show = [t for t in results if t["verdict"] == "COPY"]
     to_show += [t for t in results if t["verdict"] == "WATCH"]
 
     for t in to_show:
-        m = t["market"][:70] + ("..." if len(t["market"]) > 70 else "")
+        m_title = t["market"][:70] + ("..." if len(t["market"]) > 70 else "")
         v = t["verdict"]
+        conf = t.get("confidence", 50)
+        price = float(t.get("price") or 0)
+        side  = (t.get("side") or "YES").upper()
+
         if v == "COPY":
-            msg += "✅ *COPY — DA VALUTARE*\n"
+            header = "✅ *COPY — ENTRA ORA*" if conf >= 80 else "✅ *COPY — DA VALUTARE*"
         elif v == "WATCH":
-            msg += "👁️ *WATCH — TIENI D'OCCHIO*\n"
+            header = "👁️ *WATCH — TIENI D'OCCHIO*"
         else:
-            msg += "⭐ *IL MENO PEGGIO DI OGGI*\n"
-        msg += f"📌 _{m}_\n"
-        # Whale info + tier
+            header = "⭐ *IL MENO PEGGIO DI OGGI*"
+        msg += f"{header}\n"
+        msg += f"📌 _{m_title}_\n"
+
+        # Azione esplicita: cosa comprare e a quale prezzo
+        if v == "COPY" and price > 0:
+            pr_pct = round(price * 100, 1)
+            price_str = f"{pr_pct}¢" if pr_pct != 50.0 else "?"
+            msg += f"👉 *Azione: Compra {side} a {price_str}*\n"
+        elif v == "COPY":
+            msg += f"👉 *Azione: Compra {side}*\n"
+
+        # Whale info
         wname = t.get("whale_name", "")
         ts_val = t.get("trust_score", 40)
-        conf = t.get("confidence", 50)
         if wname and "0xpool" not in wname and "0xdemo" not in wname:
             trust_icon = "🟢" if ts_val >= 70 else "🟡" if ts_val >= 50 else "🔴"
             msg += f"🐋 {wname} {trust_icon} Trust: {ts_val}/100 | {t.get('tier','')}\n"
         msg += f"🎯 Confidence: {conf}/100\n"
+
         if t.get("vale_pena"):
             msg += f"💡 {t['vale_pena']}\n"
-        if t.get("spiegazione"):
-            msg += f"📖 {t['spiegazione'][:300]}\n"
+        if t.get("spiegazione") and v == "COPY":
+            msg += f"📖 {t['spiegazione'][:250]}\n"
+
         risk = t["risk_score"]
         icon = "🟢" if risk <= 3 else "🟡" if risk <= 6 else "🔴"
         msg += f"{icon} Rischio: {risk}/10\n"
         if t.get("sospetto", "No") not in ("No", "N/A"):
             msg += "⚠️ Potrebbe essere gonfiato artificialmente\n"
+
+        # Link diretto Polymarket
+        poly_url = t.get("poly_url") or ""
+        if poly_url:
+            msg += f"[📊 Vedi su Polymarket]({poly_url})\n"
         msg += "\n"
 
     # Top 5 whale dalla leaderboard
@@ -1951,16 +1971,24 @@ def build_message(results, state: dict = None, is_demo=False, best_skip=None):
             profit = w.get("total_profit_usd", 0)
             ts_val = w.get("trust_score", 40)
             name = w.get("username", "?")[:18]
-            msg += f"{i}\\. {name} \\+\\${profit:,.0f} \\(trust {ts_val}\\)\n"
+            msg += f"{i}. {name} +${profit:,.0f} (trust {ts_val})\n"
         msg += "\n"
 
     return msg + "_Polymarket Whale Tracker v3 — Bruno_"
 
 
-def send_telegram(message):
+def send_telegram(message, silent: bool = False):
+    """Invia un messaggio Telegram.
+    silent=True → notifica silenziosa (vibrazione/suono disattivati) per WATCH.
+    silent=False → notifica normale con suono per COPY."""
     r = requests.post(
         f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage",
-        json={"chat_id": TELEGRAM_USER_ID, "text": message, "parse_mode": "Markdown"},
+        json={
+            "chat_id":            TELEGRAM_USER_ID,
+            "text":               message,
+            "parse_mode":         "Markdown",
+            "disable_notification": silent,
+        },
         timeout=15,
     )
     d = r.json()
@@ -2201,10 +2229,19 @@ def run():
     copy_count = sum(1 for r in actionable if r["verdict"] == "COPY")
 
     if actionable:
-        log(f"Invio notifiche: {len(actionable)} segnali actionable...")
+        copies  = [r for r in actionable if r["verdict"] == "COPY"]
+        watches = [r for r in actionable if r["verdict"] == "WATCH"]
+        log(f"Invio notifiche: {len(copies)} COPY (con suono) + {len(watches)} WATCH (silenziosi)...")
         try:
-            if send_telegram(build_message(actionable, state, is_demo)):
-                log("Telegram inviato!", "OK")
+            # ── COPY: notifica CON suono (urgente, da vedere subito)
+            if copies:
+                silent_copy = all(r.get("confidence", 50) < 86 for r in copies)
+                if send_telegram(build_message(copies, state, is_demo), silent=silent_copy):
+                    log(f"Telegram COPY inviato ({'silenzioso' if silent_copy else 'CON suono'})!", "OK")
+            # ── WATCH: notifica SILENZIOSA (solo informativa)
+            if watches:
+                if send_telegram(build_message(watches, state, is_demo), silent=True):
+                    log("Telegram WATCH inviato (silenzioso).", "OK")
         except Exception as e:
             log(f"Telegram: {e}", "ERR")
         send_email(actionable, state, is_demo)
