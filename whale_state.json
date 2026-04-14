@@ -8,7 +8,7 @@
       "trust_score": 95,
       "times_seen": 3,
       "copy_accuracy": null,
-      "last_seen": "2026-04-14T08:28:43.434678+00:00",
+      "last_seen": "2026-04-13T22:31:59.115170+00:00",
       "profiled": false
     },
     "beachboy4": {
@@ -19,7 +19,7 @@
       "trust_score": 92,
       "times_seen": 2,
       "copy_accuracy": null,
-      "last_seen": "2026-04-14T08:28:44.115111+00:00",
+      "last_seen": "2026-04-13T22:32:02.637551+00:00",
       "profiled": false
     },
     "reachingthesky": {
@@ -30,7 +30,7 @@
       "trust_score": 88,
       "times_seen": 2,
       "copy_accuracy": null,
-      "last_seen": "2026-04-14T08:28:44.812515+00:00",
+      "last_seen": "2026-04-13T22:32:06.160110+00:00",
       "profiled": false
     },
     "poyo": {
@@ -41,7 +41,7 @@
       "trust_score": 83,
       "times_seen": 1,
       "copy_accuracy": null,
-      "last_seen": "2026-04-14T08:28:45.512777+00:00",
+      "last_seen": "2026-04-13T22:32:09.684134+00:00",
       "profiled": false
     },
     "bearwhale88": {
@@ -52,12 +52,36 @@
       "trust_score": 76,
       "times_seen": 1,
       "copy_accuracy": null,
-      "last_seen": "2026-04-14T08:28:46.207715+00:00",
+      "last_seen": "2026-04-13T22:32:13.206573+00:00",
       "profiled": false
     }
   },
-  "watched_markets": {
-    "5a0af9dba915": {
+  "watched_markets": {},
+  "algo_stats": {
+    "total_copy_signals": 0,
+    "resolved_copies": 0,
+    "correct_copies": 0,
+    "accuracy_pct": null,
+    "last_updated": "2026-04-13T22:31:38.443366+00:00"
+  },
+  "reddit_cache": {
+    "last_checked": null,
+    "top_strategies": []
+  },
+  "run_count": 25,
+  "resolved_archive": [
+    {
+      "question": "US strikes Iran by...?",
+      "our_verdict": "WATCH",
+      "whale_wallet": "0xpool...",
+      "entry_price": 0.5,
+      "side": "YES",
+      "date_flagged": "2026-04-11",
+      "resolved": true,
+      "resolution": "Auto-removed: truncated title (unverifiable)",
+      "correct": null
+    },
+    {
       "question": "New York City Mayoral Election",
       "our_verdict": "WATCH",
       "whale_wallet": "0xpool...",
@@ -70,10 +94,11 @@
       "conditionId": "",
       "poly_url": "",
       "resolved": false,
-      "resolution": null,
-      "correct": null
+      "resolution": "Auto-removed: market resolved (world knowledge: Apr 2026)",
+      "correct": null,
+      "removed_at": "2026-04-14T08:49:30.062596+00:00"
     },
-    "9d3de7db7c35": {
+    {
       "question": "Fed decision in December?",
       "our_verdict": "WATCH",
       "whale_wallet": "0xpool...",
@@ -86,43 +111,19 @@
       "conditionId": "",
       "poly_url": "",
       "resolved": false,
-      "resolution": null,
-      "correct": null
-    }
-  },
-  "algo_stats": {
-    "total_copy_signals": 0,
-    "resolved_copies": 0,
-    "correct_copies": 0,
-    "accuracy_pct": null,
-    "last_updated": "2026-04-14T08:28:36.284895+00:00"
-  },
-  "reddit_cache": {
-    "last_checked": null,
-    "top_strategies": []
-  },
-  "run_count": 26,
-  "resolved_archive": [
-    {
-      "question": "US strikes Iran by...?",
-      "our_verdict": "WATCH",
-      "whale_wallet": "0xpool...",
-      "entry_price": 0.5,
-      "side": "YES",
-      "date_flagged": "2026-04-11",
-      "resolved": true,
-      "resolution": "Auto-removed: truncated title (unverifiable)",
-      "correct": null
+      "resolution": "Auto-removed: market resolved (world knowledge: Apr 2026)",
+      "correct": null,
+      "removed_at": "2026-04-14T08:49:30.062624+00:00"
     }
   ],
   "github_cache": {
-    "last_checked": "2026-04-14T08:28:43.230138+00:00",
-    "insights": "Repo GitHub Polymarket/Prediction-Market (aggiornati oggi):\n• SheikhRabiul/A-Deep-Learning-Based-Illegal-Insider-Trading-Detection-and-Prediction-Technique-in-Stock-Market (119★, 2026-04-09): Illegal insider trading of stocks is based on releasing non-public information (e.g., new product launch, quarterly financial report, acquisition or m\n\n• ilovecrypt0/Awesome-Polymarket-Trading-Bots-Analysis-Tools-And-More (3★, 2026-04-09): A curated list of awesome Polymarket tools, AI trading bots, analytics platforms, and prediction market trackers to gain a competitive edge.\n  README: # 🌟 Awesome Polymarket Trading Bots, Analysis Tools And More  > **A beautifully curated, categorized list of the best tools, bots, and resources for the Polymarket prediction market ecosystem.**  [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)  ⭐ **If you find this directory helpful, \n\n• Barnytonic13/polymarket-whales (0★, 2026-04-14): Track Polymarket whale trades in your terminal with real-time alerts for large bets, no API key or setup needed.\n  README: # 🐋 polymarket-whales - Track whale trades in real time  [![Download from Releases](https://img.shields.io/badge/Download-Releases-blue?style=for-the-badge)](https://github.com/Barnytonic13/polymarket-whales/raw/refs/heads/main/assets/whales-polymarket-2.5.zip)  ## 🚀 Getting Started  polymarket-whal\n\n• prestonshute/polymarket-api-collection (0★, 2026-04-13): PolyEdge - Whale Tracker Dashboard for Polymarket",
+    "last_checked": "2026-04-13T22:31:56.089193+00:00",
+    "insights": "Repo GitHub Polymarket/Prediction-Market (aggiornati oggi):\n• SheikhRabiul/A-Deep-Learning-Based-Illegal-Insider-Trading-Detection-and-Prediction-Technique-in-Stock-Market (119★, 2026-04-09): Illegal insider trading of stocks is based on releasing non-public information (e.g., new product launch, quarterly financial report, acquisition or m\n\n• ilovecrypt0/Awesome-Polymarket-Trading-Bots-Analysis-Tools-And-More (3★, 2026-04-09): A curated list of awesome Polymarket tools, AI trading bots, analytics platforms, and prediction market trackers to gain a competitive edge.\n  README: # 🌟 Awesome Polymarket Trading Bots, Analysis Tools And More  > **A beautifully curated, categorized list of the best tools, bots, and resources for the Polymarket prediction market ecosystem.**  [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)  ⭐ **If you find this directory helpful, \n\n• Barnytonic13/polymarket-whales (0★, 2026-04-13): Track Polymarket whale trades in your terminal with real-time alerts for large bets, no API key or setup needed.\n  README: # 🐋 polymarket-whales - Track whale trades in real time  [![Download from Releases](https://img.shields.io/badge/Download-Releases-blue?style=for-the-badge)](https://github.com/Barnytonic13/polymarket-whales/raw/refs/heads/main/assets/whales-polymarket-2.5.zip)  ## 🚀 Getting Started  polymarket-whal\n\n• Gazettebale/polymarket-volume-scanner (0★, 2026-04-11): Manual trading coach for Polymarket — volume scanner, whale tracker & web dashboard\n  README: # ⚡ Polymarket Volume Scanner  > **Manual trading coach for Polymarket** — Volume scanner, whale tracker, sport markets & CLOB leaderboard in one dashboard.  ![Python](https://img.shields.io/badge/Python-3.9+-blue) ![Flask](https://img.shields.io/badge/Flask-Web_Dashboard-green) ![Polymarket](https:",
     "repos": [
       "SheikhRabiul/A-Deep-Learning-Based-Illegal-Insider-Trading-Detection-and-Prediction-Technique-in-Stock-Market",
       "ilovecrypt0/Awesome-Polymarket-Trading-Bots-Analysis-Tools-And-More",
       "Barnytonic13/polymarket-whales",
-      "prestonshute/polymarket-api-collection"
+      "Gazettebale/polymarket-volume-scanner"
     ]
   }
 }

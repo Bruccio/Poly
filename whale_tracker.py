@@ -35,6 +35,7 @@ MIN_SIZE_USDC          = int(os.environ.get("MIN_WHALE_SIZE", "100000"))
 MAX_WHALES             = int(os.environ.get("MAX_WHALES", "10"))
 CHECK_INTERVAL_MINUTES = int(os.environ.get("CHECK_INTERVAL_MINUTES", "30"))
 ONLY_NOTIFY_ON_COPY    = os.environ.get("ONLY_NOTIFY_ON_COPY", "true").lower() != "false"
+MAX_TRADE_AGE_HOURS    = 24   # scarta trade/mercati più vecchi di 24h
 
 # ── STATO PERSISTENTE ────────────────────────────────────────────────────────────
 STATE_FILE = "whale_state.json"
@@ -1031,6 +1032,7 @@ def update_watched_markets(state: dict, results: list):
                 "date_flagged": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
                 "conditionId": res.get("conditionId", ""),   # per lookup diretto in check_resolutions
                 "poly_url": res.get("poly_url", ""),         # link diretto al mercato su Polymarket
+                "why_snippet": (res.get("vale_pena") or "")[:80],  # micro-ragionamento per la card
                 "resolved": False,
                 "resolution": None,
                 "correct": None,
@@ -1138,6 +1140,82 @@ def _sz(t):
     return 0.0
 
 
+def _is_stale_trade(trade: dict) -> bool:
+    """True se il trade è più vecchio di MAX_TRADE_AGE_HOURS.
+    Controlla campi timestamp standard dalla Data API / Gamma API."""
+    ts_raw = (trade.get("createdAt") or trade.get("timestamp") or
+              trade.get("created_at") or trade.get("updatedAt") or
+              trade.get("transactionHash") and None)  # transactionHash non è un timestamp
+    if not ts_raw:
+        return False  # nessun timestamp disponibile → non scartare
+    try:
+        ts = dateutil.parser.isoparse(str(ts_raw))
+        if ts.tzinfo is None:
+            ts = ts.replace(tzinfo=timezone.utc)
+        age_hours = (datetime.now(timezone.utc) - ts).total_seconds() / 3600
+        if age_hours > MAX_TRADE_AGE_HOURS:
+            log(f"Scartato trade obsoleto (età: {age_hours:.1f}h): "
+                f"{(trade.get('title') or trade.get('question') or '')[:50]}", "DEBUG")
+            return True
+    except Exception:
+        pass
+    return False
+
+
+# Cache in-run per verifica real-time mercati (evita chiamate duplicate)
+_VERIFIED_OPEN_CACHE: dict = {}  # conditionId → True=aperto, False=chiuso
+
+
+def _verify_market_open(condition_id: str, title: str = "") -> bool:
+    """Verifica real-time che un mercato sia ancora aperto via Gamma API.
+    Controlla: closed=false, resolved=false, nessun winnerIndex assegnato.
+    Cache per run per evitare rate limiting (un mercato verificato non si richiama)."""
+    if not condition_id:
+        return True  # senza ID non possiamo verificare, lascia passare
+    if condition_id in _VERIFIED_OPEN_CACHE:
+        return _VERIFIED_OPEN_CACHE[condition_id]
+
+    # Controlla prima la cache bulk già costruita
+    cached = _GAMMA_RESOLUTION_CACHE.get(condition_id)
+    if cached is not None:
+        is_open = not _resolved_from_cache_entry(cached)
+        _VERIFIED_OPEN_CACHE[condition_id] = is_open
+        return is_open
+
+    # Chiamata API diretta per questo conditionId specifico
+    try:
+        r = _http_get(
+            f"https://gamma-api.polymarket.com/markets?conditionId={condition_id}&limit=1",
+            timeout=6, retries=1,
+        )
+        if r and r.status_code == 200:
+            items = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            if items:
+                m = items[0]
+                _GAMMA_RESOLUTION_CACHE[condition_id] = m
+                closed = bool(m.get("closed") or m.get("isResolved"))
+                # Controlla anche winnerIndex assegnato nei tokens
+                tokens = m.get("tokens") or m.get("outcomes") or []
+                has_winner = any(t.get("winnerIndex") is not None
+                                 or t.get("winner") is True
+                                 for t in (tokens if isinstance(tokens, list) else []))
+                is_open = not closed and not has_winner
+                if not is_open:
+                    log(f"Mercato STALE (closed/resolved/winner): {title[:60] or condition_id[:14]}", "WARN")
+                _VERIFIED_OPEN_CACHE[condition_id] = is_open
+                return is_open
+            else:
+                # conditionId non trovato in Gamma → rimosso/risolto
+                log(f"Mercato non trovato in Gamma (STALE): {title[:60] or condition_id[:14]}", "WARN")
+                _VERIFIED_OPEN_CACHE[condition_id] = False
+                return False
+    except Exception as e:
+        log(f"_verify_market_open {condition_id[:14]}: {e}", "WARN")
+
+    _VERIFIED_OPEN_CACHE[condition_id] = True  # in caso di errore rete, lascia passare
+    return True
+
+
 def fetch_polymarket_whales(min_size, state: dict = None):
     """
     Multi-source crawling: aggrega dati da TUTTI gli endpoint Polymarket disponibili.
@@ -1158,59 +1236,86 @@ def fetch_polymarket_whales(min_size, state: dict = None):
         if added:
             log(f"  {source}: +{added} mercati", "OK")
 
-    # ── Source 1: Gamma API Markets (volume 24h) ──
+    # ── Source 1: Gamma API Markets (volume 24h) — solo mercati aperti ──
     try:
-        r = _http_get("https://gamma-api.polymarket.com/markets?limit=100&active=true&order=volume24hr&ascending=false")
+        r = _http_get("https://gamma-api.polymarket.com/markets?limit=100"
+                      "&active=true&closed=false&order=volume24hr&ascending=false")
         if r and r.status_code == 200:
             mlist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
-            _add_items([{
-                "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
-                "price":       str(m.get("bestAsk") or m.get("lastTradePrice") or 0.5),
-                "side":        "YES",
-                "title":       m.get("question") or m.get("title") or "Mercato",
-                "userAddress": "0xpool",
-                "conditionId": m.get("conditionId") or "",
-            } for m in mlist
-              if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size
-              and not _has_sport_tag(m)],
-            "gamma-markets")
-    except Exception as e:
-        log(f"  gamma-markets: {str(e)[:80]}", "WARN")
-
-    # ── Source 2: Gamma API Events (volume totale) ──
-    try:
-        r = _http_get("https://gamma-api.polymarket.com/events?limit=80&active=true&order=volume&ascending=false")
-        if r and r.status_code == 200:
-            elist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
-            _add_items([{
-                "usdcSize":    str(float(ev.get("volume") or ev.get("volumeNum") or 0)),
-                "price":       "0.5",
-                "side":        "YES",
-                "title":       ev.get("title") or ev.get("question") or "Evento",
-                "userAddress": "0xpool",
-            } for ev in elist
-              if float(ev.get("volume") or ev.get("volumeNum") or 0) >= min_size
-              and not _has_sport_tag(ev)],
-            "gamma-events")
-    except Exception as e:
-        log(f"  gamma-events: {str(e)[:80]}", "WARN")
-
-    # ── Source 3: Gamma API Trending/Popular markets ──
-    for tag in ["trending", "popular"]:
-        try:
-            r = _http_get(f"https://gamma-api.polymarket.com/markets?limit=50&active=true&tag={tag}")
-            if r and r.status_code == 200:
-                mlist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
-                _add_items([{
+            candidates = []
+            for m in mlist:
+                if float(m.get("volume24hr") or m.get("volume") or 0) < min_size:
+                    continue
+                if _has_sport_tag(m):
+                    continue
+                cid = m.get("conditionId") or ""
+                # Scudo anti-latenza: verifica real-time per ogni mercato
+                if not _verify_market_open(cid, m.get("question") or ""):
+                    continue
+                candidates.append({
                     "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
                     "price":       str(m.get("bestAsk") or m.get("lastTradePrice") or 0.5),
                     "side":        "YES",
                     "title":       m.get("question") or m.get("title") or "Mercato",
                     "userAddress": "0xpool",
-                } for m in mlist
-                  if float(m.get("volume24hr") or m.get("volume") or 0) >= min_size
-                  and not _has_sport_tag(m)],
-                f"gamma-{tag}")
+                    "conditionId": cid,
+                })
+            _add_items(candidates, "gamma-markets")
+    except Exception as e:
+        log(f"  gamma-markets: {str(e)[:80]}", "WARN")
+
+    # ── Source 2: Gamma API Events (volume totale) — solo eventi aperti ──
+    try:
+        r = _http_get("https://gamma-api.polymarket.com/events?limit=80"
+                      "&active=true&closed=false&order=volume&ascending=false")
+        if r and r.status_code == 200:
+            elist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            candidates = []
+            for ev in elist:
+                if float(ev.get("volume") or ev.get("volumeNum") or 0) < min_size:
+                    continue
+                if _has_sport_tag(ev):
+                    continue
+                # Gli eventi non hanno conditionId — usa closed/resolved del campo evento
+                if ev.get("closed") or ev.get("resolved"):
+                    log(f"Evento chiuso scartato: {str(ev.get('title',''))[:50]}", "WARN")
+                    continue
+                candidates.append({
+                    "usdcSize":    str(float(ev.get("volume") or ev.get("volumeNum") or 0)),
+                    "price":       "0.5",
+                    "side":        "YES",
+                    "title":       ev.get("title") or ev.get("question") or "Evento",
+                    "userAddress": "0xpool",
+                })
+            _add_items(candidates, "gamma-events")
+    except Exception as e:
+        log(f"  gamma-events: {str(e)[:80]}", "WARN")
+
+    # ── Source 3: Gamma API Trending/Popular markets — solo mercati aperti ──
+    for tag in ["trending", "popular"]:
+        try:
+            r = _http_get(f"https://gamma-api.polymarket.com/markets?limit=50"
+                          f"&active=true&closed=false&tag={tag}")
+            if r and r.status_code == 200:
+                mlist = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+                candidates = []
+                for m in mlist:
+                    if float(m.get("volume24hr") or m.get("volume") or 0) < min_size:
+                        continue
+                    if _has_sport_tag(m):
+                        continue
+                    cid = m.get("conditionId") or ""
+                    if not _verify_market_open(cid, m.get("question") or ""):
+                        continue
+                    candidates.append({
+                        "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
+                        "price":       str(m.get("bestAsk") or m.get("lastTradePrice") or 0.5),
+                        "side":        "YES",
+                        "title":       m.get("question") or m.get("title") or "Mercato",
+                        "userAddress": "0xpool",
+                        "conditionId": cid,
+                    })
+                _add_items(candidates, f"gamma-{tag}")
         except Exception as e:
             log(f"  gamma-{tag}: {str(e)[:80]}", "WARN")
 
@@ -1225,8 +1330,10 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                 "side":        t.get("side") or "YES",
                 "title":       t.get("title") or t.get("question") or "Trade",
                 "userAddress": t.get("user") or t.get("proxyWallet") or "0x???",
+                "createdAt":   t.get("createdAt") or t.get("timestamp") or "",
             } for t in trades
-              if float(t.get("usdcSize") or t.get("amount") or 0) >= min_size],
+              if float(t.get("usdcSize") or t.get("amount") or 0) >= min_size
+              and not _is_stale_trade(t)],
             "data-api-activity")
     except Exception as e:
         log(f"  data-api-activity: {str(e)[:80]}", "WARN")
@@ -1270,8 +1377,10 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                     "side":        t.get("side") or "YES",
                     "title":       t.get("title") or t.get("question") or "Trade",
                     "userAddress": wallet_addr,
+                    "createdAt":   t.get("createdAt") or t.get("timestamp") or "",
                 } for t in trades
-                  if float(t.get("usdcSize") or t.get("amount") or 0) >= min_size * 0.5],
+                  if float(t.get("usdcSize") or t.get("amount") or 0) >= min_size * 0.5
+                  and not _is_stale_trade(t)],
                 f"whale-{wdata.get('username', wallet_addr[:8])}")
             time.sleep(0.3)
         except Exception as e:
@@ -1850,6 +1959,7 @@ def send_email(results, state: dict = None, is_demo=False, best_skip=None):
 def run():
     _ACTIVITY_CACHE.clear()
     _GAMMA_RESOLUTION_CACHE.clear()
+    _VERIFIED_OPEN_CACHE.clear()
     state = load_state()
     state["run_count"] = state.get("run_count", 0) + 1
     run_n = state["run_count"]

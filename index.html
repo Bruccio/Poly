@@ -579,6 +579,131 @@
       font-style: italic;
     }
 
+    /* ── MARKET SENTIMENT GAUGE ─────────────────────────────────────────── */
+    .sentiment-bar-wrap {
+      background: var(--bg-secondary);
+      border: 1.5px solid var(--border-light);
+      border-radius: 12px;
+      padding: 18px 24px;
+      margin-bottom: 32px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      flex-wrap: wrap;
+      transition: border-color 0.3s;
+    }
+    .sentiment-bar-wrap:hover { border-color: var(--accent-cyan); }
+    .sentiment-label {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      min-width: 130px;
+    }
+    .sentiment-track {
+      flex: 1;
+      height: 12px;
+      background: linear-gradient(90deg, #ff3c5a 0%, #fcee0c 50%, #00ff9f 100%);
+      border-radius: 6px;
+      position: relative;
+      max-width: 400px;
+    }
+    .sentiment-needle {
+      position: absolute;
+      top: -4px;
+      width: 4px;
+      height: 20px;
+      background: #fff;
+      border-radius: 2px;
+      box-shadow: 0 0 8px rgba(255,255,255,0.8);
+      transform: translateX(-50%);
+      transition: left 0.8s ease;
+    }
+    .sentiment-value {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.9rem;
+      font-weight: 700;
+      min-width: 110px;
+    }
+    .sentiment-sub {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.7rem;
+      color: var(--text-secondary);
+    }
+
+    /* ── FILTER TABS ─────────────────────────────────────────────────────── */
+    .filter-tabs {
+      display: flex;
+      gap: 8px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+    .filter-tab {
+      font-family: 'Fira Code', monospace;
+      font-size: 0.72rem;
+      font-weight: 600;
+      padding: 6px 14px;
+      border-radius: 6px;
+      border: 1.5px solid var(--border-light);
+      background: transparent;
+      color: var(--text-secondary);
+      cursor: pointer;
+      transition: all 0.2s ease;
+      letter-spacing: 0.05em;
+    }
+    .filter-tab:hover { border-color: var(--accent-cyan); color: var(--accent-cyan); }
+    .filter-tab.active {
+      background: rgba(0,240,255,0.15);
+      border-color: var(--accent-cyan);
+      color: var(--accent-cyan);
+      text-shadow: 0 0 8px rgba(0,240,255,0.5);
+    }
+
+    /* ── CONFIDENCE BAR ─────────────────────────────────────────────────── */
+    .conf-bar-wrap { display: flex; align-items: center; gap: 8px; margin: 6px 0 0; }
+    .conf-bar-track { flex: 1; height: 3px; background: var(--border-dark); border-radius: 2px; overflow: hidden; max-width: 80px; }
+    .conf-bar-fill  { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+    .conf-val { font-family: 'Fira Code', monospace; font-size: 0.68rem; color: var(--text-secondary); }
+
+    /* ── WHY SNIPPET ─────────────────────────────────────────────────────── */
+    .why-snippet {
+      font-size: 0.78rem;
+      color: var(--text-secondary);
+      font-style: italic;
+      margin: 6px 0 2px;
+      line-height: 1.4;
+      border-left: 2px solid var(--accent-cyan);
+      padding-left: 8px;
+    }
+
+    /* ── WIN RATE BADGE ON LEADERBOARD ──────────────────────────────────── */
+    .wr-badge {
+      display: inline-block;
+      font-family: 'Fira Code', monospace;
+      font-size: 0.6rem;
+      font-weight: 700;
+      padding: 2px 6px;
+      border-radius: 4px;
+      margin-left: 6px;
+      vertical-align: middle;
+    }
+    .wr-badge-green { background: rgba(0,255,159,0.15); color: #00ff9f; border: 1px solid #00ff9f; }
+    .wr-badge-amber { background: rgba(252,238,12,0.15); color: #fcee0c; border: 1px solid #fcee0c; }
+
+    /* ── INSIDER ALERT BORDER ─────────────────────────────────────────── */
+    .insider-alert { outline: 2px solid var(--accent-red); outline-offset: -2px; }
+    .insider-icon {
+      font-size: 0.7rem;
+      background: rgba(255,60,90,0.2);
+      color: #ff3c5a;
+      border: 1px solid #ff3c5a;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font-family: 'Fira Code', monospace;
+      margin-left: 6px;
+    }
+
     /* ── FOOTER ────────────────────────────────────────────────────────────── */
     footer {
       text-align: center;
@@ -638,6 +763,18 @@
 </header>
 
 <main>
+  <!-- MARKET SENTIMENT GAUGE -->
+  <div class="sentiment-bar-wrap" id="sentiment-wrap">
+    <span class="sentiment-label">⚡ Whale Sentiment</span>
+    <div class="sentiment-track">
+      <div class="sentiment-needle" id="sentiment-needle" style="left:50%"></div>
+    </div>
+    <div>
+      <div class="sentiment-value" id="sentiment-value" style="color:var(--text-secondary);">—</div>
+      <div class="sentiment-sub" id="sentiment-sub">in attesa dati...</div>
+    </div>
+  </div>
+
   <div class="stats-row">
     <div class="stat-card">
       <div class="label">Run Totali</div>
@@ -707,6 +844,12 @@
   <!-- SEGNALI COPY/WATCH -->
   <div class="section">
     <h2>🎯 Segnali Attivi</h2>
+    <div class="filter-tabs" id="signal-filter-tabs">
+      <button class="filter-tab active" data-filter="all">Tutti</button>
+      <button class="filter-tab" data-filter="copy">Solo COPY</button>
+      <button class="filter-tab" data-filter="watch">Solo WATCH</button>
+      <button class="filter-tab" data-filter="high">High Liquidity</button>
+    </div>
     <div class="signal-grid" id="watched-container">
       <div class="empty">// nessun segnale ancora — primo run in attesa</div>
     </div>
@@ -724,7 +867,7 @@
   <div class="section">
     <h2>💬 Reddit Insights</h2>
     <div class="box" id="reddit-container">
-      <div class="empty">// reddit insights in raccolta (ogni 10 run)</div>
+      <div class="empty">// reddit insights in raccolta — attendi il prossimo run</div>
     </div>
   </div>
 
@@ -773,6 +916,47 @@ function fmtDate(iso) {
   try {
     return new Date(iso).toLocaleDateString('it-IT', {day:'2-digit',month:'short'});
   } catch { return '—'; }
+}
+
+function timeAgo(iso) {
+  if (!iso) return '—';
+  try {
+    const diff = (Date.now() - new Date(iso).getTime()) / 1000;
+    if (diff < 60) return Math.round(diff) + 's fa';
+    if (diff < 3600) return Math.round(diff/60) + 'min fa';
+    if (diff < 86400) return Math.round(diff/3600) + 'h fa';
+    if (diff < 86400*7) return Math.round(diff/86400) + 'g fa';
+    return fmtDate(iso);
+  } catch { return '—'; }
+}
+
+function computeSentiment(state) {
+  const signals = [
+    ...Object.values(state.watched_markets || {}),
+    ...(state.resolved_archive || [])
+  ].slice(-20);
+  if (!signals.length) return null;
+  const copyW = signals.filter(s => s.our_verdict === 'COPY').length;
+  const watchW = signals.filter(s => s.our_verdict === 'WATCH').length;
+  const bullish = (copyW * 1 + watchW * 0.5) / signals.length;
+  return { bullish, total: signals.length, copy: copyW, watch: watchW };
+}
+
+function renderSentiment(state) {
+  const s = computeSentiment(state);
+  const needle = document.getElementById('sentiment-needle');
+  const valEl  = document.getElementById('sentiment-value');
+  const subEl  = document.getElementById('sentiment-sub');
+  if (!s) return;
+  const pct = Math.round(s.bullish * 100);
+  needle.style.left = pct + '%';
+  let label, color;
+  if (pct >= 70) { label = '📈 BULLISH ON WHALES'; color = '#00ff9f'; }
+  else if (pct >= 40) { label = '⚖ NEUTRAL'; color = '#fcee0c'; }
+  else { label = '📉 BEARISH SIGNAL'; color = '#ff3c5a'; }
+  valEl.textContent = label;
+  valEl.style.color = color;
+  subEl.textContent = `Ultimi ${s.total} segnali · COPY ${s.copy} · WATCH ${s.watch}`;
 }
 
 function esc(s) {
@@ -1085,6 +1269,9 @@ function render(state) {
     wrEl.style.color = '#a0b8d8';
   }
 
+  // ── Sentiment Gauge
+  renderSentiment(state);
+
   // ── Render Charts
   renderCharts(state);
 
@@ -1104,6 +1291,17 @@ function render(state) {
       const t = w.trust_score ?? 40;
       const tc = trustColor(t);
       const displayName = w.username || (w.addr ? w.addr.slice(0,6) + '...' + w.addr.slice(-4) : '?');
+      // Win-Rate badge
+      const wr = w.copy_accuracy;
+      const wrBadge = (wr != null && wr >= 40)
+        ? `<span class="wr-badge ${wr >= 60 ? 'wr-badge-green' : 'wr-badge-amber'}">${Math.round(wr)}% WR</span>`
+        : '';
+      // Insider Alert: small wallet (low volume history) moving big money on niche market
+      const isInsider = (w.total_volume_usd || 0) < 500000
+        && (w.trust_score || 0) < 35
+        && (w.times_seen || 0) <= 1
+        && (w.total_profit_usd || 0) > 0;
+      const insiderTag = isInsider ? '<span class="insider-icon">⚠ INSIDER?</span>' : '';
       // Build recent bets HTML
       const bets = w.recent_bets || [];
       let betsHtml = '';
@@ -1129,9 +1327,9 @@ function render(state) {
       }
       const vol = w.total_volume_usd ? fmtK(w.total_volume_usd) : '—';
       const timesSeen = w.times_seen || 0;
-      rows += `<tr>
+      rows += `<tr class="${isInsider ? 'insider-alert' : ''}">
         <td class="rank">#${i+1}</td>
-        <td class="whale-name">${esc(displayName)}</td>
+        <td class="whale-name">${esc(displayName)}${wrBadge}${insiderTag}</td>
         <td class="profit">${fmt$(w.total_profit_usd)}</td>
         <td style="font-family:'Fira Code',monospace;color:var(--accent-cyan);font-size:0.85rem;">${vol}</td>
         <td>
@@ -1186,24 +1384,35 @@ function render(state) {
       const tierCls = (m.tier||'').includes('Top') ? 'tier-top' : (m.tier||'').includes('Big') ? 'tier-big' : 'tier-whale';
       const tierLabel = m.tier || 'Whale';
       const whaleName = m.whale_name ? `<div class="signal-whale">⬡ ${esc(m.whale_name)}<span class="tier-badge ${tierCls}">${esc(tierLabel)}</span></div>` : '';
-      const confBadge = m.confidence ? `<span style="font-family:'Fira Code',monospace;font-size:0.72rem;color:var(--text-secondary);">conf ${m.confidence}/100</span>` : '';
+      // Confidence bar visual
+      const conf = m.confidence || 0;
+      const confColor = conf >= 70 ? '#00ff9f' : conf >= 50 ? '#fcee0c' : '#ff9900';
+      const confBar = conf ? `<div class="conf-bar-wrap">
+        <div class="conf-bar-track"><div class="conf-bar-fill" style="width:${conf}%;background:${confColor};"></div></div>
+        <span class="conf-val">${conf}/100</span>
+      </div>` : '';
       const probBar = prIsReal ? `<div class="prob-bar-wrap">
         <div class="prob-bar-label"><span>Probabilità implicita</span><span style="color:${probColor};font-weight:600;">${pr}</span></div>
         <div class="prob-bar-track"><div class="prob-bar-fill" style="width:${(prFloat*100).toFixed(0)}%;background:${probColor};"></div></div>
       </div>` : '';
+      const whySnippet = m.why_snippet ? `<div class="why-snippet">${esc(m.why_snippet)}</div>` : '';
       const polyUrl = m.poly_url || '';
       const polyBtn = polyUrl
         ? `<a href="${esc(polyUrl)}" target="_blank" rel="noopener noreferrer" class="poly-link">📊 Vedi su Polymarket ↗</a>`
         : `<a href="https://polymarket.com/search?q=${encodeURIComponent(m.question||'')}" target="_blank" rel="noopener noreferrer" class="poly-link" style="opacity:0.6;">🔍 Cerca su Polymarket ↗</a>`;
-      return `<div class="signal-card ${cls}">
-        <span class="signal-badge ${badgeCls}">${badgeTxt}</span>
+      const relTime = timeAgo(m.date_flagged);
+      return `<div class="signal-card ${cls}" data-verdict="${m.our_verdict||'COPY'}" data-size="${m.entry_price||0}">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
+          <span class="signal-badge ${badgeCls}" style="margin-bottom:0;">${badgeTxt}</span>
+          ${confBar}
+        </div>
         ${whaleName}
         <div class="signal-title">${esc(m.question||'???')}</div>
+        ${whySnippet}
         ${probBar}
         <div class="signal-meta">
           <span class="${sideClass}">${side}${prIsReal ? ' @ ' + pr : ''}</span>
-          <span>${m.date_flagged ? new Date(m.date_flagged).toLocaleDateString('it-IT') : '—'}</span>
-          ${confBadge}
+          <span title="${m.date_flagged||''}" style="cursor:default;">${relTime}</span>
           ${m.resolution ? `<span>EXIT: ${esc(m.resolution)}</span>` : ''}
         </div>
         ${polyBtn}
@@ -1314,6 +1523,25 @@ async function loadState() {
     '<span style="color:#a0b8d8;font-size:0.9rem;">Il bot deve eseguire almeno un run prima.</span></div>';
   return null;
 }
+
+// ── FILTER TABS ───────────────────────────────────────────────────────
+let _currentFilter = 'all';
+document.addEventListener('click', function(e) {
+  if (!e.target.matches('.filter-tab')) return;
+  _currentFilter = e.target.dataset.filter;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  e.target.classList.add('active');
+  const cards = document.querySelectorAll('.signal-grid .signal-card');
+  cards.forEach(card => {
+    const verdict = (card.dataset.verdict || '').toUpperCase();
+    const size = parseFloat(card.dataset.size || 0);
+    let show = true;
+    if (_currentFilter === 'copy')  show = verdict === 'COPY';
+    if (_currentFilter === 'watch') show = verdict === 'WATCH';
+    if (_currentFilter === 'high')  show = size >= 0.7 || size <= 0.3; // strong conviction
+    card.style.display = show ? '' : 'none';
+  });
+});
 
 loadState().then(d => { if (d) setTimeout(() => render(d), 600); });
 </script>
