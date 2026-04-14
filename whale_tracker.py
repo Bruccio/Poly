@@ -1128,16 +1128,20 @@ def compute_confidence(trade: dict, state: dict) -> int:
 
 # ── POLYMARKET ──────────────────────────────────────────────────────────────────
 def _gamma_price(m: dict) -> str:
-    """Estrae il miglior prezzo disponibile da un oggetto Gamma market/event.
+    """Estrae il prezzo disponibile da un oggetto Gamma market.
     Prova: bestAsk → lastTradePrice → outcomePrices[0] → tokens[0].price
-    Ritorna "" se non trovato (mai 0.5 hardcoded — il chiamante decide)."""
+    Rifiuta 0.5 esatto (placeholder Gamma = nessun dato reale).
+    Ritorna "" se non trovato."""
+    def _valid(f: float) -> bool:
+        return 0.01 < f < 0.99 and abs(f - 0.5) > 0.005  # esclude 0.5 placeholder
+
     for key in ("bestAsk", "lastTradePrice"):
         v = m.get(key)
         if v is not None:
             try:
                 f = float(v)
-                if 0.01 < f < 0.99:   # scarta 0 e 1 (dati garbage)
-                    return str(f)
+                if _valid(f):
+                    return str(round(f, 6))
             except (ValueError, TypeError):
                 pass
     # outcomePrices: ["0.65", "0.35"] — usa YES (indice 0)
@@ -1145,8 +1149,8 @@ def _gamma_price(m: dict) -> str:
     if isinstance(op, list) and op:
         try:
             f = float(op[0])
-            if 0.01 < f < 0.99:
-                return str(f)
+            if _valid(f):
+                return str(round(f, 6))
         except (ValueError, TypeError):
             pass
     # tokens: [{"price": "0.65"}, ...]
@@ -1154,11 +1158,75 @@ def _gamma_price(m: dict) -> str:
     if isinstance(tokens, list) and tokens:
         try:
             f = float(tokens[0].get("price") or 0)
-            if 0.01 < f < 0.99:
-                return str(f)
+            if _valid(f):
+                return str(round(f, 6))
         except (ValueError, TypeError):
             pass
-    return ""   # no price found
+    return ""   # no real price found
+
+
+# ── CLOB API (prezzi reali dall'orderbook) ───────────────────────────────────────
+_CLOB_PRICE_CACHE: dict = {}  # token_id → price str, svuotato a ogni run
+
+
+def _clob_price(token_id: str) -> str:
+    """Legge il prezzo midpoint dalla CLOB API di Polymarket.
+    Endpoint: GET https://clob.polymarket.com/midpoint?token_id={id}
+    Cache per run — un token interrogato non si richiama."""
+    if not token_id or len(token_id) < 10:
+        return ""
+    if token_id in _CLOB_PRICE_CACHE:
+        return _CLOB_PRICE_CACHE[token_id]
+    try:
+        r = _http_get(
+            f"https://clob.polymarket.com/midpoint?token_id={token_id}",
+            timeout=5, retries=1,
+        )
+        if r and r.status_code == 200:
+            data = r.json()
+            mid = data.get("mid") or data.get("midpoint") or ""
+            if mid:
+                try:
+                    f = float(mid)
+                    if 0.01 < f < 0.99 and abs(f - 0.5) > 0.005:
+                        result = str(round(f, 4))
+                        _CLOB_PRICE_CACHE[token_id] = result
+                        return result
+                except (ValueError, TypeError):
+                    pass
+    except Exception as e:
+        log(f"CLOB price {token_id[:20]}: {e}", "DEBUG")
+    _CLOB_PRICE_CACHE[token_id] = ""
+    return ""
+
+
+def _best_price(m: dict) -> str:
+    """Prezzo definitivo: Gamma prima (veloce), CLOB come fallback (preciso).
+    Usa clobTokenIds o tokens[].token_id per interrogare la CLOB.
+    Ritorna "" se nessuna fonte ha un prezzo reale (≠ 0.5 placeholder)."""
+    # 1. Gamma API (istantaneo, dalla cache bulk)
+    p = _gamma_price(m)
+    if p:
+        return p
+    # 2. CLOB API: prova clobTokenIds (campo JSON stringificato da Gamma)
+    try:
+        clob_ids = json.loads(m.get("clobTokenIds") or "[]")
+        if clob_ids:
+            p = _clob_price(str(clob_ids[0]))
+            if p:
+                return p
+    except (json.JSONDecodeError, TypeError, IndexError):
+        pass
+    # 3. CLOB API: prova tokens[].token_id
+    tokens = m.get("tokens") or []
+    for tok in (tokens if isinstance(tokens, list) else [])[:1]:
+        tid = (tok.get("token_id") or tok.get("tokenId") or
+               tok.get("id") or "")
+        if tid:
+            p = _clob_price(str(tid))
+            if p:
+                return p
+    return ""
 
 
 def _sz(t):
@@ -1286,7 +1354,7 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                 # Scudo anti-latenza: verifica real-time per ogni mercato
                 if not _verify_market_open(cid, m.get("question") or ""):
                     continue
-                price_str = _gamma_price(m) or "0.5"
+                price_str = _best_price(m) or "0.5"
                 candidates.append({
                     "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
                     "price":       price_str,
@@ -1315,20 +1383,26 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                 if ev.get("closed") or ev.get("resolved"):
                     log(f"Evento chiuso scartato: {str(ev.get('title',''))[:50]}", "WARN")
                     continue
-                # Prova a ottenere il prezzo dal primo mercato dell'evento
+                # Prova a ottenere il prezzo dal primo mercato dell'evento (Gamma + CLOB)
                 ev_markets = ev.get("markets") or []
                 ev_price = ""
+                first_cid = ""
                 for em in (ev_markets if isinstance(ev_markets, list) else []):
-                    ev_price = _gamma_price(em)
+                    ev_price = _best_price(em)
+                    if not first_cid:
+                        first_cid = em.get("conditionId") or ""
                     if ev_price:
                         break
+                # Se i mercati interni non avevano prezzo, prova CLOB sull'evento stesso
+                if not ev_price and first_cid:
+                    ev_price = _clob_price(first_cid)
                 candidates.append({
                     "usdcSize":    str(float(ev.get("volume") or ev.get("volumeNum") or 0)),
                     "price":       ev_price or "0.5",
                     "side":        "YES",
                     "title":       ev.get("title") or ev.get("question") or "Evento",
                     "userAddress": "0xpool",
-                    "conditionId": (ev_markets[0].get("conditionId") or "") if ev_markets else "",
+                    "conditionId": first_cid,
                 })
             _add_items(candidates, "gamma-events")
     except Exception as e:
@@ -1350,7 +1424,7 @@ def fetch_polymarket_whales(min_size, state: dict = None):
                     cid = m.get("conditionId") or ""
                     if not _verify_market_open(cid, m.get("question") or ""):
                         continue
-                    price_str = _gamma_price(m) or "0.5"
+                    price_str = _best_price(m) or "0.5"
                     candidates.append({
                         "usdcSize":    str(float(m.get("volume24hr") or m.get("volume") or 0)),
                         "price":       price_str,
@@ -2004,6 +2078,7 @@ def run():
     _ACTIVITY_CACHE.clear()
     _GAMMA_RESOLUTION_CACHE.clear()
     _VERIFIED_OPEN_CACHE.clear()
+    _CLOB_PRICE_CACHE.clear()
     state = load_state()
     state["run_count"] = state.get("run_count", 0) + 1
     run_n = state["run_count"]
