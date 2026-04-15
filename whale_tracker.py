@@ -1565,8 +1565,9 @@ def fetch_polymarket_whales(min_size, state: dict = None):
     ]
 
     # ── Arricchisci con trust_score e filtra wash trader ──
+    leaderboard = (state or {}).get("leaderboard", {})
     enriched = []
-    for t in all_trades:
+    for t in filtered:
         wallet = (t.get("userAddress") or t.get("maker") or "0xpool").lower()
         
         # ESCLUDI 0XPOOL E DEMO WALLETS
