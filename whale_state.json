@@ -8,7 +8,7 @@
       "trust_score": 95,
       "times_seen": 3,
       "copy_accuracy": null,
-      "last_seen": "2026-04-14T20:07:10.529060+00:00",
+      "last_seen": "2026-04-15T06:49:10.382645+00:00",
       "profiled": false
     },
     "beachboy4": {
@@ -19,7 +19,7 @@
       "trust_score": 92,
       "times_seen": 2,
       "copy_accuracy": null,
-      "last_seen": "2026-04-14T20:07:11.175874+00:00",
+      "last_seen": "2026-04-15T06:49:11.100928+00:00",
       "profiled": false
     },
     "reachingthesky": {
@@ -30,7 +30,7 @@
       "trust_score": 88,
       "times_seen": 2,
       "copy_accuracy": null,
-      "last_seen": "2026-04-14T20:07:11.822459+00:00",
+      "last_seen": "2026-04-15T06:49:11.833753+00:00",
       "profiled": false
     },
     "poyo": {
@@ -41,7 +41,7 @@
       "trust_score": 83,
       "times_seen": 1,
       "copy_accuracy": null,
-      "last_seen": "2026-04-14T20:07:12.494299+00:00",
+      "last_seen": "2026-04-15T06:49:12.540464+00:00",
       "profiled": false
     },
     "bearwhale88": {
@@ -52,41 +52,25 @@
       "trust_score": 76,
       "times_seen": 1,
       "copy_accuracy": null,
-      "last_seen": "2026-04-14T20:07:13.170432+00:00",
+      "last_seen": "2026-04-15T06:49:13.253738+00:00",
       "profiled": false
     }
   },
-  "watched_markets": {
-    "fe0f7c96771d": {
-      "question": "Next Prime Minister of Hungary",
-      "our_verdict": "WATCH",
-      "whale_wallet": "0xpool...",
-      "whale_name": "0xpool",
-      "tier": "Top Whale (>$1M)",
-      "confidence": 75,
-      "entry_price": 0.989,
-      "side": "YES",
-      "date_flagged": "2026-04-14",
-      "conditionId": "",
-      "poly_url": "",
-      "why_snippet": "Forse - Evento già determinato (Magyar PM confermato), ma Trust 40/100 blocca CO",
-      "resolved": false,
-      "resolution": null,
-      "correct": null
-    }
-  },
+  "watched_markets": {},
   "algo_stats": {
     "total_copy_signals": 0,
     "resolved_copies": 0,
     "correct_copies": 0,
     "accuracy_pct": null,
-    "last_updated": "2026-04-14T20:07:04.783474+00:00"
+    "last_updated": "2026-04-15T06:49:09.105982+00:00",
+    "shadow_profit_usdc": 0.0,
+    "shadow_roi_pct": null
   },
   "reddit_cache": {
     "last_checked": null,
     "top_strategies": []
   },
-  "run_count": 27,
+  "run_count": 28,
   "resolved_archive": [
     {
       "question": "US strikes Iran by...?",
@@ -132,6 +116,24 @@
       "resolution": "Auto-removed: market resolved (world knowledge: Apr 2026)",
       "correct": null,
       "removed_at": "2026-04-14T08:49:30.062624+00:00"
+    },
+    {
+      "question": "Next Prime Minister of Hungary",
+      "our_verdict": "WATCH",
+      "whale_wallet": "0xpool...",
+      "whale_name": "0xpool",
+      "tier": "Top Whale (>$1M)",
+      "confidence": 75,
+      "entry_price": 0.989,
+      "side": "YES",
+      "date_flagged": "2026-04-14",
+      "conditionId": "",
+      "poly_url": "",
+      "why_snippet": "Forse - Evento già determinato (Magyar PM confermato), ma Trust 40/100 blocca CO",
+      "resolved": true,
+      "resolution": "?",
+      "correct": null,
+      "resolution_date": "2026-04-15T06:49:09.105982+00:00"
     }
   ],
   "github_cache": {
@@ -143,5 +145,6 @@
       "prestonshute/polymarket-api-collection",
       "Gazettebale/polymarket-volume-scanner"
     ]
-  }
+  },
+  "lessons_learned": []
 }
