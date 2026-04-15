@@ -1059,6 +1059,15 @@ def update_watched_markets(state: dict, results: list):
     for res in results:
         if res.get("verdict") not in ("COPY", "WATCH"):
             continue
+        # Filtro difensivo: non salvare mai segnali con wallet placeholder
+        # (0xpool viene usato come default per sorgenti market-level senza wallet reale).
+        wallet_s = (res.get("wallet") or "").lower()
+        whale_s  = (res.get("whale_name") or "").lower()
+        wallet_f = (res.get("wallet_full") or "").lower()
+        if ("0xpool" in wallet_s or "0xpool" in whale_s or "0xpool" in wallet_f
+                or "0xdemo" in wallet_s or "0xdemo" in whale_s or "0xdemo" in wallet_f):
+            log(f"Scarto segnale senza wallet reale: {res.get('market','?')[:50]}", "WARN")
+            continue
         key = hashlib.md5(res["market"].encode()).hexdigest()[:12]
         if key not in state["watched_markets"]:
             state["watched_markets"][key] = {
@@ -2210,6 +2219,20 @@ def run():
         state["algo_stats"]["resolved_copies"] = 0
         state["algo_stats"]["correct_copies"] = 0
         state["algo_stats"]["accuracy_pct"] = None
+
+    # 1c. Cleanup proattivo: rimuovi segnali senza wallet reale (0xpool/0xdemo)
+    # residui da versioni precedenti o da code path che bypassano il filtro.
+    stale_keys = []
+    for k, m in list(state.get("watched_markets", {}).items()):
+        wallet_s = (m.get("whale_wallet") or "").lower()
+        whale_s  = (m.get("whale_name") or "").lower()
+        if "0xpool" in wallet_s or "0xpool" in whale_s \
+                or "0xdemo" in wallet_s or "0xdemo" in whale_s:
+            stale_keys.append(k)
+    for k in stale_keys:
+        del state["watched_markets"][k]
+    if stale_keys:
+        log(f"Cleanup: rimossi {len(stale_keys)} segnali stale senza wallet reale", "OK")
 
     # 2. Aggiorna leaderboard da Polymarket (chi sono le whale?)
     fetch_breaking_leaderboard(state)

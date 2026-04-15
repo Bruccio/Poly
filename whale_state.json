@@ -56,25 +56,7 @@
       "profiled": false
     }
   },
-  "watched_markets": {
-    "9bc94bf33b59": {
-      "question": "Netanyahu out by...?",
-      "our_verdict": "WATCH",
-      "whale_wallet": "0xpool...",
-      "whale_name": "0xpool",
-      "tier": "Top Whale (>$1M)",
-      "confidence": 65,
-      "entry_price": 0.44,
-      "side": "YES",
-      "date_flagged": "2026-04-15",
-      "conditionId": "",
-      "poly_url": "",
-      "why_snippet": "Forse — deadline non è chiara (Netanyahu è ancora Primo Ministro a aprile 2026?)",
-      "resolved": false,
-      "resolution": null,
-      "correct": null
-    }
-  },
+  "watched_markets": {},
   "algo_stats": {
     "total_copy_signals": 0,
     "resolved_copies": 0,
