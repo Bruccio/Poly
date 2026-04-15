@@ -375,6 +375,14 @@ def is_market_resolved(title: str, condition_id: str = "") -> bool:
         )
         if r and r.status_code == 200:
             items = r.json() if isinstance(r.json(), list) else r.json().get("data", [])
+            # Gamma API ignora conditionId sconosciuti e restituisce un market random
+            # (verificato: GET /markets?conditionId=0xfake → ritorna il primo market
+            # del feed). Filtriamo per accettare solo risposte che hanno davvero il
+            # conditionId richiesto — altrimenti cacheremmo dati sbagliati sotto la
+            # chiave e compromettere il fallback sul titolo.
+            cid_lower = condition_id.lower()
+            items = [m for m in items
+                     if (m.get("conditionId") or "").lower() == cid_lower]
             if items:
                 m = items[0]
                 _GAMMA_RESOLUTION_CACHE[condition_id] = m
@@ -382,7 +390,7 @@ def is_market_resolved(title: str, condition_id: str = "") -> bool:
                 if q:
                     _GAMMA_RESOLUTION_CACHE[q] = m
                 return _resolved_from_cache_entry(m)
-            # ID presente ma Gamma non ha questo market → rimosso/risolto molto tempo fa.
+            # ID non trovato in Gamma → rimosso/risolto molto tempo fa.
             # Per titoli troncati non abbiamo altro modo per verificare → blocca.
             if is_truncated:
                 log(f"Titolo troncato + conditionId non in Gamma → blocco: {title[:60]}", "WARN")
