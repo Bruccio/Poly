@@ -1070,6 +1070,8 @@ def update_watched_markets(state: dict, results: list):
                 "confidence": res.get("confidence", 0),
                 "entry_price": res.get("price", 0),
                 "side": res.get("side", "YES"),
+                "vale_pena": res.get("vale_pena", ""),
+                "spiegazione": res.get("spiegazione", ""),
                 "date_flagged": datetime.now(timezone.utc).strftime("%Y-%m-%d"),
                 "conditionId": res.get("conditionId", ""),   # per lookup diretto in check_resolutions
                 "poly_url": res.get("poly_url", ""),         # link diretto al mercato su Polymarket
@@ -1563,17 +1565,22 @@ def fetch_polymarket_whales(min_size, state: dict = None):
     ]
 
     # ── Arricchisci con trust_score e filtra wash trader ──
-    leaderboard = (state or {}).get("leaderboard", {})
     enriched = []
-    for t in filtered:
+    for t in all_trades:
         wallet = (t.get("userAddress") or t.get("maker") or "0xpool").lower()
+        
+        # ESCLUDI 0XPOOL E DEMO WALLETS
+        if wallet.startswith("0xpool") or wallet.startswith("0xdemo") or "0xpool" in wallet:
+            continue
+            
         lb_entry = leaderboard.get(wallet, {})
         t["whale_trust_score"] = lb_entry.get("trust_score", 40)
         t["whale_username"] = lb_entry.get("username", wallet[:10])
-        if not wallet.startswith("0xpool") and not wallet.startswith("0xdemo"):
-            if is_wash_trader(wallet):
-                log(f"Escluso wash trader: {wallet[:14]}...", "WARN")
-                continue
+        
+        if is_wash_trader(wallet):
+            log(f"Escluso wash trader: {wallet[:14]}...", "WARN")
+            continue
+            
         enriched.append(t)
 
     # ── Ordina per trust_score × size ──
@@ -2011,8 +2018,11 @@ def build_message(results, state: dict = None, is_demo=False, best_skip=None):
 
         if t.get("vale_pena"):
             msg += f"💡 {t['vale_pena']}\n"
-        if t.get("spiegazione") and v == "COPY":
-            msg += f"📖 {t['spiegazione'][:250]}\n"
+        if t.get("spiegazione"):
+            msg += f"📖 {t['spiegazione']}\n"
+        
+        # Indicazione su cosa puntare
+        msg += f"💡 *COSA FARE:* Punta su *{t['side']}* se il prezzo è vicino a {t['price']} USDC.\n"
 
         risk = t["risk_score"]
         icon = "🟢" if risk <= 3 else "🟡" if risk <= 6 else "🔴"
@@ -2096,9 +2106,12 @@ def build_email_html(results, state: dict = None, is_demo=False, best_skip=None)
           <td style="padding:16px;">
             <span style="font-weight:bold;color:{color};">{badge}</span><br>
             {trust_html}
-            <span style="font-size:15px;font-weight:600;">{t['market'][:90]}</span><br><br>
+            <span style="font-size:15px;font-weight:600;">{t['market']}</span><br><br>
             {f"<b>💡 {t['vale_pena']}</b><br>" if t.get('vale_pena') else ""}
-            {f"📖 {t['spiegazione'][:200]}<br>" if t.get('spiegazione') else ""}
+            {f"📖 {t['spiegazione']}<br>" if t.get('spiegazione') else ""}
+            <div style="margin-top:10px; padding:10px; background:#e8f4fd; border-left:4px solid #2a6dd9;">
+                <b>🎯 COSA FARE:</b> Punta su <b>{t['side']}</b> se il prezzo è vicino a {t['price']} USDC.
+            </div>
             <br>
             <span style="color:{risk_color};font-weight:bold;">Rischio: {risk}/10</span>
             {"<br>⚠️ <i>Potrebbe essere gonfiato artificialmente</i>" if t.get('sospetto','No') not in ('No','N/A') else ""}
@@ -2185,8 +2198,17 @@ def run():
     # Calcola oggi una volta sola — usata da tutti i filtri date
     build_gamma_resolution_cache()
 
-    # 1b. Controlla resolution dei mercati passati (self-improving)
+     # 1. Controlla resolution dei mercati passati (self-improving)
     check_resolutions(state)
+    
+    # 1b. WASH STORICO (Ogni 4 run = circa 2 giorni se run 2 volte al giorno)
+    if run_n % 4 == 0:
+        log(f"WASH STORICO: Pulizia watched_markets (Run #{run_n})", "WARN")
+        state["watched_markets"] = {}
+        state["algo_stats"]["total_copy_signals"] = 0
+        state["algo_stats"]["resolved_copies"] = 0
+        state["algo_stats"]["correct_copies"] = 0
+        state["algo_stats"]["accuracy_pct"] = None
 
     # 2. Aggiorna leaderboard da Polymarket (chi sono le whale?)
     fetch_breaking_leaderboard(state)
