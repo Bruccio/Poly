@@ -545,54 +545,94 @@ def _cached_activity(wallet: str, limit: int = 100) -> list:
 # ── LEADERBOARD POLYMARKET ──────────────────────────────────────────────────────
 def fetch_breaking_leaderboard(state: dict):
     """
-    Scarica la leaderboard da data-api.polymarket.com e aggiorna
+    Scarica la leaderboard da data-api.polymarket.com/v1/leaderboard e aggiorna
     state["leaderboard"] con trust_score calcolato.
+
+    Endpoint ufficiale (doc: docs.polymarket.com/api-reference/core/get-trader-leaderboard-rankings):
+      GET https://data-api.polymarket.com/v1/leaderboard
+      params: orderBy=PNL|VOL, timePeriod=DAY|WEEK|MONTH|ALL, limit=1-50
+      fields:  rank, proxyWallet, userName, vol, pnl, profileImage, xUsername, verifiedBadge
+
+    Chiamiamo due finestre/ordini per avere whale diverse:
+      - PNL/ALL  → top profit storici (sticky, stabili)
+      - PNL/WEEK → top profit settimanali (rotano)
+      - VOL/WEEK → top volume settimanali (attivi davvero)
     """
-    H = {"Accept": "application/json", "User-Agent": "Mozilla/5.0"}
-    urls = [
-        "https://data-api.polymarket.com/leaderboard?limit=50&sortBy=profit&window=all",
-        "https://data-api.polymarket.com/leaderboard?limit=50",
+    state.setdefault("leaderboard", {})
+
+    # ── Pulisci seed stale: entries il cui key non è un wallet 0x valido.
+    stale = [k for k in list(state["leaderboard"].keys())
+             if not (isinstance(k, str) and k.startswith("0x") and len(k) >= 40)]
+    for k in stale:
+        del state["leaderboard"][k]
+    if stale:
+        log(f"Leaderboard: rimossi {len(stale)} entries stale (seed/fake wallet)", "OK")
+
+    combos = [
+        ("PNL", "ALL"),
+        ("PNL", "WEEK"),
+        ("VOL", "WEEK"),
     ]
-    for url in urls:
+    total_updated = 0
+    for order_by, time_period in combos:
+        url = (f"https://data-api.polymarket.com/v1/leaderboard"
+               f"?orderBy={order_by}&timePeriod={time_period}&limit=50")
         try:
             r = _http_get(url)
             if not r or r.status_code != 200:
+                log(f"Leaderboard {order_by}/{time_period}: "
+                    f"HTTP {getattr(r,'status_code','?')}", "WARN")
                 continue
             data = r.json()
-            entries = data if isinstance(data, list) else data.get("data", data.get("leaderboard", []))
+            entries = data if isinstance(data, list) else data.get("data", [])
             if not entries:
                 continue
             updated = 0
             for e in entries:
-                wallet = (e.get("proxyWallet") or e.get("address") or e.get("wallet") or "").lower()
-                if not wallet:
+                wallet = (e.get("proxyWallet") or "").lower()
+                if not wallet.startswith("0x") or len(wallet) < 40:
                     continue
-                profit = float(e.get("profit") or e.get("pnl") or e.get("totalProfit") or 0)
-                volume = float(e.get("volume") or e.get("totalVolume") or 0)
-                username = e.get("name") or e.get("username") or wallet[:10]
+                profit = float(e.get("pnl") or 0)
+                volume = float(e.get("vol") or 0)
+                username = e.get("userName") or wallet[:10]
+                # Trust score: base 50 + bonus log-scala su profit e volume
                 score = 50
                 if profit > 0:
                     score += min(30, int(math.log10(max(profit, 1)) * 5))
                 if volume > 0:
                     score += min(20, int(math.log10(max(volume, 1)) * 3))
+                if e.get("verifiedBadge"):
+                    score += 5
                 score = min(100, score)
                 existing = state["leaderboard"].get(wallet, {})
+                # Mantieni il max di profit/volume tra le diverse finestre (ALL vince
+                # per i top storici, WEEK per i recenti — così l'arricchimento con
+                # trust_score resta coerente).
                 state["leaderboard"][wallet] = {
-                    "username": username,
-                    "total_profit_usd": profit,
-                    "total_volume_usd": volume,
-                    "trust_score": score,
-                    "times_seen": existing.get("times_seen", 0),
-                    "copy_accuracy": existing.get("copy_accuracy", None),
-                    "recent_bets": existing.get("recent_bets", []),
-                    "last_seen": datetime.now(timezone.utc).isoformat(),
+                    "username":         username,
+                    "wallet":           wallet,
+                    "total_profit_usd": max(profit, existing.get("total_profit_usd", 0)),
+                    "total_volume_usd": max(volume, existing.get("total_volume_usd", 0)),
+                    "trust_score":      max(score,  existing.get("trust_score", 0)),
+                    "times_seen":       existing.get("times_seen", 0),
+                    "copy_accuracy":    existing.get("copy_accuracy", None),
+                    "recent_bets":      existing.get("recent_bets", []),
+                    "last_seen":        datetime.now(timezone.utc).isoformat(),
+                    "source_windows":   sorted(set(
+                        existing.get("source_windows", [])
+                        + [f"{order_by}/{time_period}"]
+                    )),
                 }
                 updated += 1
-            log(f"Leaderboard: {updated} whale aggiornate", "OK")
-            return
-        except Exception as e:
-            log(f"Leaderboard fetch error: {e}", "WARN")
-    log("Leaderboard: impossibile scaricare (continuo senza)", "WARN")
+            total_updated += updated
+            log(f"Leaderboard {order_by}/{time_period}: {updated} whale", "OK")
+        except Exception as exc:
+            log(f"Leaderboard {order_by}/{time_period}: {exc}", "WARN")
+
+    if total_updated == 0:
+        log("Leaderboard: nessuna whale scaricata (continuo senza)", "WARN")
+    else:
+        log(f"Leaderboard: {len(state['leaderboard'])} whale totali in cache", "OK")
 
 
 # ── WHALE-FIRST AUTO DETECTION ───────────────────────────────────────────────────
