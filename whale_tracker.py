@@ -51,7 +51,10 @@ def _empty_state() -> dict:
             "correct_copies": 0,
             "accuracy_pct": None,
             "last_updated": None,
+            "shadow_profit_usdc": 0.0,   # ROI virtuale ($100 per segnale COPY)
+            "shadow_roi_pct": None,       # ROI % cumulativo
         },
+        "lessons_learned": [],           # errori passati → feedati a Claude per auto-miglioramento
         "reddit_cache": {
             "last_checked": None,
             "top_strategies": [],
@@ -923,6 +926,21 @@ def check_resolutions(state: dict):
                    (winning in ("NO", "0") and our_side == "NO")) if winning else None
         market.update({"resolved": True, "resolution": winning or "?", "correct": correct,
                        "resolution_date": now.isoformat()})
+
+        # ── Self-correction: salva errori COPY per feedarli a Claude
+        if market.get("our_verdict") == "COPY" and correct is False:
+            lesson = {
+                "question":    question[:80],
+                "our_side":    our_side,
+                "outcome":     winning or "?",
+                "entry_price": market.get("entry_price", 0),
+                "why":         market.get("why_snippet", ""),
+                "date":        now.strftime("%Y-%m-%d"),
+            }
+            state.setdefault("lessons_learned", []).append(lesson)
+            state["lessons_learned"] = state["lessons_learned"][-10:]  # max 10
+            log(f"  📚 Lezione salvata: '{question[:45]}' → previsto {our_side}, realtà {winning}", "WARN")
+
         # Sposta in archive, rimuovi da watched → non compare più in dashboard
         archive.append(market)
         del watched[key]
@@ -940,16 +958,39 @@ def check_resolutions(state: dict):
     # total_copy_signals = segnali COPY attivi + archiviati
     active_copies = sum(1 for m in watched.values() if m.get("our_verdict") == "COPY")
     archived_copies = sum(1 for m in state["resolved_archive"] if m.get("our_verdict") == "COPY")
+
+    # Shadow wallet: $100 virtuale per ogni segnale COPY risolto
+    # Se corretto: guadagno = $100 / entry_price - $100 (payoff binario)
+    # Se sbagliato: perdi $100 (scommessa persa)
+    shadow_profit = 0.0
+    for m in state["resolved_archive"]:
+        if m.get("our_verdict") != "COPY" or m.get("correct") is None:
+            continue
+        ep = float(m.get("entry_price") or 0.5)
+        if ep <= 0:
+            ep = 0.5
+        if m["correct"]:
+            shadow_profit += (100.0 / ep) - 100.0   # payoff netto
+        else:
+            shadow_profit -= 100.0                    # perdi la posta
+    total_copy_resolved = sum(
+        1 for m in state["resolved_archive"] if m.get("our_verdict") == "COPY" and m.get("correct") is not None
+    )
+    shadow_roi = round(shadow_profit / (total_copy_resolved * 100) * 100, 1) if total_copy_resolved else None
+
     state["algo_stats"] = {
         "total_copy_signals": active_copies + archived_copies,
         "resolved_copies": len(all_resolved),
         "correct_copies": correct_count,
         "accuracy_pct": round(correct_count / len(all_resolved) * 100, 1) if all_resolved else None,
         "last_updated": now.isoformat(),
+        "shadow_profit_usdc": round(shadow_profit, 2),
+        "shadow_roi_pct": shadow_roi,
     }
     if newly_resolved:
         log(f"Resolution: {newly_resolved} mercati risolti e rimossi dalla dashboard, "
-            f"accuracy: {state['algo_stats']['accuracy_pct']}%", "OK")
+            f"accuracy: {state['algo_stats']['accuracy_pct']}%, "
+            f"shadow ROI: {shadow_roi}%", "OK")
 
 
 # ── SPORT TAG FILTER (Gamma API) ─────────────────────────────────────────────────
@@ -1564,10 +1605,10 @@ MODELS = [
     "claude-3-haiku-20240307",
 ]
 
-def _build_system_prompt() -> str:
+def _build_system_prompt(lessons: list = None) -> str:
     today = datetime.now(timezone.utc).strftime("%d %B %Y")
     today_iso = datetime.now(timezone.utc).strftime("%Y-%m-%d")
-    return (
+    base = (
         f"Oggi è {today} ({today_iso}). Usa questa data come riferimento assoluto.\n\n"
         "REGOLA N°0 — MERCATO GIÀ RISOLTO → SKIP IMMEDIATO (priorità massima assoluta):\n"
         "Devi fare SKIP se UNA delle seguenti condizioni è vera:\n"
@@ -1606,11 +1647,25 @@ def _build_system_prompt() -> str:
         "Cosa sta succedendo: [2-3 righe MAX — spiega il mercato come a un amico]\n"
         "Sospetto?: No/Forse/Sì"
     )
+    if lessons:
+        lesson_lines = []
+        for l in lessons[-5:]:  # ultimi 5 errori
+            lesson_lines.append(
+                f"  • '{l.get('question','?')}' → previsto {l.get('our_side','?')}, "
+                f"realtà {l.get('outcome','?')} @ {l.get('entry_price',0)*100:.0f}¢ "
+                f"({l.get('date','')})"
+            )
+        base += (
+            "\n\nLEZIONI APPRESE (errori passati — NON ripetere questi pattern):\n"
+            + "\n".join(lesson_lines)
+            + "\nSe il mercato attuale è simile a uno di questi, sii più cauto (WATCH invece di COPY)."
+        )
+    return base
 
 SYSTEM_PROMPT = _build_system_prompt()
 
 
-def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):
+def analyze_with_claude(trade, state: dict = None, reddit_context: str = "", lessons: list = None):
     size        = _sz(trade)
     price       = float(trade.get("price") or trade.get("outcomePrice") or 0.5)
     side        = trade.get("side") or "YES"
@@ -1661,7 +1716,7 @@ def analyze_with_claude(trade, state: dict = None, reddit_context: str = ""):
                 json={
                     "model": model,
                     "max_tokens": 500,
-                    "system": _build_system_prompt(),  # ricostruito con la data odierna
+                    "system": _build_system_prompt(lessons),  # ricostruito con data odierna + lezioni
                     "messages": [{"role": "user", "content": f"Analizza:\n\n{text}"}],
                 },
                 timeout=30,
@@ -1765,7 +1820,7 @@ def _build_trade_text(trade: dict, state: dict, news: str = "") -> str:
     return "\n".join(lines)
 
 
-def analyze_batch_claude(trades: list, state: dict, reddit_context: str = "") -> list:
+def analyze_batch_claude(trades: list, state: dict, reddit_context: str = "", lessons: list = None) -> list:
     """
     Analizza fino a 5 mercati in una singola chiamata Claude.
     Riduce il numero di API call da N a 1, con parsing batch del risultato.
@@ -1804,6 +1859,16 @@ def analyze_batch_claude(trades: list, state: dict, reddit_context: str = "") ->
         acc_str = f"\nTrack record sistema: {algo['accuracy_pct']}% accuracy."
     if reddit_context:
         acc_str += f"\nInsight r/Polymarket: {reddit_context}"
+    if lessons:
+        lesson_lines = [
+            f"  • '{l.get('question','?')}' → previsto {l.get('our_side','?')}, "
+            f"realtà {l.get('outcome','?')} ({l.get('date','')})"
+            for l in lessons[-5:]
+        ]
+        acc_str += (
+            "\nLEZIONI APPRESE (non ripetere questi errori):\n"
+            + "\n".join(lesson_lines)
+        )
 
     prompt = (
         f"Analizza questi {len(batch)} mercati Polymarket.{acc_str}\n\n"
@@ -1828,7 +1893,7 @@ def analyze_batch_claude(trades: list, state: dict, reddit_context: str = "") ->
                 json={
                     "model": model,
                     "max_tokens": 800,
-                    "system": BATCH_SYSTEM,
+                    "system": _build_system_prompt(lessons),
                     "messages": [{"role": "user", "content": prompt}],
                 },
                 timeout=45,
@@ -2161,9 +2226,14 @@ def run():
     to_analyze = whales[:MAX_WHALES]
     results: list = []
 
+    # Lezioni apprese — passate a Claude per auto-correzione
+    lessons = state.get("lessons_learned", [])
+    if lessons:
+        log(f"Self-correction: {len(lessons)} lezioni disponibili per Claude", "OK")
+
     # 5a. Batch (top 5) — 1 call invece di 5, include news context
     log(f"Analisi batch top 5 mercati (1 chiamata Claude)...")
-    batch_results = analyze_batch_claude(to_analyze[:5], state, extra_context)
+    batch_results = analyze_batch_claude(to_analyze[:5], state, extra_context, lessons=lessons)
     if batch_results:
         results.extend(batch_results)
     else:
@@ -2173,7 +2243,7 @@ def run():
             log(f"Analisi singola fallback: {name[:55]}...")
             try:
                 news = fetch_market_context(name)
-                result = analyze_with_claude(trade, state, extra_context + (f" | News: {news}" if news else ""))
+                result = analyze_with_claude(trade, state, extra_context + (f" | News: {news}" if news else ""), lessons=lessons)
                 results.append(result)
             except Exception as e:
                 log(f"Errore analisi: {e}", "ERR")
@@ -2193,7 +2263,8 @@ def run():
             news = fetch_market_context(name)
             result = analyze_with_claude(
                 trade, state,
-                extra_context + (f" | News: {news}" if news else "")
+                extra_context + (f" | News: {news}" if news else ""),
+                lessons=lessons,
             )
             results.append(result)
             log(f"→ {result['verdict']} | R{result['risk_score']}/10 | "

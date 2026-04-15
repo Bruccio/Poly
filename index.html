@@ -800,6 +800,10 @@
       <div class="label">Win Rate COPY</div>
       <div class="value" id="stat-winrate">—</div>
     </div>
+    <div class="stat-card">
+      <div class="label">Shadow ROI</div>
+      <div class="value" id="stat-shadow-roi">—</div>
+    </div>
   </div>
 
   <!-- CHARTS SECTION -->
@@ -1267,6 +1271,20 @@ function render(state) {
   } else {
     wrEl.textContent = 'N/D';
     wrEl.style.color = '#a0b8d8';
+  }
+
+  // Shadow ROI
+  const shadowEl = document.getElementById('stat-shadow-roi');
+  const shadowRoi = (state.algo_stats || {}).shadow_roi_pct;
+  const shadowProfit = (state.algo_stats || {}).shadow_profit_usdc;
+  if (shadowRoi !== null && shadowRoi !== undefined) {
+    const sign = shadowRoi >= 0 ? '+' : '';
+    shadowEl.textContent = sign + shadowRoi + '%';
+    shadowEl.style.color = shadowRoi >= 0 ? '#00ff9f' : '#ff3c5a';
+    shadowEl.title = `Profitto virtuale: $${(shadowProfit || 0).toFixed(0)} USDC (scommesse $100 per segnale COPY)`;
+  } else {
+    shadowEl.textContent = 'N/D';
+    shadowEl.style.color = '#a0b8d8';
   }
 
   // ── Sentiment Gauge
