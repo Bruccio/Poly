@@ -1413,12 +1413,17 @@ function render(state) {
         <div class="prob-bar-label"><span>Probabilità implicita</span><span style="color:${probColor};font-weight:600;">${pr}</span></div>
         <div class="prob-bar-track"><div class="prob-bar-fill" style="width:${(prFloat*100).toFixed(0)}%;background:${probColor};"></div></div>
       </div>` : '';
-      const whySnippet = m.why_snippet ? `<div class="why-snippet">${esc(m.why_snippet)}</div>` : '';
+      const whySnippet = m.vale_pena ? `<div class="why-snippet" style="font-weight:bold; color:var(--accent-cyan); margin-bottom:8px;">💡 ${esc(m.vale_pena)}</div>` : '';
+      const explanation = m.spiegazione ? `<div style="font-size:0.85rem; color:var(--text-secondary); line-height:1.4; margin-bottom:12px;">📖 ${esc(m.spiegazione)}</div>` : '';
+      const actionBox = `<div style="padding:10px; background:rgba(74, 158, 255, 0.1); border-left:3px solid var(--accent-blue); font-size:0.85rem; margin-bottom:15px; border-radius:0 4px 4px 0;">
+          <b style="color:var(--accent-blue);">🎯 COSA FARE:</b> Punta su <span class="${sideClass}" style="font-weight:bold;">${side}</span> se il prezzo è vicino a <b>${pr}</b>
+        </div>`;
       const polyUrl = m.poly_url || '';
       const polyBtn = polyUrl
         ? `<a href="${esc(polyUrl)}" target="_blank" rel="noopener noreferrer" class="poly-link">📊 Vedi su Polymarket ↗</a>`
         : `<a href="https://polymarket.com/search?q=${encodeURIComponent(m.question||'')}" target="_blank" rel="noopener noreferrer" class="poly-link" style="opacity:0.6;">🔍 Cerca su Polymarket ↗</a>`;
       const relTime = timeAgo(m.date_flagged);
+      
       return `<div class="signal-card ${cls}" data-verdict="${m.our_verdict||'COPY'}" data-size="${m.entry_price||0}">
         <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;">
           <span class="signal-badge ${badgeCls}" style="margin-bottom:0;">${badgeTxt}</span>
@@ -1427,6 +1432,8 @@ function render(state) {
         ${whaleName}
         <div class="signal-title">${esc(m.question||'???')}</div>
         ${whySnippet}
+        ${explanation}
+        ${actionBox}
         ${probBar}
         <div class="signal-meta">
           <span class="${sideClass}">${side}${prIsReal ? ' @ ' + pr : ''}</span>
