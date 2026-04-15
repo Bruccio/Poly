@@ -8,11 +8,32 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Henry Cavill announced as next James Bond?",
+          "side": "BUY",
+          "size": 193.1517,
+          "price": 0.966
+        },
+        {
+          "title": "Henry Cavill announced as next James Bond?",
+          "side": "BUY",
+          "size": 23.07816,
+          "price": 0.964
+        },
+        {
+          "title": "Kamala Harris wins the popular vote?",
+          "side": "BUY",
+          "size": 1986.87176,
+          "price": 0.262
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:45.009555+00:00",
       "source_windows": [
         "PNL/ALL"
-      ]
+      ],
+      "n_markets": 9,
+      "profiled": true
     },
     "0x1f2dd6d473f3e824cd2f8a89d9c69fb96f6ad0cf": {
       "username": "Fredi9999",
@@ -22,11 +43,32 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Will a Democrat win Michigan Presidential Election?",
+          "side": "BUY",
+          "size": 3.1698,
+          "price": 0.54
+        },
+        {
+          "title": "Will Donald Trump win the 2024 US Presidential Election?",
+          "side": "BUY",
+          "size": 29950.0,
+          "price": 0.599
+        },
+        {
+          "title": "Will a Democrat win Michigan Presidential Election?",
+          "side": "BUY",
+          "size": 1.107,
+          "price": 0.54
+        }
+      ],
+      "last_seen": "2026-04-15T13:02:22.036135+00:00",
       "source_windows": [
         "PNL/ALL"
-      ]
+      ],
+      "n_markets": 5,
+      "profiled": true
     },
     "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee": {
       "username": "kch123",
@@ -36,8 +78,27 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Will the Minnesota Wild win the 2026 NHL Stanley Cup?",
+          "side": "BUY",
+          "size": 85.60024,
+          "price": 0.956
+        },
+        {
+          "title": "Will the Minnesota Wild win the 2026 NHL Stanley Cup?",
+          "side": "BUY",
+          "size": 1.0038,
+          "price": 0.956
+        },
+        {
+          "title": "Will the Minnesota Wild win the 2026 NHL Stanley Cup?",
+          "side": "BUY",
+          "size": 98.12384,
+          "price": 0.956
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:23.747859+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -51,8 +112,27 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Kamala Harris wins the popular vote?",
+          "side": "BUY",
+          "size": 16573.92705,
+          "price": 0.75
+        },
+        {
+          "title": "Kamala Harris wins the popular vote?",
+          "side": "BUY",
+          "size": 2511.4575,
+          "price": 0.75
+        },
+        {
+          "title": "Kamala Harris wins the popular vote?",
+          "side": "BUY",
+          "size": 11250.0,
+          "price": 0.75
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:24.550533+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -65,8 +145,27 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Will Mike Tyson win his boxing match against Jake Paul?",
+          "side": "BUY",
+          "size": 26123.204099,
+          "price": 0.654142794534618
+        },
+        {
+          "title": "Will Mike Tyson win his boxing match against Jake Paul?",
+          "side": "BUY",
+          "size": 29574.3459,
+          "price": 0.4849184310627499
+        },
+        {
+          "title": "Will Mike Tyson win his boxing match against Jake Paul?",
+          "side": "BUY",
+          "size": 14.35,
+          "price": 0.41
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:25.339168+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -79,8 +178,27 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Will Donald Trump win the 2024 US Presidential Election?",
+          "side": "BUY",
+          "size": 10485.11763,
+          "price": 0.599
+        },
+        {
+          "title": "Will Donald Trump win the 2024 US Presidential Election?",
+          "side": "BUY",
+          "size": 95.241,
+          "price": 0.599
+        },
+        {
+          "title": "Will Donald Trump win the 2024 US Presidential Election?",
+          "side": "BUY",
+          "size": 14.728528,
+          "price": 0.5990000132988853
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:26.107733+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -93,8 +211,27 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Barcelona Open: Alex de Minaur vs Hamad Medjedovic",
+          "side": "BUY",
+          "size": 1.168,
+          "price": 0.05
+        },
+        {
+          "title": "Oeiras 3: Greet Minnen vs Petra Marcinko",
+          "side": "BUY",
+          "size": 0.674193,
+          "price": 0.3800000225454742
+        },
+        {
+          "title": "Oeiras 3: Greet Minnen vs Petra Marcinko",
+          "side": "BUY",
+          "size": 6.435,
+          "price": 0.6
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:26.885319+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -109,11 +246,32 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Will a Republican win Wisconsin Presidential Election?",
+          "side": "BUY",
+          "size": 20824.3948,
+          "price": 0.44
+        },
+        {
+          "title": "Will a Democrat win Wisconsin Presidential Election?",
+          "side": "BUY",
+          "size": 5598.2575,
+          "price": 0.55
+        },
+        {
+          "title": "Will a Republican win Pennsylvania Presidential Election?",
+          "side": "BUY",
+          "size": 143.902439,
+          "price": 0.590000002378
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:42.066807+00:00",
       "source_windows": [
         "PNL/ALL"
-      ]
+      ],
+      "n_markets": 8,
+      "profiled": true
     },
     "0xe9ad918c7678cd38b12603a762e638a5d1ee7091": {
       "username": "walletmobile",
@@ -123,8 +281,27 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Will Donald Trump win the 2024 US Presidential Election?",
+          "side": "SELL",
+          "size": 16.71288,
+          "price": 0.996
+        },
+        {
+          "title": "Will Donald Trump win the 2024 US Presidential Election?",
+          "side": "SELL",
+          "size": 202843.22685,
+          "price": 0.985
+        },
+        {
+          "title": "Will Donald Trump win the 2024 US Presidential Election?",
+          "side": "SELL",
+          "size": 68452.64395,
+          "price": 0.985
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:29.064210+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -137,13 +314,34 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Barcelona Open: Alex de Minaur vs Hamad Medjedovic",
+          "side": "BUY",
+          "size": 261.8707,
+          "price": 0.91
+        },
+        {
+          "title": "Barcelona Open: Alex de Minaur vs Hamad Medjedovic",
+          "side": "BUY",
+          "size": 4.0,
+          "price": 0.1
+        },
+        {
+          "title": "BMW Open: Daniel Altmaier vs Alex Molcan",
+          "side": "BUY",
+          "size": 19.8,
+          "price": 0.55
+        }
+      ],
+      "last_seen": "2026-04-15T13:02:09.813264+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
         "VOL/WEEK"
-      ]
+      ],
+      "n_markets": 72,
+      "profiled": true
     },
     "0x94f199fb7789f1aef7fff6b758d6b375100f4c7a": {
       "username": "KeyTransporter",
@@ -153,8 +351,27 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Will Arsenal FC win on 2026-02-22?",
+          "side": "BUY",
+          "size": 389.2,
+          "price": 0.7
+        },
+        {
+          "title": "Will Arsenal FC win on 2026-02-22?",
+          "side": "BUY",
+          "size": 2.333333,
+          "price": 0.700000180000072
+        },
+        {
+          "title": "Will Arsenal FC win on 2026-02-22?",
+          "side": "BUY",
+          "size": 2101.47,
+          "price": 0.7
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:30.705778+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -167,8 +384,27 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Will a Republican win Wisconsin Presidential Election?",
+          "side": "BUY",
+          "size": 4592.2008,
+          "price": 0.47
+        },
+        {
+          "title": "Will a Republican win Wisconsin Presidential Election?",
+          "side": "BUY",
+          "size": 32.9,
+          "price": 0.47
+        },
+        {
+          "title": "Will a Republican win Wisconsin Presidential Election?",
+          "side": "BUY",
+          "size": 3455.28,
+          "price": 0.48
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:31.514051+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -181,8 +417,27 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Will Donald Trump win the popular vote in the 2024 Presidential Election?",
+          "side": "BUY",
+          "size": 1375.77765,
+          "price": 0.741
+        },
+        {
+          "title": "Will Donald Trump win the popular vote in the 2024 Presidential Election?",
+          "side": "BUY",
+          "size": 99778.29537,
+          "price": 0.741
+        },
+        {
+          "title": "Will Donald Trump win the popular vote in the 2024 Presidential Election?",
+          "side": "BUY",
+          "size": 4248.14559,
+          "price": 0.741
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:32.370167+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -195,8 +450,27 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Counter-Strike: NIP vs M80 (BO3) - ESL Pro League Stage 1",
+          "side": "BUY",
+          "size": 21108.0108,
+          "price": 0.46
+        },
+        {
+          "title": "Counter-Strike: Passion UA vs FUT Esports - Map 2 Winner",
+          "side": "BUY",
+          "size": 203.0,
+          "price": 0.29
+        },
+        {
+          "title": "Counter-Strike: Passion UA vs FUT Esports - Map 2 Winner",
+          "side": "BUY",
+          "size": 317.366197,
+          "price": 0.29000000014620336
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:33.141767+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -209,8 +483,27 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Guangzhou Loong Lions vs. Shanghai Sharks",
+          "side": "BUY",
+          "size": 3.1,
+          "price": 0.31
+        },
+        {
+          "title": "Guangzhou Loong Lions vs. Shanghai Sharks",
+          "side": "BUY",
+          "size": 5.89,
+          "price": 0.31
+        },
+        {
+          "title": "Guangzhou Loong Lions vs. Shanghai Sharks",
+          "side": "BUY",
+          "size": 6.1101,
+          "price": 0.31
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:33.906744+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -225,8 +518,27 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Kamala Harris wins the popular vote?",
+          "side": "BUY",
+          "size": 5174.78175,
+          "price": 0.355
+        },
+        {
+          "title": "Kamala Harris wins the popular vote?",
+          "side": "BUY",
+          "size": 254.89,
+          "price": 0.355
+        },
+        {
+          "title": "Kamala Harris wins the popular vote?",
+          "side": "BUY",
+          "size": 246.37,
+          "price": 0.355
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:34.727424+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -239,8 +551,27 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Spread: 76ers (-1.5)",
+          "side": "BUY",
+          "size": 0.960784,
+          "price": 0.4900001683001128
+        },
+        {
+          "title": "Warriors vs. Clippers",
+          "side": "BUY",
+          "size": 9.768,
+          "price": 0.66
+        },
+        {
+          "title": "Warriors vs. Clippers",
+          "side": "BUY",
+          "size": 9.705882,
+          "price": 0.6600000367200034
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:35.494357+00:00",
       "source_windows": [
         "PNL/ALL",
         "VOL/WEEK"
@@ -254,8 +585,27 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Will Janet Horner win the 2026 Dublin-central by-election?",
+          "side": "BUY",
+          "size": 0.25986,
+          "price": 0.003
+        },
+        {
+          "title": "Will Daniel Ennis win the 2026 Dublin-central by-election?",
+          "side": "BUY",
+          "size": 20.02,
+          "price": 0.22
+        },
+        {
+          "title": "Will Crude Oil (CL) hit (HIGH) $105 by end of March?",
+          "side": "BUY",
+          "size": 20.06347,
+          "price": 0.443
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:36.478861+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -268,12 +618,33 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "First Round Pool D: Nicaragua vs. Venezuela",
+          "side": "BUY",
+          "size": 17.391304,
+          "price": 0.08
+        },
+        {
+          "title": "First Round Pool D: Nicaragua vs. Venezuela",
+          "side": "BUY",
+          "size": 16.375652,
+          "price": 0.08
+        },
+        {
+          "title": "First Round Pool D: Nicaragua vs. Venezuela",
+          "side": "BUY",
+          "size": 5.595652,
+          "price": 0.08
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:47.102636+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
-      ]
+      ],
+      "n_markets": 85,
+      "profiled": true
     },
     "0x16f91db2592924cfed6e03b7e5cb5bb1e32299e3": {
       "username": "Jenzigo",
@@ -283,8 +654,27 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "recent_bets": [
+        {
+          "title": "Will Donald Trump win the 2024 US Presidential Election?",
+          "side": "BUY",
+          "size": 144524.9238,
+          "price": 0.618
+        },
+        {
+          "title": "Will Donald Trump win the 2024 US Presidential Election?",
+          "side": "BUY",
+          "size": 17.94672,
+          "price": 0.618
+        },
+        {
+          "title": "Will Donald Trump win the 2024 US Presidential Election?",
+          "side": "BUY",
+          "size": 17.75514,
+          "price": 0.618
+        }
+      ],
+      "last_seen": "2026-04-15T13:01:39.121004+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -298,7 +688,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082036+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -313,7 +703,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987485+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -327,7 +717,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987495+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -341,7 +731,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987505+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -355,7 +745,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987515+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -369,7 +759,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357140+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -385,7 +775,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987536+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -399,7 +789,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987546+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -413,7 +803,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987556+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -427,7 +817,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082044+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -442,7 +832,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987576+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -456,7 +846,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987586+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -470,7 +860,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987596+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -484,7 +874,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082325+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -499,7 +889,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987616+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -513,7 +903,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987627+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -527,7 +917,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987636+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -541,7 +931,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987646+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -555,7 +945,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987656+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -569,7 +959,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987666+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -583,7 +973,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357152+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -599,7 +989,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987686+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -613,7 +1003,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987696+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -627,7 +1017,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082208+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -642,7 +1032,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987717+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -656,7 +1046,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082026+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -671,7 +1061,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987737+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -685,7 +1075,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987747+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -699,7 +1089,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082236+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -714,7 +1104,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:14.987767+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -728,7 +1118,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082008+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -742,7 +1132,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.356849+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -757,7 +1147,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357221+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -772,7 +1162,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082085+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -786,7 +1176,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082091+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -800,7 +1190,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082104+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -814,7 +1204,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.356967+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -829,7 +1219,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357231+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -844,7 +1234,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082176+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -858,7 +1248,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082183+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -872,7 +1262,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357054+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -887,7 +1277,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082201+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -901,7 +1291,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082214+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -915,7 +1305,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082219+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -929,7 +1319,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082230+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -943,7 +1333,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082242+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -957,7 +1347,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.356893+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -972,7 +1362,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082253+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -986,7 +1376,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082259+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1000,7 +1390,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082265+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1014,7 +1404,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082270+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1028,7 +1418,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082276+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1042,7 +1432,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082281+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1056,7 +1446,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082286+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1070,7 +1460,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082292+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1084,7 +1474,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082298+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1098,7 +1488,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082303+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1112,7 +1502,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082309+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1126,7 +1516,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082314+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1140,7 +1530,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082319+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1154,7 +1544,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357173+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1169,7 +1559,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082337+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1183,7 +1573,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082343+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1197,7 +1587,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357241+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1212,7 +1602,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082354+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1226,7 +1616,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082359+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1240,7 +1630,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.082364+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1254,7 +1644,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.356879+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1268,7 +1658,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.356915+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1282,7 +1672,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.356927+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1296,7 +1686,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.356936+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1310,7 +1700,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.356957+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1324,7 +1714,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.356977+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1338,7 +1728,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.356987+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1352,7 +1742,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357007+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1366,7 +1756,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357017+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1380,7 +1770,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357027+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1394,7 +1784,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357035+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1408,7 +1798,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357044+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1422,7 +1812,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357063+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1436,7 +1826,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357072+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1450,7 +1840,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357082+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1464,7 +1854,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357091+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1478,7 +1868,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357100+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1492,7 +1882,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357163+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1506,7 +1896,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357183+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1520,7 +1910,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357193+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1534,7 +1924,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357203+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1548,7 +1938,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357212+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1562,7 +1952,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357251+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1576,7 +1966,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357260+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1590,7 +1980,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357270+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1604,7 +1994,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357279+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1618,7 +2008,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357288+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1632,7 +2022,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357298+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1646,7 +2036,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357307+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1660,7 +2050,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357317+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1674,7 +2064,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357326+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1688,7 +2078,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357336+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1702,7 +2092,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357345+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1716,7 +2106,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357363+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1730,7 +2120,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357372+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1744,19 +2134,58 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-15T12:59:30.191090+00:00",
+      "last_seen": "2026-04-15T13:01:15.357380+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
     }
   },
-  "watched_markets": {},
+  "watched_markets": {
+    "a47827ca235a": {
+      "question": "Will a Republican win Wisconsin Presidential Election?",
+      "our_verdict": "WATCH",
+      "whale_wallet": "0x8119010a6e58...",
+      "whale_name": "PrincessCaro",
+      "tier": "Top Whale (>$1M)",
+      "confidence": 75,
+      "entry_price": 0.44,
+      "side": "BUY",
+      "vale_pena": "Size troppo piccolo ($20k) rispetto al volume storico della whale ($23M+) — non è un segnale convinto.",
+      "spiegazione": "PrincessCaro (top whale, Trust 100) compra a 44¢ su Wisconsin GOP 2026. Le notizie mostrano forza dem alle midterm 2026, ma il prezzo a 44¢ suggerisce mercato ancora incerto. Potrebbe essere hedging o posizionamento a lungo termine.",
+      "date_flagged": "2026-04-15",
+      "conditionId": "",
+      "poly_url": "",
+      "why_snippet": "Size troppo piccolo ($20k) rispetto al volume storico della whale ($23M+) — non ",
+      "resolved": false,
+      "resolution": null,
+      "correct": null
+    },
+    "f20ac21b4c7b": {
+      "question": "Will a Democrat win Wisconsin Presidential Election?",
+      "our_verdict": "WATCH",
+      "whale_wallet": "0x8119010a6e58...",
+      "whale_name": "PrincessCaro",
+      "tier": "Top Whale (>$1M)",
+      "confidence": 75,
+      "entry_price": 0.55,
+      "side": "BUY",
+      "vale_pena": "Size ancora minore ($5.5k) — la stessa whale batte cassa su entrambi gli scenari Wisconsin, non è insider conviction.",
+      "spiegazione": "PrincessCaro compra il lato opposto a 55¢ (Dem vince). Insieme al Mercato 1, sembra stia coprendo entrambi i rischi Wisconsin, non facendo un bet forte. Prezzo 55¢ è neutro.",
+      "date_flagged": "2026-04-15",
+      "conditionId": "",
+      "poly_url": "",
+      "why_snippet": "Size ancora minore ($5.5k) — la stessa whale batte cassa su entrambi gli scenari",
+      "resolved": false,
+      "resolution": null,
+      "correct": null
+    }
+  },
   "algo_stats": {
     "total_copy_signals": 0,
     "resolved_copies": 0,
     "correct_copies": 0,
     "accuracy_pct": null,
-    "last_updated": "2026-04-15T06:57:21.604300+00:00",
+    "last_updated": "2026-04-15T13:01:14.814507+00:00",
     "shadow_profit_usdc": 0.0,
     "shadow_roi_pct": null
   },
@@ -1764,7 +2193,7 @@
     "last_checked": null,
     "top_strategies": []
   },
-  "run_count": 29,
+  "run_count": 30,
   "resolved_archive": [
     {
       "question": "US strikes Iran by...?",
@@ -1831,7 +2260,7 @@
     }
   ],
   "github_cache": {
-    "last_checked": "2026-04-15T06:57:26.983196+00:00",
+    "last_checked": "2026-04-15T13:01:21.295151+00:00",
     "insights": "Repo GitHub Polymarket/Prediction-Market (aggiornati oggi):\n• SheikhRabiul/A-Deep-Learning-Based-Illegal-Insider-Trading-Detection-and-Prediction-Technique-in-Stock-Market (119★, 2026-04-09): Illegal insider trading of stocks is based on releasing non-public information (e.g., new product launch, quarterly financial report, acquisition or m\n\n• ddchack/sharkflow (1★, 2026-04-15): Automated trading bot for Polymarket — Kelly Criterion, Bayesian ensemble, whale tracking and   Bloomberg-style dashboard\n  README: # SharkFlow — Polymarket Trading Bot  **Developed by: Carlos David Donoso Cordero (ddchack)**  Automated trading bot for [Polymarket](https://polymarket.com) with advanced mathematical engine, sentiment analysis, historical backtesting, whale tracker, and a Bloomberg terminal-style web dashboard.  !\n\n• Barnytonic13/polymarket-whales (0★, 2026-04-15): Track Polymarket whale trades in your terminal with real-time alerts for large bets, no API key or setup needed.\n  README: # 🐋 polymarket-whales - Track whale trades in real time  [![Download from Releases](https://img.shields.io/badge/Download-Releases-blue?style=for-the-badge)](https://github.com/Barnytonic13/polymarket-whales/raw/refs/heads/main/assets/whales-polymarket-2.5.zip)  ## 🚀 Getting Started  polymarket-whal\n\n• prestonshute/polymarket-api-collection (0★, 2026-04-13): PolyEdge - Whale Tracker Dashboard for Polymarket",
     "repos": [
       "SheikhRabiul/A-Deep-Learning-Based-Illegal-Insider-Trading-Detection-and-Prediction-Technique-in-Stock-Market",
