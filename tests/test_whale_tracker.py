@@ -11,7 +11,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from whale_tracker import (
     _is_sport, _parse_claude, compute_confidence, _is_past_market,
-    is_market_resolved, _GAMMA_RESOLUTION_CACHE,
+    is_market_resolved, _GAMMA_RESOLUTION_CACHE, _is_known_resolved_event,
 )
 
 
@@ -346,3 +346,29 @@ def test_non_truncated_title_unaffected():
     _GAMMA_RESOLUTION_CACHE.clear()
     _GAMMA_RESOLUTION_CACHE["will btc reach 200k?"] = {"closed": True, "isResolved": True}
     assert is_market_resolved("Will BTC reach 200k?") is True
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# _is_known_resolved_event() — eventi già decisi bloccati da world knowledge
+# ─────────────────────────────────────────────────────────────────────────────
+def test_known_resolved_presidential_election():
+    """Elezioni presidenziali USA 2024 — esito noto (Trump ha vinto)."""
+    assert _is_known_resolved_event("Will a Republican win Pennsylvania Presidential Election?")
+    assert _is_known_resolved_event("Will a Republican win Michigan Presidential Election?")
+    assert _is_known_resolved_event("Will a Republican win Wisconsin Presidential Election?")
+    assert _is_known_resolved_event("Will Trump win the presidential election?")
+    assert _is_known_resolved_event("Next President of the United States")
+
+
+def test_known_resolved_nyc_mayor():
+    """NYC Mayoral 2025 — già avvenuta."""
+    assert _is_known_resolved_event("NYC Mayor race")
+    assert _is_known_resolved_event("New York City Mayor election")
+
+
+def test_known_resolved_does_not_block_future():
+    """Mercati futuri non devono essere bloccati dal filtro resolved events."""
+    assert not _is_known_resolved_event("Will inflation reach 5% in 2027?")
+    assert not _is_known_resolved_event("Fed rate cut June 2026")
+    assert not _is_known_resolved_event("Will BTC reach $200k?")
+    assert not _is_known_resolved_event("Trump tariffs on EU goods")

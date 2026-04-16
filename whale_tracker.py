@@ -213,6 +213,55 @@ def _is_past_market(title: str) -> bool:
     return False
 
 
+# ── FILTRO EVENTI GIÀ DECISI (world knowledge) ─────────────────────────────────
+# Mercati il cui titolo non contiene una data esplicita ma l'esito è storicamente
+# noto. Le whale possono ancora avere liquidità residua → i filtri di data non
+# li catturano. Aggiornare questa lista quando nuovi eventi vengono decisi.
+# Formato: (regex_pattern, descrizione breve per log)
+_RESOLVED_EVENT_PATTERNS: list[tuple[str, str]] = [
+    # ── Elezioni presidenziali USA 2024 (Trump ha vinto Nov 2024) ──
+    (r"(republican|democrat).*(win|lose|carry).*presidential\s+election",
+     "US Presidential Election 2024 (resolved Nov 2024)"),
+    (r"presidential\s+election\s+winner",
+     "US Presidential Election 2024 (resolved Nov 2024)"),
+    (r"(win|lose|carry)\s+.*(pennsylvania|michigan|wisconsin|georgia|arizona|"
+     r"nevada|north\s*carolina|ohio|florida|iowa|texas|virginia|minnesota|"
+     r"new\s*hampshire|maine)\s*(presidential|election)",
+     "US 2024 swing state (resolved Nov 2024)"),
+    (r"will\s+(trump|harris|biden)\s+(win|be\s+elected|become\s+president)",
+     "US Presidential Election 2024 (resolved Nov 2024)"),
+    (r"next\s+president\s+of\s+the\s+united\s+states",
+     "US Presidential Election 2024 (resolved Nov 2024)"),
+    (r"electoral\s+college.*2024",
+     "US Electoral College 2024 (resolved Nov 2024)"),
+    (r"popular\s+vote.*2024",
+     "US Popular Vote 2024 (resolved Nov 2024)"),
+    # ── Elezioni/nomine USA 2024-2025 già avvenute ──
+    (r"(speaker|majority\s+leader).*2024",
+     "US Congress 2024 (resolved)"),
+    (r"nyc\s+mayor|new\s+york\s+city\s+mayor",
+     "NYC Mayoral 2025 (resolved — Mamdani)"),
+    # ── Midterm / speciali già passati ──
+    (r"(midterm|mid-term).*2022",
+     "US Midterms 2022 (resolved)"),
+    # ── Referenze temporali generiche già passate ──
+    (r"(before|by)\s+end\s+of\s+2024",
+     "Deadline 2024 (passed)"),
+    (r"(before|by)\s+end\s+of\s+2025",
+     "Deadline 2025 (passed)"),
+]
+
+def _is_known_resolved_event(title: str) -> bool:
+    """Blocca mercati il cui esito è storicamente noto anche senza data nel titolo.
+    Le whale possono piazzare ordini su mercati risolti per arbitraggio di liquidità
+    residua — questo filtro impedisce che diventino segnali COPY/WATCH."""
+    t = title.lower().strip()
+    for pattern, _desc in _RESOLVED_EVENT_PATTERNS:
+        if re.search(pattern, t):
+            return True
+    return False
+
+
 # ── FILTRO MERCATI APERTI (Time Filter) ──────────────────────────────────────────
 import dateutil.parser
 def is_future_market(trade_data):
@@ -710,6 +759,9 @@ def fetch_whale_trades(state: dict) -> list:
                 if _is_sport(title):
                     continue
                 if _is_past_market(title):
+                    continue
+                if _is_known_resolved_event(title):
+                    log(f"  Evento già deciso: {title[:55]}", "WARN")
                     continue
                 # Prova più chiavi: conditionId, market, asset_id, tokenId
                 cond_id = (t.get("conditionId") or t.get("market") or
@@ -1609,12 +1661,13 @@ def fetch_polymarket_whales(min_size, state: dict = None):
 
     log(f"Multi-source totale: {len(all_items)} mercati unici raccolti", "OK")
 
-    # ── Filtra sport e sotto soglia ──
+    # ── Filtra sport, sotto soglia, e eventi già decisi ──
     filtered = [
         t for t in all_items
         if _sz(t) >= min_size * 0.5  # più permissivo per whale top
         and not _is_sport(t.get("title") or t.get("question") or "")
         and not _is_past_market(t.get("title") or t.get("question") or "")
+        and not _is_known_resolved_event(t.get("title") or t.get("question") or "")
         and not is_market_resolved(
             t.get("title") or t.get("question") or "",
             condition_id=t.get("conditionId") or t.get("market") or "",
@@ -2269,18 +2322,28 @@ def run():
         state["algo_stats"]["accuracy_pct"] = None
 
     # 1c. Cleanup proattivo: rimuovi segnali senza wallet reale (0xpool/0xdemo)
-    # residui da versioni precedenti o da code path che bypassano il filtro.
+    # E segnali su eventi già decisi (es. elezioni USA 2024).
     stale_keys = []
     for k, m in list(state.get("watched_markets", {}).items()):
         wallet_s = (m.get("whale_wallet") or "").lower()
         whale_s  = (m.get("whale_name") or "").lower()
-        if "0xpool" in wallet_s or "0xpool" in whale_s \
-                or "0xdemo" in wallet_s or "0xdemo" in whale_s:
-            stale_keys.append(k)
-    for k in stale_keys:
-        del state["watched_markets"][k]
+        question = m.get("question") or ""
+        if ("0xpool" in wallet_s or "0xpool" in whale_s
+                or "0xdemo" in wallet_s or "0xdemo" in whale_s):
+            stale_keys.append((k, "wallet placeholder"))
+        elif _is_known_resolved_event(question):
+            stale_keys.append((k, "evento già deciso"))
+    for k, reason in stale_keys:
+        removed = state["watched_markets"].pop(k)
+        state.setdefault("resolved_archive", []).append({
+            **removed,
+            "resolved": True,
+            "resolution": f"Auto-removed: {reason}",
+            "removed_at": datetime.now(timezone.utc).isoformat(),
+        })
     if stale_keys:
-        log(f"Cleanup: rimossi {len(stale_keys)} segnali stale senza wallet reale", "OK")
+        reasons = ", ".join(f"{r}" for _, r in stale_keys)
+        log(f"Cleanup: rimossi {len(stale_keys)} segnali stale ({reasons})", "OK")
 
     # 2. Aggiorna leaderboard da Polymarket (chi sono le whale?)
     fetch_breaking_leaderboard(state)
