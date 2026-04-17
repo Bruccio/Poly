@@ -1334,10 +1334,18 @@ function render(state) {
             : esc(b.title || '???');
           const sizeStr = b.size ? fmtK(b.size) : '';
           const priceStr = b.price ? Math.round(parseFloat(b.price) * 100) + '¢' : '';
-          return `<div class="bet-line">
-            <span class="${sideClass}">${sideLabel}</span>
+          // Copy-trading advice badge + reason (calcolato dal backend)
+          const adv = b.copy_advice || {};
+          const advVerdict = adv.verdict || '';
+          const advColor = adv.color || '#888';
+          const advReason = adv.reason || '';
+          const advBadge = advVerdict ? `<span class="bet-advice" style="background:${advColor};color:#0a0f1a;font-weight:700;font-size:0.65rem;padding:1px 6px;border-radius:3px;margin-right:4px;letter-spacing:0.5px;">${esc(advVerdict)}</span>` : '';
+          const advReasonHtml = advReason ? `<div style="color:var(--text-secondary);font-size:0.72rem;margin-top:2px;margin-left:24px;font-style:italic;opacity:0.85;">↳ ${esc(advReason)}</div>` : '';
+          return `<div class="bet-line" style="margin-bottom:6px;">
+            ${advBadge}<span class="${sideClass}">${sideLabel}</span>
             <span style="color:var(--text-primary);margin-left:4px;">${titleShort}</span>
             ${sizeStr ? `<span style="color:var(--text-secondary);font-family:'Fira Code',monospace;margin-left:4px;opacity:0.7;">${sizeStr} @${priceStr}</span>` : ''}
+            ${advReasonHtml}
           </div>`;
         }).join('');
       } else {

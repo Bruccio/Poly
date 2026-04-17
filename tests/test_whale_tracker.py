@@ -366,6 +366,15 @@ def test_known_resolved_nyc_mayor():
     assert _is_known_resolved_event("New York City Mayor election")
 
 
+def test_known_resolved_popular_vote():
+    """Popular vote 2024 — Trump ha vinto anche il voto popolare."""
+    assert _is_known_resolved_event("Kamala Harris wins the popular vote?")
+    assert _is_known_resolved_event("Will Kamala Harris win the popular vote?")
+    assert _is_known_resolved_event("Trump wins the popular vote")
+    assert _is_known_resolved_event("Popular vote winner")
+    assert _is_known_resolved_event("Who wins the popular vote?")
+
+
 def test_known_resolved_does_not_block_future():
     """Mercati futuri non devono essere bloccati dal filtro resolved events."""
     assert not _is_known_resolved_event("Will inflation reach 5% in 2027?")

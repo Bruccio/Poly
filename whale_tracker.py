@@ -236,6 +236,12 @@ _RESOLVED_EVENT_PATTERNS: list[tuple[str, str]] = [
      "US Electoral College 2024 (resolved Nov 2024)"),
     (r"popular\s+vote.*2024",
      "US Popular Vote 2024 (resolved Nov 2024)"),
+    (r"(kamala|harris|trump|biden).*popular\s+vote",
+     "US Popular Vote 2024 (resolved Nov 2024)"),
+    (r"popular\s+vote\s+(winner|win)",
+     "US Popular Vote 2024 (resolved Nov 2024)"),
+    (r"wins?\s+the\s+popular\s+vote",
+     "US Popular Vote 2024 (resolved Nov 2024)"),
     # ── Elezioni/nomine USA 2024-2025 già avvenute ──
     (r"(speaker|majority\s+leader).*2024",
      "US Congress 2024 (resolved)"),
@@ -745,14 +751,21 @@ def fetch_whale_trades(state: dict) -> list:
                              t.get("amount") or 0)
                 price = float(t.get("price") or t.get("outcomePrice") or 0.5)
                 side = t.get("side") or t.get("type") or "YES"
-                # Salva nelle recenti del wallet (max 3, include anche sport per trasparenza)
-                if len(wallet_bets) < 3:
-                    wallet_bets.append({
+                # Salva nelle recenti del wallet (max 5, SOLO mercati non sport
+                # e non già risolti — così la dashboard non mostra residui stale).
+                if (len(wallet_bets) < 5
+                        and not _is_sport(title)
+                        and not _is_past_market(title)
+                        and not _is_known_resolved_event(title)):
+                    bet = {
                         "title": title,
                         "side":  side,
                         "size":  size,
                         "price": price,
-                    })
+                        "conditionId": (t.get("conditionId") or t.get("market") or ""),
+                    }
+                    bet["copy_advice"] = classify_bet(bet, whale_trust=trust_score)
+                    wallet_bets.append(bet)
                 title_key = title.lower()
                 if title_key in seen_titles:
                     continue
@@ -1252,6 +1265,63 @@ def _classify(size, total_volume=0):
     if vol >= 500_000:   return "Big Whale (>$500k)"
     if vol >= 100_000:   return "Whale (>$100k)"
     return "Small Fish"
+
+
+def classify_bet(bet: dict, whale_trust: int = 50) -> dict:
+    """Decide se una singola scommessa di una whale vale la pena copiare.
+
+    Ritorna {verdict, reason, color} dove:
+      verdict ∈ {"COPY", "WATCH", "SKIP"}
+      reason  = frase breve italiana da mostrare in UI / report
+      color   = hex per badge ("#00ff9f" / "#fcee0c" / "#777")
+
+    Logica:
+      SKIP  – mercato sport / passato / evento risolto / size troppo piccola
+      COPY  – trust ≥80, size ≥$50k, prezzo non estremo, mercato attivo
+      WATCH – tutti gli altri casi (interessante ma non conviction play)
+    """
+    title = (bet.get("title") or "").strip()
+    size = float(bet.get("size") or 0)
+    price = float(bet.get("price") or 0.5)
+
+    # Blocchi hard → SKIP
+    if not title:
+        return {"verdict": "SKIP", "reason": "titolo mancante", "color": "#777"}
+    if _is_sport(title):
+        return {"verdict": "SKIP", "reason": "sport/entertainment", "color": "#777"}
+    if _is_past_market(title):
+        return {"verdict": "SKIP", "reason": "deadline già passata", "color": "#777"}
+    if _is_known_resolved_event(title):
+        return {"verdict": "SKIP", "reason": "evento già deciso", "color": "#777"}
+    if size < 5_000:
+        return {"verdict": "SKIP", "reason": "size troppo bassa (<$5k)", "color": "#777"}
+
+    # Prezzo estremo → upside limitato
+    if price >= 0.92:
+        return {"verdict": "WATCH",
+                "reason": f"prezzo {int(price*100)}¢: upside molto limitato",
+                "color": "#fcee0c"}
+    if price <= 0.08 and price > 0:
+        return {"verdict": "WATCH",
+                "reason": f"prezzo {int(price*100)}¢: tail-risk puro",
+                "color": "#fcee0c"}
+
+    # Core rules copy / watch / skip
+    if whale_trust >= 80 and size >= 50_000 and 0.12 <= price <= 0.88:
+        return {"verdict": "COPY",
+                "reason": f"trust {whale_trust} × ${size/1000:.0f}k @ {int(price*100)}¢ → convinzione alta",
+                "color": "#00ff9f"}
+    if whale_trust >= 70 and size >= 20_000:
+        return {"verdict": "WATCH",
+                "reason": f"trust {whale_trust}, size medio — tieni d'occhio",
+                "color": "#fcee0c"}
+    if whale_trust < 50:
+        return {"verdict": "SKIP",
+                "reason": f"whale trust basso ({whale_trust})",
+                "color": "#777"}
+    return {"verdict": "WATCH",
+            "reason": f"size $%dk su mercato attivo" % int(size/1000),
+            "color": "#fcee0c"}
 
 
 def compute_confidence(trade: dict, state: dict) -> int:
@@ -2157,7 +2227,20 @@ def build_message(results, state: dict = None, is_demo=False, best_skip=None):
             profit = w.get("total_profit_usd", 0)
             ts_val = w.get("trust_score", 40)
             name = w.get("username", "?")[:18]
-            msg += f"{i}. {name} +${profit:,.0f} (trust {ts_val})\n"
+            msg += f"\n*{i}. {name}* +${profit:,.0f} (trust {ts_val})\n"
+            # Mostra le 2 bet più recenti con copy-advice
+            bets = (w.get("recent_bets") or [])[:2]
+            for b in bets:
+                adv = b.get("copy_advice") or {}
+                v = adv.get("verdict", "—")
+                icon = "🟢" if v == "COPY" else "🟡" if v == "WATCH" else "⚪"
+                side = (b.get("side") or "YES").upper()
+                side = "YES" if "YES" in side or "BUY" in side else "NO"
+                t = (b.get("title") or "")[:45]
+                sz = float(b.get("size") or 0)
+                pr = float(b.get("price") or 0.5)
+                msg += (f"  {icon} *{v}* {side} {t}\n"
+                        f"     ${sz/1000:.0f}k @ {int(pr*100)}¢ — _{adv.get('reason','')}_\n")
         msg += "\n"
 
     return msg + "_Polymarket Whale Tracker v3 — Bruno_"
@@ -2234,16 +2317,50 @@ def build_email_html(results, state: dict = None, is_demo=False, best_skip=None)
     if leaderboard:
         sorted_lb = sorted(leaderboard.values(),
                            key=lambda x: x.get("total_profit_usd", 0), reverse=True)[:5]
-        lb_rows = "".join(
-            f'<tr><td style="padding:6px 12px;">{i}.</td>'
-            f'<td style="padding:6px 12px;font-weight:600;">{w.get("username","?")[:20]}</td>'
-            f'<td style="padding:6px 12px;color:#1a7a3a;">+${w.get("total_profit_usd",0):,.0f}</td>'
-            f'<td style="padding:6px 12px;color:#555;">Trust {w.get("trust_score",40)}/100</td></tr>'
-            for i, w in enumerate(sorted_lb, 1)
-        )
+        lb_rows_html = ""
+        for i, w in enumerate(sorted_lb, 1):
+            username = w.get("username", "?")[:22]
+            profit = w.get("total_profit_usd", 0)
+            ts_val = w.get("trust_score", 40)
+            bets = (w.get("recent_bets") or [])[:3]
+            # Rendi le 3 bet più recenti con advice badge
+            bets_html = ""
+            if bets:
+                for b in bets:
+                    adv = b.get("copy_advice") or {}
+                    v = adv.get("verdict", "—")
+                    v_color = adv.get("color", "#888")
+                    reason = adv.get("reason", "")
+                    title = (b.get("title") or "")[:55]
+                    side = (b.get("side") or "YES").upper()
+                    side = "YES" if "YES" in side or "BUY" in side else "NO"
+                    side_color = "#1a7a3a" if side == "YES" else "#d9534f"
+                    sz = float(b.get("size") or 0)
+                    pr = float(b.get("price") or 0.5)
+                    bets_html += (
+                        f'<div style="margin:6px 0;padding:8px;background:#fff;'
+                        f'border-left:3px solid {v_color};border-radius:0 4px 4px 0;font-size:12px;">'
+                        f'<span style="background:{v_color};color:#0a0f1a;padding:1px 6px;'
+                        f'border-radius:3px;font-weight:700;font-size:10px;">{v}</span> '
+                        f'<span style="color:{side_color};font-weight:600;">{side}</span> '
+                        f'<span style="color:#222;">{title}</span>'
+                        f'<div style="color:#888;font-size:11px;margin-top:2px;">'
+                        f'${sz/1000:.0f}k @ {int(pr*100)}¢ — <i>{reason}</i></div></div>'
+                    )
+            else:
+                bets_html = ('<div style="color:#888;font-size:11px;font-style:italic;">'
+                             'nessuna bet recente</div>')
+            lb_rows_html += (
+                f'<div style="padding:12px;border-bottom:1px solid #e0e0e0;background:#fafcff;">'
+                f'<div style="display:flex;justify-content:space-between;align-items:baseline;">'
+                f'<span style="font-weight:700;font-size:14px;">{i}. {username}</span>'
+                f'<span style="color:#1a7a3a;font-weight:700;">+${profit:,.0f}</span></div>'
+                f'<div style="color:#666;font-size:11px;margin-top:2px;">Trust {ts_val}/100</div>'
+                f'{bets_html}</div>'
+            )
         lb_html = (f'<div style="padding:16px;background:#f0f8ff;border-top:2px solid #0d1b2a;">'
-                   f'<h3 style="margin:0 0 8px;">🏆 Top Whale Tracker</h3>'
-                   f'<table style="width:100%;font-size:13px;">{lb_rows}</table></div>')
+                   f'<h3 style="margin:0 0 8px;">🏆 Top Whale Tracker — con Copy Advice</h3>'
+                   f'{lb_rows_html}</div>')
 
     demo_banner = ('<p style="background:#fff3cd;padding:8px;border-radius:4px;">'
                    '⚠️ Dati demo — nessun mercato reale trovato</p>') if is_demo else ""
@@ -2344,6 +2461,34 @@ def run():
     if stale_keys:
         reasons = ", ".join(f"{r}" for _, r in stale_keys)
         log(f"Cleanup: rimossi {len(stale_keys)} segnali stale ({reasons})", "OK")
+
+    # 1d. Wash AUTOMATICO delle recent_bets di ogni whale nella leaderboard.
+    # Rimuove scommesse su sport, mercati passati e eventi già decisi — così la
+    # Top Whale Leaderboard nella dashboard non mostra mai bet obsolete, senza
+    # che l'utente debba chiedere pulizia manuale.
+    bets_purged = 0
+    whales_touched = 0
+    for wallet_k, entry in state.get("leaderboard", {}).items():
+        bets = entry.get("recent_bets") or []
+        if not bets:
+            continue
+        cleaned = []
+        for b in bets:
+            t = (b.get("title") or "").strip()
+            if not t:
+                continue
+            if _is_sport(t) or _is_past_market(t) or _is_known_resolved_event(t):
+                bets_purged += 1
+                continue
+            # Ri-classifica la bet con il trust corrente (trust può essere cambiato)
+            b["copy_advice"] = classify_bet(b, whale_trust=entry.get("trust_score", 50))
+            cleaned.append(b)
+        if len(cleaned) != len(bets):
+            whales_touched += 1
+        entry["recent_bets"] = cleaned
+    if bets_purged:
+        log(f"Cleanup recent_bets: {bets_purged} bet stale rimosse da "
+            f"{whales_touched} whale", "OK")
 
     # 2. Aggiorna leaderboard da Polymarket (chi sono le whale?)
     fetch_breaking_leaderboard(state)
