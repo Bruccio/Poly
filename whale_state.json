@@ -93,20 +93,7 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [
-        {
-          "title": "Spread: Toulouse FC (-1.5)",
-          "side": "BUY",
-          "size": 6.804317,
-          "price": 0.19100000179650656,
-          "conditionId": "0x7dd44a668687d7336444476e94e9ab53cd707823f9a67e8ec6665ebb49c87dd0",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        }
-      ],
+      "recent_bets": [],
       "last_seen": "2026-04-19T08:06:53.709725+00:00",
       "source_windows": [
         "PNL/ALL",
@@ -150,20 +137,7 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [
-        {
-          "title": "Spread: Gimnasia y Esgrima de La Plata (-2.5)",
-          "side": "BUY",
-          "size": 4.9,
-          "price": 0.98,
-          "conditionId": "0xb3c9f0adbb6d5b7a1f590bc98e2564baf0f1caede4c5f06b9052ce24e949876f",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        }
-      ],
+      "recent_bets": [],
       "last_seen": "2026-04-19T08:06:55.610626+00:00",
       "source_windows": [
         "PNL/ALL",
@@ -235,20 +209,7 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [
-        {
-          "title": "1H Spread: Nuggets (-3.5)",
-          "side": "BUY",
-          "size": 96.078431,
-          "price": 0.49000000153,
-          "conditionId": "0xc306d6dde8fd6f4694277d7a4d376395e4147a0cfcf0e88ed963e3a36b8e46e3",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        }
-      ],
+      "recent_bets": [],
       "last_seen": "2026-04-19T08:06:58.828295+00:00",
       "source_windows": [
         "PNL/ALL",
@@ -278,68 +239,7 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [
-        {
-          "title": "Spread: Rockets (-5.5)",
-          "side": "BUY",
-          "size": 17.608695,
-          "price": 0.5400000073600004,
-          "conditionId": "0x3e962dab7dd5aba0135bbf71cfe67b432c5675fbb2598452842f6f144a7e1fcc",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Spread: Rockets (-5.5)",
-          "side": "BUY",
-          "size": 117.391304,
-          "price": 0.540000001748,
-          "conditionId": "0x3e962dab7dd5aba0135bbf71cfe67b432c5675fbb2598452842f6f144a7e1fcc",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Spread: Rockets (-4.5)",
-          "side": "BUY",
-          "size": 13098.1067,
-          "price": 0.49,
-          "conditionId": "0x8f827d4c2470a502f9700c4970dae0cec63db34f7f666cd173b7b4d2b000ff64",
-          "copy_advice": {
-            "verdict": "WATCH",
-            "reason": "size $13k su mercato attivo",
-            "color": "#fcee0c"
-          }
-        },
-        {
-          "title": "Spread: Rockets (-5.5)",
-          "side": "BUY",
-          "size": 1056.521739,
-          "price": 0.5400000002453333,
-          "conditionId": "0x3e962dab7dd5aba0135bbf71cfe67b432c5675fbb2598452842f6f144a7e1fcc",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Spread: Rockets (-5.5)",
-          "side": "BUY",
-          "size": 352.173913,
-          "price": 0.5400000007973333,
-          "conditionId": "0x3e962dab7dd5aba0135bbf71cfe67b432c5675fbb2598452842f6f144a7e1fcc",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        }
-      ],
+      "recent_bets": [],
       "last_seen": "2026-04-19T08:07:00.099642+00:00",
       "source_windows": [
         "PNL/ALL",
@@ -354,68 +254,7 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [
-        {
-          "title": "US forces enter Iran by March 31?",
-          "side": "BUY",
-          "size": 0.0034,
-          "price": 0.17,
-          "conditionId": "0x306d10d4a4d51b41910dbc779ca00908bd917c131541c5c42bbbc736258d2d56",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "US forces enter Iran by March 31?",
-          "side": "BUY",
-          "size": 0.0017,
-          "price": 0.17,
-          "conditionId": "0x306d10d4a4d51b41910dbc779ca00908bd917c131541c5c42bbbc736258d2d56",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "US forces enter Iran by March 31?",
-          "side": "BUY",
-          "size": 0.0289,
-          "price": 0.17,
-          "conditionId": "0x306d10d4a4d51b41910dbc779ca00908bd917c131541c5c42bbbc736258d2d56",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "US forces enter Iran by March 31?",
-          "side": "BUY",
-          "size": 0.0017,
-          "price": 0.17,
-          "conditionId": "0x306d10d4a4d51b41910dbc779ca00908bd917c131541c5c42bbbc736258d2d56",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "US forces enter Iran by March 31?",
-          "side": "BUY",
-          "size": 0.0017,
-          "price": 0.17,
-          "conditionId": "0x306d10d4a4d51b41910dbc779ca00908bd917c131541c5c42bbbc736258d2d56",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        }
-      ],
+      "recent_bets": [],
       "last_seen": "2026-04-19T08:07:09.229975+00:00",
       "source_windows": [
         "PNL/ALL"
@@ -431,68 +270,7 @@
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [
-        {
-          "title": "Spread: Warriors (-6.5)",
-          "side": "BUY",
-          "size": 149.941729,
-          "price": 0.4900000009150221,
-          "conditionId": "0x448c889f53a7da5111ecdbfe5a9a10e04043ad5bc950c38755e418f1aec532ce",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Spread: Grizzlies (-2.5)",
-          "side": "BUY",
-          "size": 6.89,
-          "price": 0.53,
-          "conditionId": "0x1769ac888ad4c0168cdcb1658eefcbf70bb779fea2244e264f3158aa31612081",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Spread: Grizzlies (-2.5)",
-          "side": "BUY",
-          "size": 2.8885,
-          "price": 0.53,
-          "conditionId": "0x1769ac888ad4c0168cdcb1658eefcbf70bb779fea2244e264f3158aa31612081",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Spread: Grizzlies (-2.5)",
-          "side": "BUY",
-          "size": 3.45684,
-          "price": 0.5300000505953463,
-          "conditionId": "0x1769ac888ad4c0168cdcb1658eefcbf70bb779fea2244e264f3158aa31612081",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Spread: Grizzlies (-1.5)",
-          "side": "BUY",
-          "size": 3.8416,
-          "price": 0.49,
-          "conditionId": "0x23bf4bd611a4ddb7a74ee7b01169dbe2585e419f2f475aba0a08eae65f960843",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        }
-      ],
+      "recent_bets": [],
       "last_seen": "2026-04-19T08:07:06.085764+00:00",
       "source_windows": [
         "PNL/ALL",

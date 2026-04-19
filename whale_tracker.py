@@ -121,6 +121,24 @@ SPORT_KEYWORDS = [
     "slam dunk", "three-pointer", "hat trick", "penalty",
     "transfer", "signing", "drafted", "roster",
     "season opener", "regular season", "division title",
+    # Scommesse sportive esplicite (Polymarket vende handicap/moneyline)
+    "spread:", "moneyline:", "total:", "1h spread:", "2h spread:",
+    "1q spread:", "2q spread:", "3q spread:", "4q spread:",
+    "over/under", "o/u", "puckline", "run line",
+    # Nomi franchise NBA (spread/moneyline senza league nel titolo)
+    "lakers", "celtics", "warriors", "nuggets", "heat", "bucks", "knicks",
+    "76ers", "sixers", "nets", "suns", "mavericks", "mavs", "grizzlies",
+    "clippers", "rockets", "thunder", "pelicans", "kings", "timberwolves",
+    "wolves", "spurs", "trail blazers", "blazers", "jazz", "pistons",
+    "cavaliers", "cavs", "raptors", "bulls", "hawks", "hornets", "magic",
+    "pacers", "wizards",
+    # Nomi franchise NFL
+    "patriots", "chiefs", "eagles", "cowboys", "49ers", "packers",
+    "bills", "ravens", "steelers", "bengals", "dolphins", "jets",
+    "giants", "commanders", "vikings", "lions", "bears",
+    # Nomi franchise MLB / NHL
+    "yankees", "red sox", "dodgers", "mets", "cubs", "white sox",
+    "maple leafs", "oilers", "bruins", "rangers", "canadiens",
 ]
 
 # Pattern regex per catturare sport che sfuggono alle keyword
@@ -131,13 +149,28 @@ SPORT_PATTERNS = [
     r"\b(home|away)\s+(win|team|game)\b",
     r"\b\d+\s+(goals?|points?|runs?|sets?|games?|touchdowns?)\b",
     r"\b(fc|cf|ac|as|sc|rc|afc|ssc)\s+\w+",    # nomi club: FC Barcelona, AC Milan
+    r"\bfc\b",                                   # "Toulouse FC (-1.5)" — FC postfix
     r"\b(united|city|rovers|wanderers|athletic)\b.*\b(win|lose|draw|score)\b",
+    r"\(-\d+(\.\d+)?\)",                        # spread notation "(-1.5)", "(-5.5)"
+    r"\(\+\d+(\.\d+)?\)",                       # spread notation "(+2.5)"
+    r"^\s*(1h|2h|1q|2q|3q|4q|ot)\s+",           # quarter/half period markers
 ]
 
 def _is_sport(title: str) -> bool:
     t = title.lower()
-    if any(kw.lower() in t for kw in SPORT_KEYWORDS):
-        return True
+    for kw in SPORT_KEYWORDS:
+        k = kw.lower().strip()
+        if not k:
+            continue
+        # Sigle corte (≤4 char) o solo alfanumeriche → word-boundary match
+        # per evitare falsi positivi tipo NFL in "inflation".
+        if len(k) <= 4 and k.isalnum():
+            if re.search(rf"\b{re.escape(k)}\b", t):
+                return True
+        else:
+            # keyword con spazi o punteggiatura → substring match OK
+            if k in t:
+                return True
     return any(re.search(p, t) for p in SPORT_PATTERNS)
 
 
@@ -197,6 +230,44 @@ def _is_past_market(title: str) -> bool:
             return True
         # mn >= now.month → potrebbe essere futuro (es. "in December" = December 2026)
         # Non bloccare: lascia decidere a Gamma API / is_market_resolved()
+    # "by/before/on <Mese> <Giorno>, <Anno>" (es. "by April 5, 2026")
+    for m in re.finditer(
+        r'\b(?:by|before|on)\s+'
+        r'(january|february|march|april|may|june|july|august|september|'
+        r'october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)'
+        r'\s+(\d{1,2})\s*,?\s*(\d{4})\b', t
+    ):
+        mn = _MONTH_MAP.get(m.group(1), 0)
+        try:
+            day, yr = int(m.group(2)), int(m.group(3))
+        except ValueError:
+            continue
+        if mn and 1 <= day <= 31:
+            try:
+                if datetime(yr, mn, day, tzinfo=timezone.utc) < now:
+                    return True
+            except ValueError:
+                pass
+    # "by/before <Mese> <Giorno>" senza anno (es. "by March 31", "by Apr 15")
+    # Assumi anno corrente; se già passato → blocca.
+    for m in re.finditer(
+        r'\b(?:by|before|on)\s+'
+        r'(january|february|march|april|may|june|july|august|september|'
+        r'october|november|december|jan|feb|mar|apr|jun|jul|aug|sep|oct|nov|dec)'
+        r'\s+(\d{1,2})\b(?!\s*,?\s*\d{4})', t
+    ):
+        mn = _MONTH_MAP.get(m.group(1), 0)
+        try:
+            day = int(m.group(2))
+        except ValueError:
+            continue
+        if mn and 1 <= day <= 31:
+            try:
+                candidate = datetime(now.year, mn, day, tzinfo=timezone.utc)
+                if candidate < now:
+                    return True
+            except ValueError:
+                pass
     # Q1-Q4 Anno
     for m in re.finditer(r'\bq([1-4])\s*(\d{4})\b', t):
         em, ed = _QUARTER_END[int(m.group(1))]

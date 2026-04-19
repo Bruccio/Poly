@@ -71,6 +71,33 @@ def test_not_sport_crypto():
     assert _is_sport("Will Ethereum ETF launch in Q2 2026?") is False
 
 
+def test_not_sport_inflation_substring():
+    """Regression: 'NFL' non deve matchare come substring dentro 'iNFLation'."""
+    assert _is_sport("Will inflation reach 5% in 2027?") is False
+    assert _is_sport("NFL won't match inflation keyword") is True  # vero NFL
+    assert _is_sport("Will FBI indict politician?") is False  # FBI ≠ FB + I
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# _is_sport() — scommesse sportive esplicite su Polymarket (spread/moneyline)
+# ─────────────────────────────────────────────────────────────────────────────
+def test_sport_spread_notation():
+    assert _is_sport("Spread: Toulouse FC (-1.5)") is True
+    assert _is_sport("1H Spread: Nuggets (-3.5)") is True
+    assert _is_sport("Spread: Rockets (-5.5)") is True
+    assert _is_sport("Spread: Warriors (-6.5)") is True
+
+
+def test_sport_moneyline_total():
+    assert _is_sport("Moneyline: Lakers") is True
+    assert _is_sport("Total: Heat vs Celtics") is True
+
+
+def test_sport_team_name_without_league():
+    assert _is_sport("Will Celtics beat Warriors tonight") is True
+    assert _is_sport("Rockets playoff run") is True
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # _parse_claude() — verdict parsing
 # ─────────────────────────────────────────────────────────────────────────────
@@ -232,6 +259,23 @@ def test_past_market_quarter_future():
 def test_past_market_bare_month_year():
     """'January 2026 Fed decision' senza preposizione — passato."""
     assert _is_past_market("January 2026 Fed decision outcome?") is True
+
+
+def test_past_market_by_month_day_no_year():
+    """'by March 31' senza anno — assumi anno corrente, se passato → blocca."""
+    assert _is_past_market("US forces enter Iran by March 31?") is True
+    assert _is_past_market("Will X happen by Feb 15?") is True
+
+
+def test_past_market_by_month_day_with_year():
+    """'by April 5, 2026' — passato il 19 aprile."""
+    assert _is_past_market("Will X happen by April 5, 2026?") is True
+    assert _is_past_market("Deal closes on March 3, 2026") is True
+
+
+def test_past_market_by_month_day_future_year():
+    """'by March 31, 2027' — futuro, non bloccare."""
+    assert _is_past_market("Will it happen by March 31, 2027?") is False
 
 def test_past_market_politics_not_blocked():
     """Mercato politico senza data — non bloccare."""
