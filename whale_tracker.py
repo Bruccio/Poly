@@ -829,12 +829,14 @@ def fetch_whale_trades(state: dict) -> list:
                         and not _is_sport(title)
                         and not _is_past_market(title)
                         and not _is_known_resolved_event(title)):
+                    cond_id = (t.get("conditionId") or t.get("market") or "")
                     bet = {
                         "title": title,
                         "side":  side,
                         "size":  size,
                         "price": price,
-                        "conditionId": (t.get("conditionId") or t.get("market") or ""),
+                        "conditionId": cond_id,
+                        "poly_url": _get_poly_url(cond_id, title),
                     }
                     bet["copy_advice"] = classify_bet(bet, whale_trust=trust_score)
                     wallet_bets.append(bet)
@@ -2283,10 +2285,11 @@ def build_message(results, state: dict = None, is_demo=False, best_skip=None):
         if t.get("sospetto", "No") not in ("No", "N/A"):
             msg += "⚠️ Potrebbe essere gonfiato artificialmente\n"
 
-        # Link diretto Polymarket
+        # Link diretto Polymarket — CTA esplicita sul cosa fare
         poly_url = t.get("poly_url") or ""
         if poly_url:
-            msg += f"[📊 Vedi su Polymarket]({poly_url})\n"
+            cta = "🚀 COPY SU POLYMARKET" if v == "COPY" else "👁️ APRI IL MERCATO"
+            msg += f"\n👉 [{cta} ↗]({poly_url})\n"
         msg += "\n"
 
     # Top 5 whale dalla leaderboard
@@ -2300,7 +2303,7 @@ def build_message(results, state: dict = None, is_demo=False, best_skip=None):
             ts_val = w.get("trust_score", 40)
             name = w.get("username", "?")[:18]
             msg += f"\n*{i}. {name}* +${profit:,.0f} (trust {ts_val})\n"
-            # Mostra le 2 bet più recenti con copy-advice
+            # Mostra le 2 bet più recenti con copy-advice + link al mercato
             bets = (w.get("recent_bets") or [])[:2]
             for b in bets:
                 adv = b.get("copy_advice") or {}
@@ -2308,11 +2311,14 @@ def build_message(results, state: dict = None, is_demo=False, best_skip=None):
                 icon = "🟢" if v == "COPY" else "🟡" if v == "WATCH" else "⚪"
                 side = (b.get("side") or "YES").upper()
                 side = "YES" if "YES" in side or "BUY" in side else "NO"
-                t = (b.get("title") or "")[:45]
+                t_short = (b.get("title") or "")[:45]
                 sz = float(b.get("size") or 0)
                 pr = float(b.get("price") or 0.5)
-                msg += (f"  {icon} *{v}* {side} {t}\n"
+                bet_url = b.get("poly_url") or ""
+                msg += (f"  {icon} *{v}* {side} {t_short}\n"
                         f"     ${sz/1000:.0f}k @ {int(pr*100)}¢ — _{adv.get('reason','')}_\n")
+                if bet_url:
+                    msg += f"     [→ apri mercato]({bet_url})\n"
         msg += "\n"
 
     return msg + "_Polymarket Whale Tracker v3 — Bruno_"
@@ -2367,6 +2373,23 @@ def build_email_html(results, state: dict = None, is_demo=False, best_skip=None)
         if wname and "0xpool" not in wname and "0xdemo" not in wname:
             tc = "#2a9d2a" if ts_val >= 70 else "#e6a817" if ts_val >= 50 else "#d9534f"
             trust_html = f'<span style="color:{tc};font-size:12px;">🐋 {wname} — Trust {ts_val}/100</span><br>'
+
+        # Bottone grande e colorato: link diretto al mercato su Polymarket
+        poly_url = t.get("poly_url") or ""
+        if not poly_url:
+            poly_url = ("https://polymarket.com/search?q=" +
+                        urllib.parse.quote(t.get("market", "")[:80]))
+        btn_bg  = "#1a7a3a" if v == "COPY" else "#2a6dd9"
+        btn_txt = "🚀 COPY SU POLYMARKET →" if v == "COPY" else "👁️ APRI IL MERCATO →"
+        poly_btn_html = (
+            f'<div style="margin-top:14px;text-align:center;">'
+            f'<a href="{poly_url}" target="_blank" '
+            f'style="display:inline-block;background:{btn_bg};color:#fff;'
+            f'padding:12px 22px;border-radius:6px;font-weight:700;'
+            f'text-decoration:none;font-size:14px;letter-spacing:0.5px;">'
+            f'{btn_txt}</a></div>'
+        )
+
         rows += f"""
         <tr style="background:{bg};border-bottom:1px solid #e0e0e0;">
           <td style="padding:16px;">
@@ -2381,6 +2404,7 @@ def build_email_html(results, state: dict = None, is_demo=False, best_skip=None)
             <br>
             <span style="color:{risk_color};font-weight:bold;">Rischio: {risk}/10</span>
             {"<br>⚠️ <i>Potrebbe essere gonfiato artificialmente</i>" if t.get('sospetto','No') not in ('No','N/A') else ""}
+            {poly_btn_html}
           </td>
         </tr>"""
 
@@ -2409,6 +2433,10 @@ def build_email_html(results, state: dict = None, is_demo=False, best_skip=None)
                     side_color = "#1a7a3a" if side == "YES" else "#d9534f"
                     sz = float(b.get("size") or 0)
                     pr = float(b.get("price") or 0.5)
+                    bet_url = b.get("poly_url") or (
+                        "https://polymarket.com/search?q=" +
+                        urllib.parse.quote((b.get("title") or "")[:80])
+                    )
                     bets_html += (
                         f'<div style="margin:6px 0;padding:8px;background:#fff;'
                         f'border-left:3px solid {v_color};border-radius:0 4px 4px 0;font-size:12px;">'
@@ -2417,7 +2445,10 @@ def build_email_html(results, state: dict = None, is_demo=False, best_skip=None)
                         f'<span style="color:{side_color};font-weight:600;">{side}</span> '
                         f'<span style="color:#222;">{title}</span>'
                         f'<div style="color:#888;font-size:11px;margin-top:2px;">'
-                        f'${sz/1000:.0f}k @ {int(pr*100)}¢ — <i>{reason}</i></div></div>'
+                        f'${sz/1000:.0f}k @ {int(pr*100)}¢ — <i>{reason}</i></div>'
+                        f'<a href="{bet_url}" target="_blank" style="display:inline-block;'
+                        f'margin-top:4px;color:#2a6dd9;font-size:11px;text-decoration:none;">'
+                        f'→ apri mercato</a></div>'
                     )
             else:
                 bets_html = ('<div style="color:#888;font-size:11px;font-style:italic;">'
