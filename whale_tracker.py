@@ -35,6 +35,7 @@ MIN_SIZE_USDC          = int(os.environ.get("MIN_WHALE_SIZE", "100000"))
 MAX_WHALES             = int(os.environ.get("MAX_WHALES", "10"))
 CHECK_INTERVAL_MINUTES = int(os.environ.get("CHECK_INTERVAL_MINUTES", "30"))
 ONLY_NOTIFY_ON_COPY    = os.environ.get("ONLY_NOTIFY_ON_COPY", "true").lower() != "false"
+SEND_HEARTBEAT         = os.environ.get("SEND_HEARTBEAT", "true").lower() != "false"
 MAX_TRADE_AGE_HOURS    = 24   # scarta trade/mercati più vecchi di 24h
 
 # ── STATO PERSISTENTE ────────────────────────────────────────────────────────────
@@ -2414,7 +2415,28 @@ def run():
     _VERIFIED_OPEN_CACHE.clear()
     _CLOB_PRICE_CACHE.clear()
     state = load_state()
+
+    # ── DEDUP RUN (backup cron) ────────────────────────────────────────────────
+    # Il workflow GitHub Actions ha 2 cron (primario + backup 15 min dopo) per
+    # resistere agli skip casuali dello scheduler GitHub. Se l'ultimo run è
+    # finito da meno di ~3 ore, il secondo cron è ridondante → esce silenzioso
+    # senza spammare email/telegram. Override via env FORCE_RUN=1 o
+    # workflow_dispatch (che setta GITHUB_EVENT_NAME=workflow_dispatch).
+    last_run_ts = state.get("last_run_ts")
+    is_manual = os.environ.get("GITHUB_EVENT_NAME") == "workflow_dispatch"
+    force = os.environ.get("FORCE_RUN") == "1"
+    if last_run_ts and not is_manual and not force:
+        try:
+            last_dt = datetime.fromisoformat(last_run_ts.replace("Z", "+00:00"))
+            age_min = (datetime.now(timezone.utc) - last_dt).total_seconds() / 60
+            if age_min < 180:  # 3 ore
+                log(f"DEDUP: ultimo run {age_min:.0f} min fa — skip backup cron", "WARN")
+                return
+        except Exception as e:
+            log(f"DEDUP: parse last_run_ts fallito ({e}), procedo", "WARN")
+
     state["run_count"] = state.get("run_count", 0) + 1
+    state["last_run_ts"] = datetime.now(timezone.utc).isoformat()
     run_n = state["run_count"]
 
     today = datetime.now(timezone.utc)
@@ -2619,7 +2641,25 @@ def run():
             log(f"Telegram: {e}", "ERR")
         send_email(actionable, state, is_demo)
     else:
-        log(f"Nessun COPY/WATCH — notifiche soppresse (tutti SKIP).", "OK")
+        log(f"Nessun COPY/WATCH — notifiche dei segnali soppresse (tutti SKIP).", "OK")
+        # ── HEARTBEAT: conferma che il bot sta girando anche senza segnali ───
+        # Altrimenti l'utente non distingue "bot down" da "bot vivo senza segnali".
+        if SEND_HEARTBEAT:
+            try:
+                lb_size = len(state.get("leaderboard", {}))
+                skips   = sum(1 for r in results if r.get("verdict") == "SKIP")
+                hb_msg  = (
+                    f"🐋 <b>Whale Tracker — run #{run_n}</b>\n"
+                    f"<i>{today.strftime('%d/%m/%Y %H:%M')} UTC</i>\n\n"
+                    f"✅ Bot vivo, nessun segnale attivo\n"
+                    f"• Whale monitorate: {lb_size}\n"
+                    f"• Mercati analizzati: {len(results)} ({skips} SKIP)\n\n"
+                    f"📊 Dashboard: https://bruccio.github.io/Poly/"
+                )
+                if send_telegram(hb_msg, silent=True):
+                    log("Heartbeat Telegram inviato (silenzioso).", "OK")
+            except Exception as e:
+                log(f"Heartbeat Telegram fallito: {e}", "WARN")
 
     log(f"Run #{run_n} completato — {copy_count} COPY su {len(results)} analizzati.")
 
