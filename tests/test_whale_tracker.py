@@ -78,6 +78,32 @@ def test_not_sport_inflation_substring():
     assert _is_sport("Will FBI indict politician?") is False  # FBI ≠ FB + I
 
 
+def test_not_sport_win_the_political():
+    """Regression CRITICO (28/04/26): 'win the' come keyword bloccava
+    TUTTA la politica — 113/160 trade reali finivano in sport.
+    Ora 'win the ' è rimosso; SPORT_PATTERNS richiede già contesto sportivo
+    (cup/championship/series/league/title/season) dopo 'win'."""
+    assert _is_sport("Will a Republican win the popular vote and the Presidency?") is False
+    assert _is_sport("Will Donald Trump win the 2024 US Presidential Election?") is False
+    assert _is_sport("Who will win the next presidential election?") is False
+    assert _is_sport("Will Mamdani win the NYC mayoral?") is False
+    # Sport veri col pattern restano bloccati:
+    assert _is_sport("Will Lakers win the NBA championship?") is True
+    assert _is_sport("Will Real Madrid win the Champions League?") is True
+
+
+def test_not_sport_as_preposition():
+    """Regression: la regex club (fc|cf|ac|as|sc|rc|...) catturava 'as next' in
+    'announced as next James Bond' → falso positivo. Ora la regex è ristretta
+    a sigle UNIVOCHE (fc|afc|ssc|cska) — 'as/ac/cf/sc/rc' rimossi."""
+    assert _is_sport("Henry Cavill announced as next James Bond?") is False
+    assert _is_sport("Will SpaceX go public as a company by 2026?") is False
+    assert _is_sport("Will Trump act as president after term?") is False
+    # Club veri (FC/AFC/SSC) restano bloccati:
+    assert _is_sport("Will FC Barcelona win La Liga?") is True
+    assert _is_sport("Will AFC Bournemouth stay up this season?") is True
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # _is_sport() — scommesse sportive esplicite su Polymarket (spread/moneyline)
 # ─────────────────────────────────────────────────────────────────────────────

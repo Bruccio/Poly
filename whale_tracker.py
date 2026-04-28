@@ -89,8 +89,12 @@ def save_state(state: dict):
 # ── FILTRO SPORT / ENTERTAINMENT ─────────────────────────────────────────────────
 SPORT_KEYWORDS = [
     # Partite / sfide dirette
+    # NB: NON includere "win the " — è troppo comune in politica
+    # ("Will Trump win the election", "Will X win the popular vote").
+    # Per gli sport usiamo invece SPORT_PATTERNS che richiede contesto
+    # (cup/championship/series/league/title/season) dopo "win".
     " vs ", " vs. ", " v ", " @ ", "beat ", "beats ",
-    "win the ", "score ", "scores ", "goal ", "match ", "game ",
+    "score ", "scores ", "goal ", "match ", "game ",
     # Leghe americane
     "NBA", "NFL", "NHL", "MLB", "MLS", "WNBA", "NCAA", "NWSL",
     # Leghe europee
@@ -148,7 +152,9 @@ SPORT_PATTERNS = [
     r"will .+ beat ",
     r"\b(home|away)\s+(win|team|game)\b",
     r"\b\d+\s+(goals?|points?|runs?|sets?|games?|touchdowns?)\b",
-    r"\b(fc|cf|ac|as|sc|rc|afc|ssc)\s+\w+",    # nomi club: FC Barcelona, AC Milan
+    # Nomi club: SOLO sigle UNIVOCHE per evitare falsi positivi.
+    # "as", "ac", "cf", "sc", "rc" sono troppo comuni in inglese (es. "as next").
+    r"\b(fc|afc|ssc|cska)\s+\w+",                # FC Barcelona, AFC Bournemouth, SSC Napoli
     r"\bfc\b",                                   # "Toulouse FC (-1.5)" — FC postfix
     r"\b(united|city|rovers|wanderers|athletic)\b.*\b(win|lose|draw|score)\b",
     r"\(-\d+(\.\d+)?\)",                        # spread notation "(-1.5)", "(-5.5)"
@@ -782,12 +788,15 @@ def fetch_whale_trades(state: dict) -> list:
         log("fetch_whale_trades: leaderboard vuota, skip", "WARN")
         return []
 
-    # Prendi top 20 wallet ordinati per trust_score
+    # Prendi top 40 wallet ordinati per trust_score.
+    # Le top 10-20 storiche sono spesso "dormienti" (whale dell'elezione 2024
+    # che ora tradano solo sport): allargare il pool dà ossigeno alle whale
+    # ancora attive su mercati politici/macro/crypto.
     sorted_wallets = sorted(
         leaderboard.items(),
         key=lambda kv: kv[1].get("trust_score", 0),
         reverse=True,
-    )[:20]
+    )[:40]
 
     all_trades: list = []
     seen_titles: set = set()
@@ -861,6 +870,10 @@ def fetch_whale_trades(state: dict) -> list:
                 if is_market_resolved(title, condition_id=cond_id):
                     continue
                 if not is_future_market(t):
+                    continue
+                # Filtro size minimo: trade <$1k = retail noise, non whale signal.
+                # Risparmia API call Claude e tiene il pool focalizzato.
+                if size < 1000:
                     continue
                 seen_titles.add(title_key)
                 all_trades.append({
