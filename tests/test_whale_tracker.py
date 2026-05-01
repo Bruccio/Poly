@@ -13,6 +13,8 @@ from whale_tracker import (
     _is_sport, _parse_claude, compute_confidence, _is_past_market,
     is_market_resolved, _GAMMA_RESOLUTION_CACHE, _is_known_resolved_event,
     _activity_score, effective_trust,
+    _classify_archive_entry, _migrate_archive_kinds,
+    ARCHIVE_RESOLVED, ARCHIVE_FILTERED, ARCHIVE_STALE, ARCHIVE_UNKNOWN,
 )
 
 
@@ -501,6 +503,54 @@ def test_effective_trust_today_top():
     """Whale top con trade oggi → trust massimo (≈100)."""
     eff = effective_trust({"trust_score": 100, "last_non_sport_trade": _ts_days_ago(0)})
     assert eff == 100
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Archive classification — separa risolti veri da filtered/stale/unknown
+# ─────────────────────────────────────────────────────────────────────────────
+def test_archive_kind_explicit_wins():
+    """Se l'entry ha già archive_kind, viene rispettato."""
+    assert _classify_archive_entry({"archive_kind": ARCHIVE_RESOLVED}) == ARCHIVE_RESOLVED
+    assert _classify_archive_entry({"archive_kind": ARCHIVE_FILTERED}) == ARCHIVE_FILTERED
+    assert _classify_archive_entry({"archive_kind": ARCHIVE_STALE}) == ARCHIVE_STALE
+
+
+def test_archive_kind_inferred_filtered():
+    """Auto-removed dai filtri → filtered (anche senza campo archive_kind)."""
+    e = {"resolution": "Auto-removed: US Presidential Election 2024",
+         "correct": None}
+    assert _classify_archive_entry(e) == ARCHIVE_FILTERED
+
+
+def test_archive_kind_inferred_resolved():
+    """Mercato chiuso da Polymarket con outcome known → resolved."""
+    assert _classify_archive_entry({"correct": True,
+                                    "resolution": "YES",
+                                    "resolution_date": "2026-04-15"}) == ARCHIVE_RESOLVED
+    assert _classify_archive_entry({"correct": False,
+                                    "resolution": "NO",
+                                    "resolution_date": "2026-04-15"}) == ARCHIVE_RESOLVED
+
+
+def test_archive_kind_inferred_unknown():
+    """Entry incompleta (no auto-removed, no correct, no resolution proper)."""
+    assert _classify_archive_entry({"resolution": "?"}) == ARCHIVE_UNKNOWN
+    assert _classify_archive_entry({}) == ARCHIVE_UNKNOWN
+
+
+def test_migrate_archive_kinds_idempotent():
+    """Migrate è idempotente — non altera entry già marcate."""
+    state = {"resolved_archive": [
+        {"archive_kind": ARCHIVE_RESOLVED, "correct": True},
+        {"resolution": "Auto-removed: x"},   # → filtered
+        {"correct": False, "resolution": "NO", "resolution_date": "2026-04-01"},  # → resolved
+    ]}
+    n = _migrate_archive_kinds(state)
+    assert n == 2  # solo le ultime due, la prima era già marcata
+    assert state["resolved_archive"][1]["archive_kind"] == ARCHIVE_FILTERED
+    assert state["resolved_archive"][2]["archive_kind"] == ARCHIVE_RESOLVED
+    # Seconda chiamata: nessun cambio
+    assert _migrate_archive_kinds(state) == 0
 
 
 def test_effective_trust_silent_demoting():

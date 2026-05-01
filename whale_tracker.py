@@ -1282,6 +1282,48 @@ def fetch_github_insights(state: dict) -> str:
     return summary
 
 
+# ── ARCHIVE CLASSIFICATION ──────────────────────────────────────────────────────
+# Ogni entry in resolved_archive ha un 'archive_kind' che distingue come è
+# arrivata lì. Importante per il calcolo dell'accuracy reale.
+ARCHIVE_RESOLVED = "resolved"  # mercato chiuso da Polymarket, ha winning outcome
+ARCHIVE_FILTERED = "filtered"  # rimosso dai nostri filtri (event noto, wallet pool, ecc.)
+ARCHIVE_STALE    = "stale"     # ancora aperto ma >30 giorni dal flag, rimosso per pulizia
+ARCHIVE_UNKNOWN  = "unknown"   # entry da versione vecchia, kind dedotto a posteriori
+
+
+def _classify_archive_entry(entry: dict) -> str:
+    """Determina il kind di un'entry archivio (con backward-compat).
+
+    Le entry vecchie non hanno 'archive_kind' — lo deduciamo:
+      - resolution inizia con 'Auto-removed' → filtered
+      - resolution_date present + correct in {True, False} → resolved
+      - resolution è un valore YES/NO/altro testo proper → resolved
+      - altrimenti → unknown
+    """
+    if entry.get("archive_kind"):
+        return entry["archive_kind"]
+    res = (entry.get("resolution") or "").strip()
+    if res.startswith("Auto-removed"):
+        return ARCHIVE_FILTERED
+    if entry.get("correct") in (True, False):
+        return ARCHIVE_RESOLVED
+    if res and res.upper() in ("YES", "NO") and entry.get("resolution_date"):
+        return ARCHIVE_RESOLVED
+    return ARCHIVE_UNKNOWN
+
+
+def _migrate_archive_kinds(state: dict) -> int:
+    """Backward-compat: ad ogni run popola archive_kind sulle entry vecchie.
+    Idempotente (skippa quelle che già lo hanno). Ritorna # entries aggiornate."""
+    archive = state.get("resolved_archive") or []
+    n = 0
+    for e in archive:
+        if not e.get("archive_kind"):
+            e["archive_kind"] = _classify_archive_entry(e)
+            n += 1
+    return n
+
+
 # ── SELF-IMPROVING: CONTROLLA RESOLUTION ────────────────────────────────────────
 def check_resolutions(state: dict):
     """Controlla se i mercati watched hanno avuto una resolution.
@@ -1292,14 +1334,23 @@ def check_resolutions(state: dict):
     archive = state.setdefault("resolved_archive", [])
     now = datetime.now(timezone.utc)
 
-    # 0. Migrazione one-shot: se ci sono mercati già risolti in watched (da vecchie versioni),
-    #    spostali subito in archive
+    # 0a. Backward-compat: migra entry archivio vecchie a kind classificato
+    migrated = _migrate_archive_kinds(state)
+    if migrated:
+        log(f"Archive: classificate {migrated} entry retroattivamente", "OK")
+
+    # 0b. Migrazione one-shot: se ci sono mercati già risolti in watched
+    # (da vecchie versioni), spostali subito in archive con kind 'resolved'.
     for key, market in list(watched.items()):
         if market.get("resolved"):
+            market["archive_kind"] = ARCHIVE_RESOLVED
             archive.append(market)
             del watched[key]
 
-    # 1. Pulizia mercati obsoleti (stale) > 30 giorni non risolti
+    # 1. Pulizia mercati obsoleti (stale) > 30 giorni non risolti.
+    # ARCHIVIA invece di cancellare: l'utente vede il pattern "X mercati
+    # mai risolti — Polymarket non ha chiuso entro deadline" come segnale
+    # di affidabilità del feed/dei filtri. Tracciabile separatamente.
     removed_stale = 0
     for key, market in list(watched.items()):
         df_str = market.get("date_flagged")
@@ -1307,11 +1358,17 @@ def check_resolutions(state: dict):
             try:
                 df_dt = datetime.strptime(df_str, "%Y-%m-%d").replace(tzinfo=timezone.utc)
                 if (now - df_dt).days > 30:
+                    market.update({
+                        "archive_kind": ARCHIVE_STALE,
+                        "resolution": "Stale: >30g senza resolution",
+                        "resolution_date": now.isoformat(),
+                    })
+                    archive.append(market)
                     del watched[key]
                     removed_stale += 1
             except: pass
     if removed_stale:
-        log(f"Cleanup: rimossi {removed_stale} mercati obsoleti (>30gg)", "OK")
+        log(f"Cleanup: archiviati {removed_stale} mercati stale (>30gg)", "OK")
 
     # 2. Controlla ogni watched market usando is_market_resolved() — unica fonte di verità.
     #    Quella funzione gestisce: cache bulk → conditionId API → fuzzy title → slug event.
@@ -1356,7 +1413,8 @@ def check_resolutions(state: dict):
                    (winning in ("YES", "1") and our_side == "YES") or
                    (winning in ("NO", "0") and our_side == "NO")) if winning else None
         market.update({"resolved": True, "resolution": winning or "?", "correct": correct,
-                       "resolution_date": now.isoformat()})
+                       "resolution_date": now.isoformat(),
+                       "archive_kind": ARCHIVE_RESOLVED})
 
         # ── Self-correction: salva errori COPY per feedarli a Claude
         if market.get("our_verdict") == "COPY" and correct is False:
@@ -1382,21 +1440,28 @@ def check_resolutions(state: dict):
     # 3. Limita archive a 200 voci (le più recenti)
     state["resolved_archive"] = archive[-200:]
 
-    # 4. Ricalcola algo_stats dall'archive (tutti i mercati risolti storicamente)
-    all_resolved = [m for m in state["resolved_archive"]
-                    if m.get("correct") is not None]
-    correct_count = sum(1 for m in all_resolved if m.get("correct"))
-    # total_copy_signals = segnali COPY attivi + archiviati
+    # 4. Ricalcola algo_stats SOLO dai mercati VERAMENTE risolti
+    # (archive_kind == 'resolved'), NON da quelli filtrati o stale.
+    # Filtered/stale non hanno mai avuto un outcome reale → non contano per accuracy.
+    truly_resolved = [m for m in state["resolved_archive"]
+                      if _classify_archive_entry(m) == ARCHIVE_RESOLVED
+                      and m.get("correct") is not None]
+    correct_count = sum(1 for m in truly_resolved if m.get("correct"))
+    # total_copy_signals = segnali COPY attivi + archiviati COPY
     active_copies = sum(1 for m in watched.values() if m.get("our_verdict") == "COPY")
-    archived_copies = sum(1 for m in state["resolved_archive"] if m.get("our_verdict") == "COPY")
+    archived_copies = sum(1 for m in state["resolved_archive"]
+                          if m.get("our_verdict") == "COPY")
 
-    # Shadow wallet: $100 virtuale per ogni segnale COPY risolto
-    # Se corretto: guadagno = $100 / entry_price - $100 (payoff binario)
-    # Se sbagliato: perdi $100 (scommessa persa)
+    # Shadow wallet: $100 virtuale per ogni COPY effettivamente RISOLTO
+    # (i filtered/stale non hanno outcome → non contribuiscono al ROI).
     shadow_profit = 0.0
+    copy_resolved_count = 0
     for m in state["resolved_archive"]:
-        if m.get("our_verdict") != "COPY" or m.get("correct") is None:
+        if (m.get("our_verdict") != "COPY"
+                or _classify_archive_entry(m) != ARCHIVE_RESOLVED
+                or m.get("correct") is None):
             continue
+        copy_resolved_count += 1
         ep = float(m.get("entry_price") or 0.5)
         if ep <= 0:
             ep = 0.5
@@ -1404,19 +1469,25 @@ def check_resolutions(state: dict):
             shadow_profit += (100.0 / ep) - 100.0   # payoff netto
         else:
             shadow_profit -= 100.0                    # perdi la posta
-    total_copy_resolved = sum(
-        1 for m in state["resolved_archive"] if m.get("our_verdict") == "COPY" and m.get("correct") is not None
-    )
-    shadow_roi = round(shadow_profit / (total_copy_resolved * 100) * 100, 1) if total_copy_resolved else None
+    shadow_roi = (round(shadow_profit / (copy_resolved_count * 100) * 100, 1)
+                  if copy_resolved_count else None)
+
+    # Conta entry per kind per la dashboard
+    archive_breakdown = {ARCHIVE_RESOLVED: 0, ARCHIVE_FILTERED: 0,
+                         ARCHIVE_STALE: 0, ARCHIVE_UNKNOWN: 0}
+    for m in state["resolved_archive"]:
+        archive_breakdown[_classify_archive_entry(m)] += 1
 
     state["algo_stats"] = {
         "total_copy_signals": active_copies + archived_copies,
-        "resolved_copies": len(all_resolved),
+        "resolved_copies": len(truly_resolved),
         "correct_copies": correct_count,
-        "accuracy_pct": round(correct_count / len(all_resolved) * 100, 1) if all_resolved else None,
+        "accuracy_pct": (round(correct_count / len(truly_resolved) * 100, 1)
+                         if truly_resolved else None),
         "last_updated": now.isoformat(),
         "shadow_profit_usdc": round(shadow_profit, 2),
         "shadow_roi_pct": shadow_roi,
+        "archive_breakdown": archive_breakdown,  # nuovo: per dashboard
     }
     if newly_resolved:
         log(f"Resolution: {newly_resolved} mercati risolti e rimossi dalla dashboard, "
@@ -2825,6 +2896,7 @@ def run():
             "resolved": True,
             "resolution": f"Auto-removed: {reason}",
             "removed_at": datetime.now(timezone.utc).isoformat(),
+            "archive_kind": ARCHIVE_FILTERED,
         })
     if stale_keys:
         reasons = ", ".join(f"{r}" for _, r in stale_keys)

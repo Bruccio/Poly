@@ -321,8 +321,18 @@
     </section>
 
     <details>
-      <summary>Storico segnali risolti <span class="count" id="arch-count">0</span></summary>
+      <summary>Storico — chiusi da Polymarket <span class="count" id="arch-count">0</span></summary>
       <div class="body" id="archive"></div>
+    </details>
+
+    <details>
+      <summary>Auto-puliti dai filtri <span class="count" id="arch-filtered-count">0</span></summary>
+      <div class="body" id="archive-filtered"></div>
+    </details>
+
+    <details>
+      <summary>Stale (&gt;30g senza chiusura) <span class="count" id="arch-stale-count">0</span></summary>
+      <div class="body" id="archive-stale"></div>
     </details>
 
     <details>
@@ -371,6 +381,17 @@ function trustCls(t) { return t >= 70 ? 'trust-hi' : t >= 50 ? 'trust-md' : 'tru
 function searchUrl(q) {
   return 'https://polymarket.com/search?q=' + encodeURIComponent(String(q || '').slice(0, 80));
 }
+
+/* Stesso classifier del backend (whale_tracker._classify_archive_entry).
+ * Tiene il fallback per entry vecchie senza archive_kind. */
+function archiveKind(entry) {
+  if (entry.archive_kind) return entry.archive_kind;
+  const res = String(entry.resolution || '').trim();
+  if (res.startsWith('Auto-removed')) return 'filtered';
+  if (entry.correct === true || entry.correct === false) return 'resolved';
+  if (res && ['YES','NO'].includes(res.toUpperCase()) && entry.resolution_date) return 'resolved';
+  return 'unknown';
+}
 function polyLink(item, kind) {
   // kind: 'copy' | 'watch' | '' (default blu)
   const url = item.poly_url || searchUrl(item.question || item.title || item.market || '');
@@ -404,8 +425,11 @@ function renderStats(s) {
     accEl.classList.add(acc >= 60 ? 'g' : acc >= 40 ? 'a' : 'r');
   } else accEl.textContent = 'N/D';
 
+  // Archive split: solo i veri risolti (archive_kind='resolved') contano
+  // per win rate. Filtered/stale sono auto-pulizia, non outcome reali.
   const archive = s.resolved_archive || [];
-  const copies = archive.filter(m => m.our_verdict === 'COPY');
+  const trulyResolved = archive.filter(m => archiveKind(m) === 'resolved');
+  const copies = trulyResolved.filter(m => m.our_verdict === 'COPY');
   const ok     = copies.filter(m => m.correct === true);
   const wrEl = $('stat-winrate');
   if (copies.length >= 3) {
@@ -540,21 +564,20 @@ function renderLeaderboard(s) {
 }
 
 /* ════════════════════════════════════════════════════════════════════
- * RENDER: ARCHIVE
+ * RENDER: ARCHIVE — split by kind (resolved / filtered / stale)
  * ════════════════════════════════════════════════════════════════════ */
 function renderArchive(s) {
-  const archive = (s.resolved_archive || []).slice().reverse().slice(0, 25);
-  $('arch-count').textContent = archive.length;
+  const all = (s.resolved_archive || []).slice().reverse();
+  const buckets = { resolved: [], filtered: [], stale: [], unknown: [] };
+  for (const m of all) buckets[archiveKind(m)].push(m);
 
-  const el = $('archive');
-  if (!archive.length) {
-    el.innerHTML = '<div class="empty">// nessun segnale risolto ancora</div>';
-    return;
-  }
-  el.innerHTML = archive.map(m => {
-    const ok = m.correct === true;
-    const ko = m.correct === false;
-    const icon = ok ? '✓' : ko ? '✗' : '·';
+  $('arch-count').textContent = buckets.resolved.length;
+  $('arch-filtered-count').textContent = buckets.filtered.length;
+  $('arch-stale-count').textContent = buckets.stale.length;
+
+  const fmtRow = (m, kind) => {
+    const ok = m.correct === true, ko = m.correct === false;
+    const icon = ok ? '✓' : ko ? '✗' : kind === 'filtered' ? '⊘' : kind === 'stale' ? '⏱' : '·';
     const iconCls = ok ? 'ok' : ko ? 'ko' : 'un';
     const v = m.our_verdict || 'COPY';
     const vCls = v === 'COPY' ? 'copy' : 'watch';
@@ -562,15 +585,28 @@ function renderArchive(s) {
     const side = (m.side || 'YES').toUpperCase();
     const date = m.resolution_date || m.removed_at || m.date_flagged;
     const dateStr = date ? new Date(date).toLocaleDateString('it-IT', { day: '2-digit', month: 'short' }) : '—';
+    const reason = m.resolution || '';
     return `
     <div class="archive-row">
       <span class="archive-icon ${iconCls}">${icon}</span>
       <span class="verdict ${vCls}">${v}</span>
       <span class="archive-q">${esc(m.question || '???')}</span>
       <span class="archive-meta">${esc(side)} @ ${price}</span>
-      <span class="archive-meta">${dateStr}</span>
+      <span class="archive-meta">${esc(dateStr)}${reason ? ' · ' + esc(reason.slice(0,30)) : ''}</span>
     </div>`;
-  }).join('');
+  };
+
+  $('archive').innerHTML = buckets.resolved.length
+    ? buckets.resolved.slice(0, 30).map(m => fmtRow(m, 'resolved')).join('')
+    : '<div class="empty">// nessun segnale chiuso da Polymarket ancora</div>';
+
+  $('archive-filtered').innerHTML = buckets.filtered.length
+    ? buckets.filtered.slice(0, 25).map(m => fmtRow(m, 'filtered')).join('')
+    : '<div class="empty">// nessuna entry filtered</div>';
+
+  $('archive-stale').innerHTML = buckets.stale.length
+    ? buckets.stale.slice(0, 25).map(m => fmtRow(m, 'stale')).join('')
+    : '<div class="empty">// nessuna entry stale</div>';
 }
 
 /* ════════════════════════════════════════════════════════════════════
