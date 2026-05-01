@@ -36,7 +36,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-01T09:03:21.434890+00:00",
+      "last_seen": "2026-05-01T20:06:29.041844+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -50,7 +50,7 @@
       "times_seen": 1,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:22.319882+00:00",
+      "last_seen": "2026-05-01T20:06:29.041873+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -59,12 +59,12 @@
       "username": "kch123",
       "wallet": "0x6a72f61820b26b1fe4d956e17b6dc2a1ea3033ee",
       "total_profit_usd": 12066467.208288113,
-      "total_volume_usd": 288120645.2978321,
+      "total_volume_usd": 288120645.29783213,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:22.985465+00:00",
+      "last_seen": "2026-05-01T20:06:29.041885+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -79,7 +79,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:23.696305+00:00",
+      "last_seen": "2026-05-01T20:06:29.041894+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -93,7 +93,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:24.240790+00:00",
+      "last_seen": "2026-05-01T20:06:29.041910+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -107,7 +107,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:24.790486+00:00",
+      "last_seen": "2026-05-01T20:06:29.041917+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -116,12 +116,12 @@
       "username": "RN1",
       "wallet": "0x2005d16a84ceefa912d4e380cd32e7ff827875ea",
       "total_profit_usd": 7931508.718754351,
-      "total_volume_usd": 493499891.9256011,
+      "total_volume_usd": 494354702.567322,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:25.421458+00:00",
+      "last_seen": "2026-05-01T20:06:29.443861+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -137,7 +137,7 @@
       "times_seen": 1,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:25.972469+00:00",
+      "last_seen": "2026-05-01T20:06:29.041932+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -151,7 +151,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:26.528768+00:00",
+      "last_seen": "2026-05-01T20:06:29.041938+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -159,13 +159,13 @@
     "0x204f72f35326db932158cba6adff0b9a1da95e14": {
       "username": "swisstony",
       "wallet": "0x204f72f35326db932158cba6adff0b9a1da95e14",
-      "total_profit_usd": 7018573.626238977,
-      "total_volume_usd": 715957801.9363569,
+      "total_profit_usd": 7066855.420321403,
+      "total_volume_usd": 717450956.26605,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:27.188270+00:00",
+      "last_seen": "2026-05-01T20:06:29.443907+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -181,7 +181,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:27.759729+00:00",
+      "last_seen": "2026-05-01T20:06:29.041945+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -195,7 +195,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:28.333268+00:00",
+      "last_seen": "2026-05-01T20:06:29.041974+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -209,7 +209,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:28.890284+00:00",
+      "last_seen": "2026-05-01T20:06:29.041982+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -223,7 +223,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:29.553690+00:00",
+      "last_seen": "2026-05-01T20:06:29.041988+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -232,12 +232,12 @@
       "username": "GamblingIsAllYouNeed",
       "wallet": "0x507e52ef684ca2dd91f90a9d26d149dd3288beae",
       "total_profit_usd": 5029435.9101198865,
-      "total_volume_usd": 395538148.0025461,
+      "total_volume_usd": 397528927.70579505,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:30.185772+00:00",
+      "last_seen": "2026-05-01T20:06:29.443938+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -253,7 +253,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:30.855635+00:00",
+      "last_seen": "2026-05-01T20:06:29.041994+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -267,7 +267,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:31.483952+00:00",
+      "last_seen": "2026-05-01T20:06:29.247776+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -349,12 +349,10 @@
           }
         }
       ],
-      "last_seen": "2026-05-01T09:03:54.794057+00:00",
+      "last_seen": "2026-05-01T20:06:29.042007+00:00",
       "source_windows": [
         "PNL/ALL"
-      ],
-      "n_markets": 163,
-      "profiled": true
+      ]
     },
     "0xdc876e6873772d38716fda7f2452a78d426d7ab6": {
       "username": "432614799197",
@@ -365,7 +363,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:34.718814+00:00",
+      "last_seen": "2026-05-01T20:06:29.042014+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -380,7 +378,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:35.262685+00:00",
+      "last_seen": "2026-05-01T20:06:29.042021+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -394,7 +392,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:35.806049+00:00",
+      "last_seen": "2026-05-01T20:06:29.042027+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -409,7 +407,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:36.377726+00:00",
+      "last_seen": "2026-05-01T20:06:29.042034+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -423,7 +421,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:36.927479+00:00",
+      "last_seen": "2026-05-01T20:06:29.042040+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -432,7 +430,7 @@
       "username": "GCottrell93",
       "wallet": "0x94a428cfa4f84b264e01f70d93d02bc96cb36356",
       "total_profit_usd": 3484274.398974966,
-      "total_volume_usd": 18304090.51355295,
+      "total_volume_usd": 18305594.90558195,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
@@ -503,7 +501,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-01T09:03:37.500561+00:00",
+      "last_seen": "2026-05-01T20:06:29.042060+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -517,7 +515,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:39.938151+00:00",
+      "last_seen": "2026-05-01T20:06:29.042066+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -531,7 +529,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:40.614698+00:00",
+      "last_seen": "2026-05-01T20:06:29.042047+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -547,7 +545,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:41.240619+00:00",
+      "last_seen": "2026-05-01T20:06:29.042079+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -561,7 +559,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:41.877394+00:00",
+      "last_seen": "2026-05-01T20:06:29.042085+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -575,7 +573,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:42.436445+00:00",
+      "last_seen": "2026-05-01T20:06:29.042091+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -589,7 +587,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:43.077613+00:00",
+      "last_seen": "2026-05-01T20:06:29.042072+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -599,7 +597,7 @@
       "username": "ImJustKen",
       "wallet": "0x9d84ce0306f8551e02efef1680475fc0f1dc1344",
       "total_profit_usd": 2932405.3955728253,
-      "total_volume_usd": 473488741.72122294,
+      "total_volume_usd": 473488741.7212231,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
@@ -670,12 +668,10 @@
           }
         }
       ],
-      "last_seen": "2026-05-01T09:04:00.561737+00:00",
+      "last_seen": "2026-05-01T20:06:29.042104+00:00",
       "source_windows": [
         "PNL/ALL"
-      ],
-      "n_markets": 120,
-      "profiled": true
+      ]
     },
     "0xd38b71f3e8ed1af71983e5c309eac3dfa9b35029": {
       "username": "primm",
@@ -686,7 +682,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:45.751115+00:00",
+      "last_seen": "2026-05-01T20:06:29.042110+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -700,7 +696,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:46.447146+00:00",
+      "last_seen": "2026-05-01T20:06:29.042116+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -709,7 +705,7 @@
       "username": "0x8dxd",
       "wallet": "0x63ce342161250d705dc0b16df89036c8e5f9ba9a",
       "total_profit_usd": 2382957.5860263677,
-      "total_volume_usd": 200502822.09256297,
+      "total_volume_usd": 200502822.092563,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
@@ -780,13 +776,11 @@
           }
         }
       ],
-      "last_seen": "2026-05-01T09:03:58.837619+00:00",
+      "last_seen": "2026-05-01T20:06:29.042136+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
-      ],
-      "n_markets": 14,
-      "profiled": true
+      ]
     },
     "0x0b9cae2b0dfe7a71c413e0604eaac1c352f87e44": {
       "username": "geniusMC",
@@ -811,12 +805,10 @@
           }
         }
       ],
-      "last_seen": "2026-05-01T09:04:02.394067+00:00",
+      "last_seen": "2026-05-01T20:06:29.042142+00:00",
       "source_windows": [
         "PNL/ALL"
-      ],
-      "n_markets": 30,
-      "profiled": true
+      ]
     },
     "0xb786b8b6335e77dfad19928313e97753039cb18d": {
       "username": "0xb786b8b6335e77dfad19928313e97753039cb18d",
@@ -827,7 +819,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:48.574255+00:00",
+      "last_seen": "2026-05-01T20:06:29.042148+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -841,7 +833,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:49.248875+00:00",
+      "last_seen": "2026-05-01T20:06:29.042154+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -849,7 +841,7 @@
     "0x5bffcf561bcae83af680ad600cb99f1184d6ffbe": {
       "username": "YatSen",
       "wallet": "0x5bffcf561bcae83af680ad600cb99f1184d6ffbe",
-      "total_profit_usd": 2306350.273413801,
+      "total_profit_usd": 2307270.3909240635,
       "total_volume_usd": 343816476.016203,
       "trust_score": 100,
       "times_seen": 0,
@@ -869,12 +861,10 @@
           }
         }
       ],
-      "last_seen": "2026-05-01T09:03:56.730166+00:00",
+      "last_seen": "2026-05-01T20:06:29.042160+00:00",
       "source_windows": [
         "PNL/ALL"
-      ],
-      "n_markets": 93,
-      "profiled": true
+      ]
     },
     "0x7fb7ad0d194d7123e711e7db6c9d418fac14e33d": {
       "username": "0x7fB7Ad0d194D7123e711e7db6C9D418fAc14E33d-1750343282446",
@@ -951,7 +941,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-01T09:03:50.508069+00:00",
+      "last_seen": "2026-05-01T20:06:29.042165+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -992,7 +982,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-01T09:03:52.124504+00:00",
+      "last_seen": "2026-05-01T20:06:29.042171+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -1001,12 +991,12 @@
       "username": "Countryside",
       "wallet": "0xbddf61af533ff524d27154e589d2d7a81510c684",
       "total_profit_usd": 2290711.9216366643,
-      "total_volume_usd": 252699009.08931205,
+      "total_volume_usd": 253200982.105929,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181253+00:00",
+      "last_seen": "2026-05-01T20:06:29.443781+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -1022,7 +1012,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.099404+00:00",
+      "last_seen": "2026-05-01T20:06:29.042183+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -1036,7 +1026,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.099410+00:00",
+      "last_seen": "2026-05-01T20:06:29.042189+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -1065,7 +1055,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.099339+00:00",
+      "last_seen": "2026-05-01T20:06:29.042122+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -1081,7 +1071,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.099422+00:00",
+      "last_seen": "2026-05-01T20:06:29.042201+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -1105,12 +1095,12 @@
       "username": "aenews2",
       "wallet": "0x44c1dfe43260c94ed4f1d00de2e1f80fb113ebc1",
       "total_profit_usd": 1985220.3360727334,
-      "total_volume_usd": 217403813.67107406,
+      "total_volume_usd": 217493314.61107403,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141051+00:00",
+      "last_seen": "2026-05-01T20:06:29.247749+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -1125,7 +1115,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141114+00:00",
+      "last_seen": "2026-05-01T20:06:29.247881+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -1140,7 +1130,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-27T20:10:36.892867+00:00",
+      "last_seen": "2026-05-01T20:06:56.281064+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -1149,12 +1139,12 @@
       "username": "0x492442EaB586F242B53bDa933fD5dE859c8A3782-1766317541188",
       "wallet": "0x492442eab586f242b53bda933fd5de859c8a3782",
       "total_profit_usd": 8090662.229308188,
-      "total_volume_usd": 12940940.629487999,
+      "total_volume_usd": 12940940.629488,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181476+00:00",
+      "last_seen": "2026-05-01T20:06:29.444028+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1164,12 +1154,12 @@
       "username": "0x2a2C53bD278c04DA9962Fcf96490E17F3DfB9Bc1-1772479215461",
       "wallet": "0x2a2c53bd278c04da9962fcf96490e17f3dfb9bc1",
       "total_profit_usd": 4451259.118425563,
-      "total_volume_usd": 451363864.57388806,
+      "total_volume_usd": 452355425.38648695,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181295+00:00",
+      "last_seen": "2026-05-01T20:06:29.443825+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -1185,7 +1175,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181464+00:00",
+      "last_seen": "2026-05-01T20:06:29.443994+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1228,7 +1218,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141014+00:00",
+      "last_seen": "2026-05-01T20:06:29.247728+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1242,7 +1232,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-26T19:49:36.559620+00:00",
+      "last_seen": "2026-05-01T20:06:57.020607+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1257,7 +1247,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T20:12:42.770186+00:00",
+      "last_seen": "2026-05-01T20:06:57.731537+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1272,7 +1262,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T20:12:42.770131+00:00",
+      "last_seen": "2026-05-01T20:06:58.428656+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1301,7 +1291,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141201+00:00",
+      "last_seen": "2026-05-01T20:06:29.247919+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1325,12 +1315,12 @@
       "username": "05143",
       "wallet": "0x777d9f00c2b4f7b829c9de0049ca3e707db05143",
       "total_profit_usd": 1964061.1952111775,
-      "total_volume_usd": 3753864.3851030003,
+      "total_volume_usd": 3839968.993563,
       "trust_score": 99,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141136+00:00",
+      "last_seen": "2026-05-01T20:06:29.247810+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1345,7 +1335,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T20:12:42.770136+00:00",
+      "last_seen": "2026-05-01T20:06:29.247869+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -1374,7 +1364,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T20:12:42.770222+00:00",
+      "last_seen": "2026-05-01T20:07:08.103831+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1389,7 +1379,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-22T20:07:06.421591+00:00",
+      "last_seen": "2026-05-01T20:06:59.139723+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1418,7 +1408,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T20:12:42.770149+00:00",
+      "last_seen": "2026-05-01T20:07:08.647529+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1446,7 +1436,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-21T20:05:02.932121+00:00",
+      "last_seen": "2026-05-01T20:07:09.339202+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1460,7 +1450,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T20:12:42.770246+00:00",
+      "last_seen": "2026-05-01T20:07:02.055281+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1489,7 +1479,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T20:12:42.770216+00:00",
+      "last_seen": "2026-05-01T20:07:10.016416+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1503,7 +1493,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T20:12:42.770210+00:00",
+      "last_seen": "2026-05-01T20:07:02.770434+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1531,7 +1521,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-20T09:08:33.749482+00:00",
+      "last_seen": "2026-05-01T20:07:10.703933+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1546,7 +1536,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T20:12:42.770156+00:00",
+      "last_seen": "2026-05-01T20:07:11.392526+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1573,11 +1563,78 @@
       "trust_score": 97,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-28T09:25:42.277553+00:00",
+      "recent_bets": [
+        {
+          "title": "Will the Iranian regime fall by May 31?",
+          "side": "BUY",
+          "size": 173.571428,
+          "price": 0.9720000053536001,
+          "conditionId": "0x789c947a9415600d30d56a4aae88d4111996679b0caed166d0c96242fdce92a2",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20May%2031%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the Iranian regime fall by May 31?",
+          "side": "BUY",
+          "size": 9.98244,
+          "price": 0.972,
+          "conditionId": "0x789c947a9415600d30d56a4aae88d4111996679b0caed166d0c96242fdce92a2",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20May%2031%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the Iranian regime fall by May 31?",
+          "side": "BUY",
+          "size": 347.142857,
+          "price": 0.9720000027104,
+          "conditionId": "0x789c947a9415600d30d56a4aae88d4111996679b0caed166d0c96242fdce92a2",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20May%2031%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the Iranian regime fall by May 31?",
+          "side": "BUY",
+          "size": 9.99216,
+          "price": 0.972,
+          "conditionId": "0x789c947a9415600d30d56a4aae88d4111996679b0caed166d0c96242fdce92a2",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20May%2031%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the Iranian regime fall by May 31?",
+          "side": "BUY",
+          "size": 9.98244,
+          "price": 0.972,
+          "conditionId": "0x789c947a9415600d30d56a4aae88d4111996679b0caed166d0c96242fdce92a2",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20May%2031%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        }
+      ],
+      "last_seen": "2026-05-01T20:07:12.075350+00:00",
       "source_windows": [
         "PNL/WEEK"
-      ]
+      ],
+      "last_non_sport_trade": "2026-05-01T19:14:14+00:00"
     },
     "0xe1d6b51521bd4365769199f392f9818661bd907c": {
       "username": "0xe1D6b51521Bd4365769199f392F9818661BD907",
@@ -1588,7 +1645,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181508+00:00",
+      "last_seen": "2026-05-01T20:06:29.444059+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1602,8 +1659,74 @@
       "trust_score": 95,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-21T08:53:24.643660+00:00",
+      "recent_bets": [
+        {
+          "title": "Will the Republican Party control the House after the 2026 Midterm elections?",
+          "side": "SELL",
+          "size": 28.2736,
+          "price": 0.16,
+          "conditionId": "0x4e4f77e7dbf4cab666e9a1943674d7ae66348e862df03ea6f44b11eb95731928",
+          "poly_url": "https://polymarket.com/event/will-the-republican-party-control-the-house-after-the-2026-midterm-elections",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the Republican Party control the House after the 2026 Midterm elections?",
+          "side": "SELL",
+          "size": 11.2,
+          "price": 0.16,
+          "conditionId": "0x4e4f77e7dbf4cab666e9a1943674d7ae66348e862df03ea6f44b11eb95731928",
+          "poly_url": "https://polymarket.com/event/will-the-republican-party-control-the-house-after-the-2026-midterm-elections",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the Republican Party control the House after the 2026 Midterm elections?",
+          "side": "SELL",
+          "size": 459.04,
+          "price": 0.16,
+          "conditionId": "0x4e4f77e7dbf4cab666e9a1943674d7ae66348e862df03ea6f44b11eb95731928",
+          "poly_url": "https://polymarket.com/event/will-the-republican-party-control-the-house-after-the-2026-midterm-elections",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the Republican Party control the House after the 2026 Midterm elections?",
+          "side": "SELL",
+          "size": 16.0,
+          "price": 0.16,
+          "conditionId": "0x4e4f77e7dbf4cab666e9a1943674d7ae66348e862df03ea6f44b11eb95731928",
+          "poly_url": "https://polymarket.com/event/will-the-republican-party-control-the-house-after-the-2026-midterm-elections",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the Republican Party control the House after the 2026 Midterm elections?",
+          "side": "SELL",
+          "size": 51.52,
+          "price": 0.16,
+          "conditionId": "0x4e4f77e7dbf4cab666e9a1943674d7ae66348e862df03ea6f44b11eb95731928",
+          "poly_url": "https://polymarket.com/event/will-the-republican-party-control-the-house-after-the-2026-midterm-elections",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        }
+      ],
+      "last_seen": "2026-05-01T20:07:30.559831+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1616,11 +1739,78 @@
       "trust_score": 96,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-23T20:07:57.871436+00:00",
+      "recent_bets": [
+        {
+          "title": "Will WTI Crude Oil (WTI) hit (HIGH) $120 in May?",
+          "side": "SELL",
+          "size": 1924.2908400000001,
+          "price": 0.5303259076576942,
+          "conditionId": "0x416e3cbe25a60b8210f4e67c056ea2b03f4d511e7b969826d69ef90b753ff214",
+          "poly_url": "https://polymarket.com/search?q=Will%20WTI%20Crude%20Oil%20%28WTI%29%20hit%20%28HIGH%29%20%24120%20in%20May%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will WTI Crude Oil (WTI) hit (HIGH) $130 in May?",
+          "side": "SELL",
+          "size": 1269.63819,
+          "price": 0.72,
+          "conditionId": "0x828aaec481308550a867fff3bd1e497ca1ebb5998fcf1fb40aaa4abfeb85db26",
+          "poly_url": "https://polymarket.com/search?q=Will%20WTI%20Crude%20Oil%20%28WTI%29%20hit%20%28HIGH%29%20%24130%20in%20May%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will WTI Crude Oil (WTI) hit (HIGH) $130 in May?",
+          "side": "SELL",
+          "size": 3.04,
+          "price": 0.76,
+          "conditionId": "0x828aaec481308550a867fff3bd1e497ca1ebb5998fcf1fb40aaa4abfeb85db26",
+          "poly_url": "https://polymarket.com/search?q=Will%20WTI%20Crude%20Oil%20%28WTI%29%20hit%20%28HIGH%29%20%24130%20in%20May%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will WTI Crude Oil (WTI) hit (HIGH) $130 in May?",
+          "side": "SELL",
+          "size": 3.04,
+          "price": 0.76,
+          "conditionId": "0x828aaec481308550a867fff3bd1e497ca1ebb5998fcf1fb40aaa4abfeb85db26",
+          "poly_url": "https://polymarket.com/search?q=Will%20WTI%20Crude%20Oil%20%28WTI%29%20hit%20%28HIGH%29%20%24130%20in%20May%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will WTI Crude Oil (WTI) hit (HIGH) $130 in May?",
+          "side": "SELL",
+          "size": 3.04,
+          "price": 0.76,
+          "conditionId": "0x828aaec481308550a867fff3bd1e497ca1ebb5998fcf1fb40aaa4abfeb85db26",
+          "poly_url": "https://polymarket.com/search?q=Will%20WTI%20Crude%20Oil%20%28WTI%29%20hit%20%28HIGH%29%20%24130%20in%20May%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        }
+      ],
+      "last_seen": "2026-05-01T20:07:13.538655+00:00",
       "source_windows": [
         "PNL/WEEK"
-      ]
+      ],
+      "last_non_sport_trade": "2026-04-30T14:37:04+00:00"
     },
     "0xb27bc932bf8110d8f78e55da7d5f0497a18b5b82": {
       "username": "0xB27BC932bf8110D8F78e55da7d5f0497A18B5b82-1772569391020",
@@ -1630,8 +1820,74 @@
       "trust_score": 98,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-26T08:16:54.789029+00:00",
+      "recent_bets": [
+        {
+          "title": "Bitcoin Up or Down - May 1, 1:25AM-1:30AM ET",
+          "side": "BUY",
+          "size": 5.6252,
+          "price": 0.98,
+          "conditionId": "0x718c35aeabc3e1a65a94eaacc5e23b103e281174303d79697df6d1632bc439af",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%201%2C%201%3A25AM-1%3A30AM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Bitcoin Up or Down - May 1, 1:25AM-1:30AM ET",
+          "side": "BUY",
+          "size": 1.1858,
+          "price": 0.98,
+          "conditionId": "0x718c35aeabc3e1a65a94eaacc5e23b103e281174303d79697df6d1632bc439af",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%201%2C%201%3A25AM-1%3A30AM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Bitcoin Up or Down - May 1, 1:25AM-1:30AM ET",
+          "side": "BUY",
+          "size": 9.8,
+          "price": 0.98,
+          "conditionId": "0x718c35aeabc3e1a65a94eaacc5e23b103e281174303d79697df6d1632bc439af",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%201%2C%201%3A25AM-1%3A30AM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Bitcoin Up or Down - May 1, 1:25AM-1:30AM ET",
+          "side": "BUY",
+          "size": 9.7,
+          "price": 0.97,
+          "conditionId": "0x718c35aeabc3e1a65a94eaacc5e23b103e281174303d79697df6d1632bc439af",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%201%2C%201%3A25AM-1%3A30AM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Bitcoin Up or Down - May 1, 1:25AM-1:30AM ET",
+          "side": "BUY",
+          "size": 9.6,
+          "price": 0.96,
+          "conditionId": "0x718c35aeabc3e1a65a94eaacc5e23b103e281174303d79697df6d1632bc439af",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%201%2C%201%3A25AM-1%3A30AM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        }
+      ],
+      "last_seen": "2026-05-01T20:07:03.324911+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1659,8 +1915,74 @@
       "trust_score": 96,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-15T13:01:15.082359+00:00",
+      "recent_bets": [
+        {
+          "title": "Bitcoin Up or Down - April 30, 3:40AM-3:45AM ET",
+          "side": "BUY",
+          "size": 465.55961,
+          "price": 0.6963580228043897,
+          "conditionId": "0x1f077ddfafbf6f97758f24e139d7ea9404e0dd69644d6aedf4d2ccad0423286a",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20April%2030%2C%203%3A40AM-3%3A45AM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Bitcoin Up or Down - April 30, 3:40AM-3:45AM ET",
+          "side": "BUY",
+          "size": 45.231979,
+          "price": 0.7399999966667267,
+          "conditionId": "0x1f077ddfafbf6f97758f24e139d7ea9404e0dd69644d6aedf4d2ccad0423286a",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20April%2030%2C%203%3A40AM-3%3A45AM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Bitcoin Up or Down - April 30, 3:35AM-3:40AM ET",
+          "side": "SELL",
+          "size": 520.2370400000001,
+          "price": 0.8533847302473544,
+          "conditionId": "0x0c7213fd6f9706e624962d30c05b0ce6291ea97f0bbd6419a56d6b6aac3f11c9",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20April%2030%2C%203%3A35AM-3%3A40AM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Bitcoin Up or Down - April 30, 3:35AM-3:40AM ET",
+          "side": "BUY",
+          "size": 99.512169,
+          "price": 0.4306509240795797,
+          "conditionId": "0x0c7213fd6f9706e624962d30c05b0ce6291ea97f0bbd6419a56d6b6aac3f11c9",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20April%2030%2C%203%3A35AM-3%3A40AM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Bitcoin Up or Down - April 30, 3:35AM-3:40AM ET",
+          "side": "BUY",
+          "size": 161.16862,
+          "price": 0.3917455283521502,
+          "conditionId": "0x0c7213fd6f9706e624962d30c05b0ce6291ea97f0bbd6419a56d6b6aac3f11c9",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20April%2030%2C%203%3A35AM-3%3A40AM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        }
+      ],
+      "last_seen": "2026-05-01T20:07:15.030081+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1673,11 +1995,78 @@
       "trust_score": 97,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-21T08:53:24.643637+00:00",
+      "recent_bets": [
+        {
+          "title": "US x Iran diplomatic meeting by May 5, 2026?",
+          "side": "BUY",
+          "size": 2715.46518,
+          "price": 0.06167647181073132,
+          "conditionId": "0xb75c07f4252992808d7ca7d9828169c524b0fef44bf5adf78c327ef88469c986",
+          "poly_url": "https://polymarket.com/search?q=US%20x%20Iran%20diplomatic%20meeting%20by%20May%205%2C%202026%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "US x Iran permanent peace deal by May 15, 2026?",
+          "side": "BUY",
+          "size": 8812.1968,
+          "price": 0.07369393997958325,
+          "conditionId": "0x1db02ba50e2312a62b4104de691cc7a76065d8d0da40decf93eb1b914a3217b7",
+          "poly_url": "https://polymarket.com/search?q=US%20x%20Iran%20permanent%20peace%20deal%20by%20May%2015%2C%202026%3F",
+          "copy_advice": {
+            "verdict": "WATCH",
+            "reason": "prezzo 7¢: tail-risk puro",
+            "color": "#fcee0c"
+          }
+        },
+        {
+          "title": "US x Iran permanent peace deal by May 31, 2026?",
+          "side": "BUY",
+          "size": 13776.2585,
+          "price": 0.18699972471811432,
+          "conditionId": "0x0e4a0c937b8934c2475613b6322b3f8edc8dedc24762e01e42b0e6f87424a089",
+          "poly_url": "https://polymarket.com/search?q=US%20x%20Iran%20permanent%20peace%20deal%20by%20May%2031%2C%202026%3F",
+          "copy_advice": {
+            "verdict": "WATCH",
+            "reason": "size $13k su mercato attivo",
+            "color": "#fcee0c"
+          }
+        },
+        {
+          "title": "US x Iran permanent peace deal by May 31, 2026?",
+          "side": "BUY",
+          "size": 4325.4377,
+          "price": 0.19632871587686965,
+          "conditionId": "0x0e4a0c937b8934c2475613b6322b3f8edc8dedc24762e01e42b0e6f87424a089",
+          "poly_url": "https://polymarket.com/search?q=US%20x%20Iran%20permanent%20peace%20deal%20by%20May%2031%2C%202026%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the Republican Party win the TN-09 House seat?",
+          "side": "BUY",
+          "size": 49.9365,
+          "price": 0.3572409744643381,
+          "conditionId": "0x6c819e0fd75102231cdcd640ac45422eac4fa3afdc289b2448fab9c64fb18ab0",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20Republican%20Party%20win%20the%20TN-09%20House%20seat%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        }
+      ],
+      "last_seen": "2026-05-01T20:07:18.003455+00:00",
       "source_windows": [
         "PNL/WEEK"
-      ]
+      ],
+      "last_non_sport_trade": "2026-04-30T17:35:50+00:00"
     },
     "0x6480542954b70a674a74bd1a6015dec362dc8dc5": {
       "username": "tripping",
@@ -1696,13 +2085,13 @@
     "0x5d189e816b4149be00977c1a3c8840374aec4972": {
       "username": "gloriafoster",
       "wallet": "0x5d189e816b4149be00977c1a3c8840374aec4972",
-      "total_profit_usd": 0,
-      "total_volume_usd": 24746437.250175994,
-      "trust_score": 70,
+      "total_profit_usd": 258.6328234940844,
+      "total_volume_usd": 24847191.766051996,
+      "trust_score": 82,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181357+00:00",
+      "last_seen": "2026-05-01T20:06:29.443889+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1711,12 +2100,12 @@
       "username": "Just2SeeULaugh",
       "wallet": "0xc21ea96be762bb55041529af6e386e7c53b80215",
       "total_profit_usd": 77025.65394384788,
-      "total_volume_usd": 23371672.79984,
+      "total_volume_usd": 24710514.169603005,
       "trust_score": 94,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181363+00:00",
+      "last_seen": "2026-05-01T20:06:29.443894+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1725,12 +2114,12 @@
       "username": "Q96s3kwozynxpau",
       "wallet": "0x2663daca3cecf3767ca1c3b126002a8578a8ed1f",
       "total_profit_usd": 299611.11544945487,
-      "total_volume_usd": 60268658.508967996,
+      "total_volume_usd": 60936166.564089,
       "trust_score": 97,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181287+00:00",
+      "last_seen": "2026-05-01T20:06:29.443817+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1744,7 +2133,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181501+00:00",
+      "last_seen": "2026-05-01T20:06:29.444040+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1767,12 +2156,12 @@
       "username": "ferrariChampions2026",
       "wallet": "0xfe787d2da716d60e8acff57fb87eb13cd4d10319",
       "total_profit_usd": 458105.6536143089,
-      "total_volume_usd": 26994650.348887995,
+      "total_volume_usd": 28019318.371795,
       "trust_score": 98,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181345+00:00",
+      "last_seen": "2026-05-01T20:06:29.443876+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1800,11 +2189,78 @@
       "trust_score": 95,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-30T09:15:24.800836+00:00",
+      "recent_bets": [
+        {
+          "title": "Clavicular pregnancy in 2026?",
+          "side": "BUY",
+          "size": 4530.0,
+          "price": 0.906,
+          "conditionId": "0x6747bae2269c348786d0c0c0f4286ac006f13f16325d4dcbab954b46de029f19",
+          "poly_url": "https://polymarket.com/search?q=Clavicular%20pregnancy%20in%202026%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will Kevin Warsh be confirmed as Fed Chair?",
+          "side": "BUY",
+          "size": 4942.3712,
+          "price": 0.988,
+          "conditionId": "0x23dbb60ade08c2664ac29488325afbc0136735bc7beb9180d9c0cb72620b0b13",
+          "poly_url": "https://polymarket.com/search?q=Will%20Kevin%20Warsh%20be%20confirmed%20as%20Fed%20Chair%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will Kevin Warsh be confirmed as Fed Chair?",
+          "side": "BUY",
+          "size": 98.6,
+          "price": 0.986,
+          "conditionId": "0x23dbb60ade08c2664ac29488325afbc0136735bc7beb9180d9c0cb72620b0b13",
+          "poly_url": "https://polymarket.com/search?q=Will%20Kevin%20Warsh%20be%20confirmed%20as%20Fed%20Chair%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will Kevin Warsh be confirmed as Fed Chair?",
+          "side": "BUY",
+          "size": 169.592,
+          "price": 0.986,
+          "conditionId": "0x23dbb60ade08c2664ac29488325afbc0136735bc7beb9180d9c0cb72620b0b13",
+          "poly_url": "https://polymarket.com/search?q=Will%20Kevin%20Warsh%20be%20confirmed%20as%20Fed%20Chair%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will Kevin Warsh be confirmed as Fed Chair?",
+          "side": "BUY",
+          "size": 342.06312,
+          "price": 0.986,
+          "conditionId": "0x23dbb60ade08c2664ac29488325afbc0136735bc7beb9180d9c0cb72620b0b13",
+          "poly_url": "https://polymarket.com/search?q=Will%20Kevin%20Warsh%20be%20confirmed%20as%20Fed%20Chair%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        }
+      ],
+      "last_seen": "2026-05-01T20:07:31.254195+00:00",
       "source_windows": [
         "VOL/WEEK"
-      ]
+      ],
+      "last_non_sport_trade": "2026-04-29T03:27:06+00:00"
     },
     "0xe40ea00e74059c76c0035c919ef6b99c3e25a94d": {
       "username": "restart77",
@@ -1815,7 +2271,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T09:11:53.517312+00:00",
+      "last_seen": "2026-05-01T20:07:20.645622+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1829,7 +2285,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.099428+00:00",
+      "last_seen": "2026-05-01T20:06:29.042207+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -1839,17 +2295,86 @@
     "0xc8ab97a9089a9ff7e6ef0688e6e591a066946418": {
       "username": "ArmageddonRewardsBilly",
       "wallet": "0xc8ab97a9089a9ff7e6ef0688e6e591a066946418",
-      "total_profit_usd": 64473.288653293646,
-      "total_volume_usd": 21766826.830995,
+      "total_profit_usd": 65053.204805717905,
+      "total_volume_usd": 23977103.927142996,
       "trust_score": 94,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181382+00:00",
+      "recent_bets": [
+        {
+          "title": "Strait of Hormuz traffic returns to normal by end of June?",
+          "side": "SELL",
+          "size": 10.488,
+          "price": 0.46,
+          "conditionId": "0x348cd9adf4f6855f58bd9c6dbf9ff251c4142ef77233a5dc95c65b4b61cd2187",
+          "poly_url": "https://polymarket.com/search?q=Strait%20of%20Hormuz%20traffic%20returns%20to%20normal%20by%20end%20of%20June%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Strait of Hormuz traffic returns to normal by May 15?",
+          "side": "BUY",
+          "size": 64.3524,
+          "price": 0.94,
+          "conditionId": "0xffe381a80c1e36f9e0b03a542aa8fe56e74a67d2566a4e29396d4427aa4244c9",
+          "poly_url": "https://polymarket.com/search?q=Strait%20of%20Hormuz%20traffic%20returns%20to%20normal%20by%20May%2015%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will Trump visit China by May 31?",
+          "side": "SELL",
+          "size": 99.999998,
+          "price": 0.8599999958719999,
+          "conditionId": "0xcd215b8330a35098a1a3f6c46b6492347edb5e74c1e0a95ac4d3d54aece6c262",
+          "poly_url": "https://polymarket.com/search?q=Will%20Trump%20visit%20China%20by%20May%2031%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will WTI Crude Oil (WTI) hit (HIGH) $110 in May?",
+          "side": "BUY",
+          "size": 3.69863,
+          "price": 0.27000001241000104,
+          "conditionId": "0x4bab360a81b57047b48c0dd7c6c1377706129e3e6b9fa3f079cc28d310ec4cec",
+          "poly_url": "https://polymarket.com/search?q=Will%20WTI%20Crude%20Oil%20%28WTI%29%20hit%20%28HIGH%29%20%24110%20in%20May%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the U.S. invade Iran before 2027?",
+          "side": "SELL",
+          "size": 1553.328,
+          "price": 0.69,
+          "conditionId": "0x5db999fad322cea2914535aae5517060c3f80ad6d8c0231cde2124a434d16846",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20U.S.%20invade%20Iran%20before%202027%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        }
+      ],
+      "last_seen": "2026-05-01T20:08:09.347715+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
-      ]
+      ],
+      "last_non_sport_trade": "2026-05-01T19:33:32+00:00",
+      "n_markets": 134,
+      "profiled": true
     },
     "0x3b5c629f114098b0dee345fb78b7a3a013c7126e": {
       "username": "SMCAOMCRL",
@@ -1874,11 +2399,78 @@
       "trust_score": 95,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-25T19:46:36.972435+00:00",
+      "recent_bets": [
+        {
+          "title": "Bitcoin Up or Down - May 1, 4AM ET",
+          "side": "BUY",
+          "size": 256.698419,
+          "price": 0.6278652574631066,
+          "conditionId": "0x5fdc02523778530186d39a87967f1a7a5b0c41fcda25219bcb2ed667fe6ce31b",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%201%2C%204AM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Bitcoin Up or Down - May 1, 4AM ET",
+          "side": "BUY",
+          "size": 12.3456,
+          "price": 0.6,
+          "conditionId": "0x5fdc02523778530186d39a87967f1a7a5b0c41fcda25219bcb2ed667fe6ce31b",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%201%2C%204AM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Bitcoin Up or Down - May 1, 4AM ET",
+          "side": "BUY",
+          "size": 515.110929,
+          "price": 0.5802517699437182,
+          "conditionId": "0x5fdc02523778530186d39a87967f1a7a5b0c41fcda25219bcb2ed667fe6ce31b",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%201%2C%204AM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Bitcoin Up or Down - May 1, 4AM ET",
+          "side": "BUY",
+          "size": 515.554868,
+          "price": 0.5679201718590963,
+          "conditionId": "0x5fdc02523778530186d39a87967f1a7a5b0c41fcda25219bcb2ed667fe6ce31b",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%201%2C%204AM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Bitcoin Up or Down - May 1, 3AM ET",
+          "side": "SELL",
+          "size": 1740.86848,
+          "price": 0.99,
+          "conditionId": "0x9c39e94c4b5b6b2a3a30aa60499da022b0c742ee8785c8b018a35fbefbea336c",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%201%2C%203AM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        }
+      ],
+      "last_seen": "2026-05-01T20:07:32.628768+00:00",
       "source_windows": [
         "VOL/WEEK"
-      ]
+      ],
+      "last_non_sport_trade": "2026-05-01T07:58:16+00:00"
     },
     "0xbefa95c276ee8ef6ff3ef43d1c1c454f52bc300d": {
       "username": "BabyGroot",
@@ -1889,7 +2481,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181551+00:00",
+      "last_seen": "2026-05-01T20:06:29.444106+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1917,7 +2509,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181538+00:00",
+      "last_seen": "2026-05-01T20:06:29.444088+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1927,12 +2519,12 @@
       "username": "LynxTitan",
       "wallet": "0x68146921df11eab44296dc4e58025ca84741a9e7",
       "total_profit_usd": 184489.88521256406,
-      "total_volume_usd": 14181395.17042,
+      "total_volume_usd": 15008866.770491002,
       "trust_score": 96,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181440+00:00",
+      "last_seen": "2026-05-01T20:06:29.443987+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1946,8 +2538,74 @@
       "trust_score": 97,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-18T19:42:41.116998+00:00",
+      "recent_bets": [
+        {
+          "title": "Bitcoin Up or Down - April 22, 7:55PM-8:00PM ET",
+          "side": "BUY",
+          "size": 2.576,
+          "price": 0.1,
+          "conditionId": "0x81d2267bc4f6a9c8b480e8150db100ab8a61763f7ce48ffc9e2b6d00f14989b6",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20April%2022%2C%207%3A55PM-8%3A00PM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Bitcoin Up or Down - April 22, 7:55PM-8:00PM ET",
+          "side": "BUY",
+          "size": 60.633,
+          "price": 0.9,
+          "conditionId": "0x81d2267bc4f6a9c8b480e8150db100ab8a61763f7ce48ffc9e2b6d00f14989b6",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20April%2022%2C%207%3A55PM-8%3A00PM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "XRP Up or Down - April 22, 7:45PM-8:00PM ET",
+          "side": "BUY",
+          "size": 23.039998,
+          "price": 0.9577137740784603,
+          "conditionId": "0xca10bcd3c17482cc63739bd2e702fd08fa3ef6497d26a8b38db907a64a6d1914",
+          "poly_url": "https://polymarket.com/search?q=XRP%20Up%20or%20Down%20-%20April%2022%2C%207%3A45PM-8%3A00PM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "XRP Up or Down - April 22, 7:55PM-8:00PM ET",
+          "side": "BUY",
+          "size": 17.639999,
+          "price": 0.5996566523546791,
+          "conditionId": "0x0e89265a5f59f381ed55280aeff27bc530950b4cf8ba1c7fb1b1b10c409d6b67",
+          "poly_url": "https://polymarket.com/search?q=XRP%20Up%20or%20Down%20-%20April%2022%2C%207%3A55PM-8%3A00PM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Ethereum Up or Down - April 22, 7:55PM-8:00PM ET",
+          "side": "BUY",
+          "size": 9.5,
+          "price": 0.95,
+          "conditionId": "0x93c130c6ff69a3283f93458361a5967f9be3f3830da51ab16a05ffef1a32ded2",
+          "poly_url": "https://polymarket.com/search?q=Ethereum%20Up%20or%20Down%20-%20April%2022%2C%207%3A55PM-8%3A00PM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        }
+      ],
+      "last_seen": "2026-05-01T20:07:21.610646+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -1961,7 +2619,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-25T19:46:36.908864+00:00",
+      "last_seen": "2026-05-01T20:06:59.813333+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -2005,7 +2663,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-28T09:25:42.532023+00:00",
+      "last_seen": "2026-05-01T20:07:35.868786+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2019,7 +2677,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-30T09:15:24.800894+00:00",
+      "last_seen": "2026-05-01T20:06:29.444128+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2047,7 +2705,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141255+00:00",
+      "last_seen": "2026-05-01T20:06:29.247939+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -2062,7 +2720,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181563+00:00",
+      "last_seen": "2026-05-01T20:06:29.444100+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -2072,12 +2730,12 @@
       "username": "pizzaallosqualo",
       "wallet": "0x801ba46b0e7ba3f82e6a3cfcedb436318e43e036",
       "total_profit_usd": 19073.694240104967,
-      "total_volume_usd": 10969268.348569,
+      "total_volume_usd": 11065150.384535,
       "trust_score": 91,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181515+00:00",
+      "last_seen": "2026-05-01T20:06:29.444065+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2100,12 +2758,12 @@
       "username": "influenz.eth",
       "wallet": "0xe8dd7741ccb12350957ec71e9ee332e0d1e6ec86",
       "total_profit_usd": 1357459.3502467873,
-      "total_volume_usd": 7922327.108219999,
+      "total_volume_usd": 8284443.700763,
       "trust_score": 99,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181580+00:00",
+      "last_seen": "2026-05-01T20:06:29.444122+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -2144,12 +2802,12 @@
       "username": "risk-manager",
       "wallet": "0xa61ef8773ec2e821962306ca87d4b57e39ff0abd",
       "total_profit_usd": 77027.37072353168,
-      "total_volume_usd": 26808597.901514,
+      "total_volume_usd": 27011042.815362997,
       "trust_score": 94,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181351+00:00",
+      "last_seen": "2026-05-01T20:06:29.443882+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2158,12 +2816,12 @@
       "username": "0xe9076a87c5ed90ef16e6fe6529c943baeca0cff6",
       "wallet": "0xe9076a87c5ed90ef16e6fe6529c943baeca0cff6",
       "total_profit_usd": 0,
-      "total_volume_usd": 9846520.0395,
+      "total_volume_usd": 10537834.794333,
       "trust_score": 70,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181532+00:00",
+      "last_seen": "2026-05-01T20:06:29.444081+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2172,12 +2830,12 @@
       "username": ".Sisyphus",
       "wallet": "0xfc25f141ed27bb1787338d2c4e7f51e3a15e1f7f",
       "total_profit_usd": 15468.9165314058,
-      "total_volume_usd": 13902837.7192,
+      "total_volume_usd": 14167184.171256002,
       "trust_score": 90,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181447+00:00",
+      "last_seen": "2026-05-01T20:06:29.444005+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2191,7 +2849,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-30T09:15:24.800881+00:00",
+      "last_seen": "2026-05-01T20:07:00.616244+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -2207,7 +2865,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181422+00:00",
+      "last_seen": "2026-05-01T20:06:29.443980+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2221,7 +2879,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T20:12:42.770197+00:00",
+      "last_seen": "2026-05-01T20:07:25.841459+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -2235,7 +2893,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141286+00:00",
+      "last_seen": "2026-05-01T20:06:29.248002+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -2250,7 +2908,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141220+00:00",
+      "last_seen": "2026-05-01T20:06:29.247974+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -2264,7 +2922,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T20:12:42.770257+00:00",
+      "last_seen": "2026-05-01T20:07:26.528608+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -2278,7 +2936,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181395+00:00",
+      "last_seen": "2026-05-01T20:06:29.443926+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2291,8 +2949,74 @@
       "trust_score": 94,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-25T19:46:36.972569+00:00",
+      "recent_bets": [
+        {
+          "title": "XRP Up or Down - May 1, 3:30PM-3:35PM ET",
+          "side": "BUY",
+          "size": 485.14214999999996,
+          "price": 0.99,
+          "conditionId": "0x20c90951be3daec12b51a0a808668d39509fe31b6e61c261ace9a12da0584f4f",
+          "poly_url": "https://polymarket.com/search?q=XRP%20Up%20or%20Down%20-%20May%201%2C%203%3A30PM-3%3A35PM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Bitcoin Up or Down - May 1, 3:15PM-3:30PM ET",
+          "side": "BUY",
+          "size": 4.995,
+          "price": 0.999,
+          "conditionId": "0x9849e8e651dc71c31bc30d5b0e4160981fd1f2ffa38f5ca5f36c77885e0d4f3d",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%201%2C%203%3A15PM-3%3A30PM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "BNB Up or Down - May 1, 3:15PM-3:30PM ET",
+          "side": "BUY",
+          "size": 10.3257,
+          "price": 0.99,
+          "conditionId": "0x3dc026e9509b590c7159f962da9b7e4216231ec3905f4e6820fc0a3e9ac17f27",
+          "poly_url": "https://polymarket.com/search?q=BNB%20Up%20or%20Down%20-%20May%201%2C%203%3A15PM-3%3A30PM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Dogecoin Up or Down - May 1, 3:15PM-3:30PM ET",
+          "side": "BUY",
+          "size": 80.14591,
+          "price": 0.988516232563881,
+          "conditionId": "0x29f6520adedc591dbc38a82b512e1936552f5c962247a938339156058566b130",
+          "poly_url": "https://polymarket.com/search?q=Dogecoin%20Up%20or%20Down%20-%20May%201%2C%203%3A15PM-3%3A30PM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Dogecoin Up or Down - May 1, 3:15PM-3:30PM ET",
+          "side": "BUY",
+          "size": 3.1878,
+          "price": 0.99,
+          "conditionId": "0x29f6520adedc591dbc38a82b512e1936552f5c962247a938339156058566b130",
+          "poly_url": "https://polymarket.com/search?q=Dogecoin%20Up%20or%20Down%20-%20May%201%2C%203%3A15PM-3%3A30PM%20ET",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        }
+      ],
+      "last_seen": "2026-05-01T20:07:36.577853+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2320,7 +3044,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-21T08:53:24.601838+00:00",
+      "last_seen": "2026-05-01T20:07:01.358249+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -2333,8 +3057,48 @@
       "trust_score": 96,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-04-18T08:01:06.719341+00:00",
+      "recent_bets": [
+        {
+          "title": "Will the Iranian regime fall before 2027?",
+          "side": "SELL",
+          "size": 42.104,
+          "price": 0.2,
+          "conditionId": "0xbb4d51e6364066d92eb6f9b8413dd7193de70966736044463b205834805a1f3b",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20before%202027%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Russia x Ukraine ceasefire by May 31, 2026?",
+          "side": "SELL",
+          "size": 1114.12326,
+          "price": 0.03560900840202917,
+          "conditionId": "0xa93b28a6384aefff4e7d5adb2061c444e4a0e95b8ad17755f9cee123c7099b35",
+          "poly_url": "https://polymarket.com/search?q=Russia%20x%20Ukraine%20ceasefire%20by%20May%2031%2C%202026%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Russia x Ukraine ceasefire by May 31, 2026?",
+          "side": "BUY",
+          "size": 1535.999999,
+          "price": 0.0490927914238853,
+          "conditionId": "0xa93b28a6384aefff4e7d5adb2061c444e4a0e95b8ad17755f9cee123c7099b35",
+          "poly_url": "https://polymarket.com/search?q=Russia%20x%20Ukraine%20ceasefire%20by%20May%2031%2C%202026%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        }
+      ],
+      "last_seen": "2026-05-01T20:07:27.279930+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -2362,7 +3126,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181488+00:00",
+      "last_seen": "2026-05-01T20:06:29.444046+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2376,7 +3140,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181470+00:00",
+      "last_seen": "2026-05-01T20:06:29.444023+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2390,7 +3154,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-25T19:46:36.972495+00:00",
+      "last_seen": "2026-05-01T20:07:05.956475+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -2405,7 +3169,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-20T09:08:33.749499+00:00",
+      "last_seen": "2026-05-01T20:07:42.512236+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2419,7 +3183,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T09:11:53.517330+00:00",
+      "last_seen": "2026-05-01T20:07:28.425709+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2475,7 +3239,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141058+00:00",
+      "last_seen": "2026-05-01T20:06:29.247763+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -2518,7 +3282,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141176+00:00",
+      "last_seen": "2026-05-01T20:06:29.247900+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -2681,13 +3445,13 @@
     "0xdd92232bcdfbbac04132b3cbacbf32c2e5b16b2a": {
       "username": "Jdhdhduu",
       "wallet": "0xdd92232bcdfbbac04132b3cbacbf32c2e5b16b2a",
-      "total_profit_usd": 72274.50864166272,
-      "total_volume_usd": 2782715.6836599996,
+      "total_profit_usd": 72950.54753219377,
+      "total_volume_usd": 3062583.252966,
       "trust_score": 93,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141129+00:00",
+      "last_seen": "2026-05-01T20:06:29.247823+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -2730,7 +3494,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.099312+00:00",
+      "last_seen": "2026-05-01T20:06:29.042097+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -2970,7 +3734,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T20:12:42.770174+00:00",
+      "last_seen": "2026-05-01T20:07:06.637285+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -3168,7 +3932,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-28T20:19:50.214164+00:00",
+      "last_seen": "2026-05-01T20:07:29.112518+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -3247,12 +4011,12 @@
       "username": "bobe2",
       "wallet": "0xed107a85a4585a381e48c7f7ca4144909e7dd2e5",
       "total_profit_usd": 397429.0268484347,
-      "total_volume_usd": 21789798.072067,
+      "total_volume_usd": 21843103.918645002,
       "trust_score": 97,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181376+00:00",
+      "last_seen": "2026-05-01T20:06:29.443914+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -3288,13 +4052,13 @@
     "0xfbfd14dd4bb607373119de95f1d4b21c3b6c0029": {
       "username": "XAE12Archangel",
       "wallet": "0xfbfd14dd4bb607373119de95f1d4b21c3b6c0029",
-      "total_profit_usd": 1011.0953596038996,
-      "total_volume_usd": 33174979.266797,
+      "total_profit_usd": 1568.917690462798,
+      "total_volume_usd": 33303577.523058,
       "trust_score": 85,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181325+00:00",
+      "last_seen": "2026-05-01T20:06:29.443854+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -3303,12 +4067,12 @@
       "username": "SP888",
       "wallet": "0x5d05b1f588780423488a09d9aefeb64df54d6320",
       "total_profit_usd": 7768.519262103982,
-      "total_volume_usd": 14223088.648539001,
+      "total_volume_usd": 14302570.565353002,
       "trust_score": 89,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181434+00:00",
+      "last_seen": "2026-05-01T20:06:29.443999+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -3322,7 +4086,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T20:12:42.770162+00:00",
+      "last_seen": "2026-05-01T20:07:07.334767+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -3331,12 +4095,12 @@
       "username": "LaBradfordSmith22",
       "wallet": "0x9495425feeb0c250accb89275c97587011b19a27",
       "total_profit_usd": 2149853.9590847865,
-      "total_volume_usd": 26535009.844326,
+      "total_volume_usd": 26691951.210009996,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181408+00:00",
+      "last_seen": "2026-05-01T20:06:29.443945+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -3375,12 +4139,12 @@
       "username": "Sassy-Bucket",
       "wallet": "0x4bff30af91642dc7d2b19a8664378fe55c45fc26",
       "total_profit_usd": 130326.50267153,
-      "total_volume_usd": 3087370.5539659997,
+      "total_volume_usd": 3087370.553966,
       "trust_score": 94,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141044+00:00",
+      "last_seen": "2026-05-01T20:06:29.247756+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -3390,12 +4154,12 @@
       "username": "mooseborzoi",
       "wallet": "0x84cfffc3f16dcc353094de30d4a45226eccd2f63",
       "total_profit_usd": 344094.4081016053,
-      "total_volume_usd": 17889908.366374,
+      "total_volume_usd": 18274288.553183004,
       "trust_score": 96,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181401+00:00",
+      "last_seen": "2026-05-01T20:06:29.443932+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -3446,12 +4210,12 @@
       "username": "AppleTime67",
       "wallet": "0xacb206b460a17382a734de8d931cc176307eb989",
       "total_profit_usd": 60041.03532479218,
-      "total_volume_usd": 3871280.8916310007,
+      "total_volume_usd": 3885953.1616310007,
       "trust_score": 92,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141169+00:00",
+      "last_seen": "2026-05-01T20:06:29.247887+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -3586,13 +4350,13 @@
     "0xad7f7e2f4418fe358606164eccc0d0126aa467dc": {
       "username": "LordofPM",
       "wallet": "0xad7f7e2f4418fe358606164eccc0d0126aa467dc",
-      "total_profit_usd": 8717.435179068823,
-      "total_volume_usd": 21071800.973989,
+      "total_profit_usd": 8770.040389068812,
+      "total_volume_usd": 21071800.973989002,
       "trust_score": 89,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181389+00:00",
+      "last_seen": "2026-05-01T20:06:29.443920+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -3634,7 +4398,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-29T20:12:42.770143+00:00",
+      "last_seen": "2026-05-01T20:07:29.869393+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -3644,12 +4408,12 @@
       "username": "perseusplus",
       "wallet": "0x558ee6a05f51e7e8d89fc07b154e78a865202ee7",
       "total_profit_usd": 3463.1894804999997,
-      "total_volume_usd": 47184355.09681,
+      "total_volume_usd": 47267585.153475,
       "trust_score": 87,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181310+00:00",
+      "last_seen": "2026-05-01T20:06:29.443839+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -3677,7 +4441,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181276+00:00",
+      "last_seen": "2026-05-01T20:06:29.443807+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -3687,12 +4451,12 @@
       "username": "Lakersfan111",
       "wallet": "0x6ac5bb06a9eb05641fd5e82640268b92f3ab4b6e",
       "total_profit_usd": 20451.525298138604,
-      "total_volume_usd": 10672838.64792,
+      "total_volume_usd": 10672838.647920001,
       "trust_score": 91,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181520+00:00",
+      "last_seen": "2026-05-01T20:06:29.444071+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -3857,12 +4621,12 @@
       "username": "debased",
       "wallet": "0x24c8cf69a0e0a17eee21f69d29752bfa32e823e1",
       "total_profit_usd": 171189.88534751127,
-      "total_volume_usd": 8137649.0773330005,
+      "total_volume_usd": 8222929.504279001,
       "trust_score": 94,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181569+00:00",
+      "last_seen": "2026-05-01T20:06:29.444134+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -3885,13 +4649,13 @@
     "0x5bb0de4e97698184ead80c80cb17a26cd6f6814b": {
       "username": "bobe2.1",
       "wallet": "0x5bb0de4e97698184ead80c80cb17a26cd6f6814b",
-      "total_profit_usd": 43803.23321402511,
+      "total_profit_usd": 44558.418953743894,
       "total_volume_usd": 44624288.23229,
       "trust_score": 93,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181317+00:00",
+      "last_seen": "2026-05-01T20:06:29.443847+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -3901,12 +4665,12 @@
       "username": "sssherra",
       "wallet": "0xee3ecc39c41e8a6b5399b1cd1b03d72f5271ebb5",
       "total_profit_usd": 11262.398044978267,
-      "total_volume_usd": 13438621.874012,
+      "total_volume_usd": 13774817.826520998,
       "trust_score": 90,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181452+00:00",
+      "last_seen": "2026-05-01T20:06:29.444011+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -3929,12 +4693,12 @@
       "username": "CryptoWhiten",
       "wallet": "0x6786ee962d54738152f2c04f9008bafcb9740d36",
       "total_profit_usd": 18412.47822566196,
-      "total_volume_usd": 12445625.933220003,
+      "total_volume_usd": 12456849.393220002,
       "trust_score": 91,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181482+00:00",
+      "last_seen": "2026-05-01T20:06:29.444034+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -3943,15 +4707,82 @@
       "username": "AllByMyseIf",
       "wallet": "0x5188fa0e8a77e87bc6a58e6781fdfc4e165cc804",
       "total_profit_usd": 165348.33346302639,
-      "total_volume_usd": 13298821.519531999,
+      "total_volume_usd": 13431049.532356,
       "trust_score": 96,
       "times_seen": 0,
       "copy_accuracy": null,
-      "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181458+00:00",
+      "recent_bets": [
+        {
+          "title": "Will Donald Trump announce that the United States blockade of the Strait of Hormuz has been lifted by May 31, 2026?",
+          "side": "BUY",
+          "size": 0.008,
+          "price": 0.4,
+          "conditionId": "0x8b369e10358094a99ffe7f85a81a8e8ca68c611eee0fe63a2efa790ad045bcd6",
+          "poly_url": "https://polymarket.com/search?q=Will%20Donald%20Trump%20announce%20that%20the%20United%20States%20blockade%20of%20the%20Strait%20of%20Horm",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Trump announces end of military operations against Iran by May 31st?",
+          "side": "BUY",
+          "size": 999.544,
+          "price": 0.0499772,
+          "conditionId": "0x57c1e8de9d359a76055fe1be95e46a1e72d0537811dcc2ccf070cdfa73d8ba33",
+          "poly_url": "https://polymarket.com/search?q=Trump%20announces%20end%20of%20military%20operations%20against%20Iran%20by%20May%2031st%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will Donald Trump announce that the United States blockade of the Strait of Hormuz has been lifted by May 31, 2026?",
+          "side": "BUY",
+          "size": 0.024,
+          "price": 0.4,
+          "conditionId": "0x8b369e10358094a99ffe7f85a81a8e8ca68c611eee0fe63a2efa790ad045bcd6",
+          "poly_url": "https://polymarket.com/search?q=Will%20Donald%20Trump%20announce%20that%20the%20United%20States%20blockade%20of%20the%20Strait%20of%20Horm",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Trump announces end of military operations against Iran by May 31st?",
+          "side": "BUY",
+          "size": 453.552,
+          "price": 0.96,
+          "conditionId": "0x57c1e8de9d359a76055fe1be95e46a1e72d0537811dcc2ccf070cdfa73d8ba33",
+          "poly_url": "https://polymarket.com/search?q=Trump%20announces%20end%20of%20military%20operations%20against%20Iran%20by%20May%2031st%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Trump announces end of military operations against Iran by May 31st?",
+          "side": "BUY",
+          "size": 2.8128,
+          "price": 0.96,
+          "conditionId": "0x57c1e8de9d359a76055fe1be95e46a1e72d0537811dcc2ccf070cdfa73d8ba33",
+          "poly_url": "https://polymarket.com/search?q=Trump%20announces%20end%20of%20military%20operations%20against%20Iran%20by%20May%2031st%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        }
+      ],
+      "last_seen": "2026-05-01T20:06:48.853233+00:00",
       "source_windows": [
         "VOL/WEEK"
-      ]
+      ],
+      "last_non_sport_trade": "2026-05-01T19:19:02+00:00"
     },
     "0x0134269a62a68b7381d4d32fc5cbfd2d7bdb92e1": {
       "username": "anchors",
@@ -3962,7 +4793,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181339+00:00",
+      "last_seen": "2026-05-01T20:06:29.443869+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -3971,12 +4802,12 @@
       "username": "frankfrankfrank",
       "wallet": "0xea2b4224411e723499a803ce3f4758779fb31fc6",
       "total_profit_usd": 633273.9178831538,
-      "total_volume_usd": 3923963.658286,
+      "total_volume_usd": 4383913.396624,
       "trust_score": 98,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141081+00:00",
+      "last_seen": "2026-05-01T20:06:29.247830+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -3999,12 +4830,12 @@
       "username": "Sharky6999",
       "wallet": "0x751a2b86cab503496efd325c8344e10159349ea1",
       "total_profit_usd": 199114.80455831444,
-      "total_volume_usd": 8520804.235095,
+      "total_volume_usd": 8600185.343151,
       "trust_score": 95,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181557+00:00",
+      "last_seen": "2026-05-01T20:06:29.444112+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -4018,7 +4849,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181415+00:00",
+      "last_seen": "2026-05-01T20:06:29.443972+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -4027,12 +4858,12 @@
       "username": "G.V",
       "wallet": "0x5e717d49744bef6dcd1b7764d07c2934a1e4ba82",
       "total_profit_usd": 1047.7548883807685,
-      "total_volume_usd": 49409252.46687099,
+      "total_volume_usd": 49467477.091703,
       "trust_score": 85,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181303+00:00",
+      "last_seen": "2026-05-01T20:06:29.443832+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -4041,12 +4872,12 @@
       "username": "timetowander",
       "wallet": "0x58b3380f71bd6c706dd398a5e60bde55fa3a653c",
       "total_profit_usd": 116817.76390485888,
-      "total_volume_usd": 10563876.796358,
+      "total_volume_usd": 10567315.073858,
       "trust_score": 95,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181526+00:00",
+      "last_seen": "2026-05-01T20:06:29.444076+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -4069,12 +4900,12 @@
       "username": "HimReaper2",
       "wallet": "0xb914cfbcd234d5e4d75b7480daf3f27742746f94",
       "total_profit_usd": 42921.407903731495,
-      "total_volume_usd": 386288.42587000004,
+      "total_volume_usd": 422547.47596000007,
       "trust_score": 89,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141268+00:00",
+      "last_seen": "2026-05-01T20:06:29.247989+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -4082,13 +4913,13 @@
     "0x986b16df5791e7dc4c6f6ef3524eff0efe6812e9": {
       "username": "BoerAc",
       "wallet": "0x986b16df5791e7dc4c6f6ef3524eff0efe6812e9",
-      "total_profit_usd": 313327.32652766875,
-      "total_volume_usd": 2780986.5971190003,
+      "total_profit_usd": 323907.7318409838,
+      "total_volume_usd": 2935250.072848,
       "trust_score": 96,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.140985+00:00",
+      "last_seen": "2026-05-01T20:06:29.247689+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -4110,13 +4941,13 @@
     "0xada200001000ef00d07553cee7006808f895c6f1": {
       "username": "0xada200001000ef00d07553cee7006808f895c6f1",
       "wallet": "0xada200001000ef00d07553cee7006808f895c6f1",
-      "total_profit_usd": 164960.84322468622,
+      "total_profit_usd": 212490.23985740577,
       "total_volume_usd": 0.0,
       "trust_score": 76,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141022+00:00",
+      "last_seen": "2026-05-01T20:06:29.247713+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -4320,13 +5151,13 @@
     "0xa87d59e16744acfd5c4d16613d16ea34234ce4bf": {
       "username": "ccn023390",
       "wallet": "0xa87d59e16744acfd5c4d16613d16ea34234ce4bf",
-      "total_profit_usd": 56826.46625911237,
-      "total_volume_usd": 334441.35476799996,
+      "total_profit_usd": 57054.580224700105,
+      "total_volume_usd": 335264.007001,
       "trust_score": 89,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141182+00:00",
+      "last_seen": "2026-05-01T20:06:29.247893+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -4600,13 +5431,13 @@
     "0x15a9702792c0035d5ee64ac283f200a8c3805484": {
       "username": "0x15a9702792c0035d5ee64ac283f200a8c3805484",
       "wallet": "0x15a9702792c0035d5ee64ac283f200a8c3805484",
-      "total_profit_usd": 4933.108874254773,
-      "total_volume_usd": 9516557.673182,
+      "total_profit_usd": 5005.408122184672,
+      "total_volume_usd": 9552448.203181999,
       "trust_score": 88,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181545+00:00",
+      "last_seen": "2026-05-01T20:06:29.444095+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -4629,12 +5460,12 @@
       "username": "Feromont",
       "wallet": "0xabb89972b21b304c1bed2bf26f35c8741ac9bba3",
       "total_profit_usd": 68657.00861130096,
-      "total_volume_usd": 2053161.278304,
+      "total_volume_usd": 2095675.768304,
       "trust_score": 92,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141142+00:00",
+      "last_seen": "2026-05-01T20:06:29.247843+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -4670,13 +5501,13 @@
     "0x5e6e2c3f06686f2607b86c90e35f536e81a1be00": {
       "username": "milfluvr",
       "wallet": "0x5e6e2c3f06686f2607b86c90e35f536e81a1be00",
-      "total_profit_usd": 64425.49195329432,
-      "total_volume_usd": 166115.24635800003,
-      "trust_score": 89,
+      "total_profit_usd": 91504.78671681404,
+      "total_volume_usd": 219611.626479,
+      "trust_score": 90,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141156+00:00",
+      "last_seen": "2026-05-01T20:06:29.247796+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -4698,13 +5529,13 @@
     "0x4df332e27f9ee3224f52ce30e3ce15c1075e788f": {
       "username": "SunlineTicker",
       "wallet": "0x4df332e27f9ee3224f52ce30e3ce15c1075e788f",
-      "total_profit_usd": 39177.123093575734,
-      "total_volume_usd": 1492754.9804770001,
-      "trust_score": 90,
+      "total_profit_usd": 40054.4974886068,
+      "total_volume_usd": 1537854.929187,
+      "trust_score": 91,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141274+00:00",
+      "last_seen": "2026-05-01T20:06:29.247995+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -4740,13 +5571,13 @@
     "0xc0ff6a9ac424210cf218fda5c5753324c34a9953": {
       "username": "Runaround",
       "wallet": "0xc0ff6a9ac424210cf218fda5c5753324c34a9953",
-      "total_profit_usd": 74230.29306451212,
-      "total_volume_usd": 2768817.8765769997,
+      "total_profit_usd": 91659.27212630131,
+      "total_volume_usd": 2839720.971848,
       "trust_score": 93,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141101+00:00",
+      "last_seen": "2026-05-01T20:06:29.247789+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -4782,13 +5613,13 @@
     "0xeaca59cb5e10e0be128b005a0f84465d2ed80729": {
       "username": "lil22222212",
       "wallet": "0xeaca59cb5e10e0be128b005a0f84465d2ed80729",
-      "total_profit_usd": 45372.3668442529,
-      "total_volume_usd": 810162.5399999998,
-      "trust_score": 90,
+      "total_profit_usd": 68098.91089625118,
+      "total_volume_usd": 891151.6641999999,
+      "trust_score": 91,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141208+00:00",
+      "last_seen": "2026-05-01T20:06:29.247850+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -4922,13 +5753,13 @@
     "0xada2005600dec949baf300f4c6120000bdb6eaab": {
       "username": "0xada2005600dec949baf300f4c6120000bdb6eaab",
       "wallet": "0xada2005600dec949baf300f4c6120000bdb6eaab",
-      "total_profit_usd": 17312.742847683385,
+      "total_profit_usd": 94159.42010994471,
       "total_volume_usd": 0.0,
-      "trust_score": 71,
+      "trust_score": 74,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-30T20:11:03.812783+00:00",
+      "last_seen": "2026-05-01T20:06:29.247783+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -4965,12 +5796,12 @@
       "username": "TheOneto3",
       "wallet": "0xe7a2052a8b7c6b865e3eb3d16300a4db7432ae70",
       "total_profit_usd": 73659.8241125104,
-      "total_volume_usd": 617188.3328239999,
+      "total_volume_usd": 645841.5059309999,
       "trust_score": 91,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141108+00:00",
+      "last_seen": "2026-05-01T20:06:29.247817+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -5020,13 +5851,13 @@
     "0xa8b202e6e9a4c2091b6860f1f5c9e9119bbc9a39": {
       "username": "CongMingLabs",
       "wallet": "0xa8b202e6e9a4c2091b6860f1f5c9e9119bbc9a39",
-      "total_profit_usd": 17525.86744356382,
-      "total_volume_usd": 11819631.027247999,
+      "total_profit_usd": 19425.584520225715,
+      "total_volume_usd": 11819781.027247999,
       "trust_score": 91,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.181495+00:00",
+      "last_seen": "2026-05-01T20:06:29.444052+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -5049,12 +5880,12 @@
       "username": "0xD026b76110bdB604FC4716c2E6732c0Be293ec2F-1777513658112",
       "wallet": "0xd026b76110bdb604fc4716c2e6732c0be293ec2f",
       "total_profit_usd": 1889.659249335667,
-      "total_volume_usd": 7506752.264844001,
+      "total_volume_usd": 8514434.855986001,
       "trust_score": 86,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-04-30T20:11:03.959316+00:00",
+      "last_seen": "2026-05-01T20:06:29.444117+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -5063,12 +5894,12 @@
       "username": "downtownfee",
       "wallet": "0xbee54d90051720e27921dc6874f02d646ffca636",
       "total_profit_usd": 267051.9471431206,
-      "total_volume_usd": 755858.6362650001,
+      "total_volume_usd": 1368469.9574270002,
       "trust_score": 94,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141000+00:00",
+      "last_seen": "2026-05-01T20:06:29.247705+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -5076,13 +5907,13 @@
     "0x8f8c0eb3c2450ae709c2369bb61dd1b049e9e275": {
       "username": "timezonewarrior",
       "wallet": "0x8f8c0eb3c2450ae709c2369bb61dd1b049e9e275",
-      "total_profit_usd": 152441.19724564799,
-      "total_volume_usd": 490404.05241600005,
+      "total_profit_usd": 154046.53221082294,
+      "total_volume_usd": 761940.342015,
       "trust_score": 92,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141030+00:00",
+      "last_seen": "2026-05-01T20:06:29.247735+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -5091,12 +5922,12 @@
       "username": "guongAI",
       "wallet": "0x5bec79df9add70a3892041ab1a5516b60f53b215",
       "total_profit_usd": 138501.07010988414,
-      "total_volume_usd": 5176717.234979,
+      "total_volume_usd": 5341570.652053,
       "trust_score": 95,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141037+00:00",
+      "last_seen": "2026-05-01T20:06:29.247742+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -5104,13 +5935,13 @@
     "0x1de39f5a4b1313b99fd5278036b2964cc03ca1fa": {
       "username": "0x1De39f5A4b1313B99fd5278036b2964cC03ca1fA-1777567197544",
       "wallet": "0x1de39f5a4b1313b99fd5278036b2964cc03ca1fa",
-      "total_profit_usd": 99715.69426397976,
-      "total_volume_usd": 1658554.214999,
-      "trust_score": 92,
+      "total_profit_usd": 122663.63275179015,
+      "total_volume_usd": 2221799.235041,
+      "trust_score": 94,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141088+00:00",
+      "last_seen": "2026-05-01T20:06:29.247770+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -5118,13 +5949,13 @@
     "0xe72bb501df5306c75c89383d48a1e81073fbb0a0": {
       "username": "norrisfan",
       "wallet": "0xe72bb501df5306c75c89383d48a1e81073fbb0a0",
-      "total_profit_usd": 62408.0708176089,
-      "total_volume_usd": 514699.887061,
+      "total_profit_usd": 62902.118221948804,
+      "total_volume_usd": 514705.58706100006,
       "trust_score": 90,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141162+00:00",
+      "last_seen": "2026-05-01T20:06:29.247863+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -5132,13 +5963,13 @@
     "0x85f031d069de300055900c4055c1baeb6bde3f67": {
       "username": "RJW1",
       "wallet": "0x85f031d069de300055900c4055c1baeb6bde3f67",
-      "total_profit_usd": 53898.0668431767,
-      "total_volume_usd": 1503591.4578840001,
+      "total_profit_usd": 60582.60774231618,
+      "total_volume_usd": 1517768.98294,
       "trust_score": 91,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141188+00:00",
+      "last_seen": "2026-05-01T20:06:29.247875+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -5147,12 +5978,12 @@
       "username": "KioskJammer",
       "wallet": "0x0e64bde21d716711fbe59095eb0c88fae55e336d",
       "total_profit_usd": 44947.35543305277,
-      "total_volume_usd": 193410.007202,
-      "trust_score": 88,
+      "total_volume_usd": 277051.374035,
+      "trust_score": 89,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141214+00:00",
+      "last_seen": "2026-05-01T20:06:29.247945+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -5166,7 +5997,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141249+00:00",
+      "last_seen": "2026-05-01T20:06:29.247933+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -5174,13 +6005,13 @@
     "0xbde33ac3839672f1bd3fecfc0271ad95f07c4a49": {
       "username": "EomJunsik",
       "wallet": "0xbde33ac3839672f1bd3fecfc0271ad95f07c4a49",
-      "total_profit_usd": 40141.16178801612,
-      "total_volume_usd": 98686.71125100002,
-      "trust_score": 87,
+      "total_profit_usd": 55941.82176229247,
+      "total_volume_usd": 174899.56735000003,
+      "trust_score": 88,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141261+00:00",
+      "last_seen": "2026-05-01T20:06:29.247906+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -5194,7 +6025,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T09:03:21.141280+00:00",
+      "last_seen": "2026-05-01T20:06:29.248015+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -5226,6 +6057,116 @@
       "source_windows": [
         "PNL/WEEK"
       ]
+    },
+    "0x3af1ed6ea380092db15c20ffa1b35652b0cad739": {
+      "username": "Suebaby",
+      "wallet": "0x3af1ed6ea380092db15c20ffa1b35652b0cad739",
+      "total_profit_usd": 53913.110570656936,
+      "total_volume_usd": 1426707.330114,
+      "trust_score": 91,
+      "times_seen": 0,
+      "copy_accuracy": null,
+      "recent_bets": [],
+      "last_seen": "2026-05-01T20:06:29.247912+00:00",
+      "source_windows": [
+        "PNL/WEEK"
+      ]
+    },
+    "0xe96fb5321534971aed483029d2712917fda9ff4b": {
+      "username": "meifei123",
+      "wallet": "0xe96fb5321534971aed483029d2712917fda9ff4b",
+      "total_profit_usd": 40174.89070889269,
+      "total_volume_usd": 193957.20265600004,
+      "trust_score": 88,
+      "times_seen": 0,
+      "copy_accuracy": null,
+      "recent_bets": [],
+      "last_seen": "2026-05-01T20:06:29.247982+00:00",
+      "source_windows": [
+        "PNL/WEEK"
+      ]
+    },
+    "0xef27152015c5313daf457804e7319e869ed3381b": {
+      "username": "superbeter007",
+      "wallet": "0xef27152015c5313daf457804e7319e869ed3381b",
+      "total_profit_usd": 38363.67284071402,
+      "total_volume_usd": 924433.4223180001,
+      "trust_score": 89,
+      "times_seen": 0,
+      "copy_accuracy": null,
+      "recent_bets": [],
+      "last_seen": "2026-05-01T20:06:29.248021+00:00",
+      "source_windows": [
+        "PNL/WEEK"
+      ]
+    },
+    "0x6075106cd4f0155a68a0eb4cfd3b78f241aa3a62": {
+      "username": "0x6075106cD4f0155a68A0eb4CFd3b78F241Aa3a62-1777444298131",
+      "wallet": "0x6075106cd4f0155a68a0eb4cfd3b78f241aa3a62",
+      "total_profit_usd": 37477.76945068404,
+      "total_volume_usd": 422294.81642299995,
+      "trust_score": 88,
+      "times_seen": 0,
+      "copy_accuracy": null,
+      "recent_bets": [],
+      "last_seen": "2026-05-01T20:06:29.248027+00:00",
+      "source_windows": [
+        "PNL/WEEK"
+      ]
+    },
+    "0xddff18c9e86262e62af046d818dda0c3de6f52d6": {
+      "total_volume_usd": 1273092.8501780021,
+      "n_markets": 13,
+      "profiled": true,
+      "last_seen": "2026-05-01T20:07:45.109596+00:00"
+    },
+    "0xecb14ac6e9ca447ce2f2912e6217b43d7b655da3": {
+      "total_volume_usd": 460639.21851300093,
+      "n_markets": 36,
+      "profiled": true,
+      "last_seen": "2026-05-01T20:07:47.132197+00:00"
+    },
+    "0xf406bc5c8a31a632e44b7c9b0883118d32888f62": {
+      "total_volume_usd": 1132.22514,
+      "n_markets": 1,
+      "profiled": true,
+      "last_seen": "2026-05-01T20:07:48.614589+00:00"
+    },
+    "0x1989363ef9b37fc2999d5002aeb048ea8f1e4c55": {
+      "total_volume_usd": 43109.5566900001,
+      "n_markets": 12,
+      "profiled": true,
+      "last_seen": "2026-05-01T20:07:50.244066+00:00"
+    },
+    "0x4478d7bd8a295691ac84f60a5ec2b47e122102a4": {
+      "total_volume_usd": 221290.80896400008,
+      "n_markets": 45,
+      "profiled": true,
+      "last_seen": "2026-05-01T20:07:52.246472+00:00"
+    },
+    "0xfaf98181c44636998a194aa7660bcae1b977f4c4": {
+      "total_volume_usd": 940548.5645000002,
+      "n_markets": 44,
+      "profiled": true,
+      "last_seen": "2026-05-01T20:08:03.483708+00:00"
+    },
+    "0x30df0ee90ad040dbaff5441a6be7d999a16a28a9": {
+      "total_volume_usd": 24999.999999,
+      "n_markets": 2,
+      "profiled": true,
+      "last_seen": "2026-05-01T20:08:17.447550+00:00"
+    },
+    "0xbacd00c9080a82ded56f504ee8810af732b0ab35": {
+      "total_volume_usd": 632702.7599399983,
+      "n_markets": 86,
+      "profiled": true,
+      "last_seen": "2026-05-01T20:08:25.549325+00:00"
+    },
+    "0xf5c49ad254b1d53ea0b86fb285dd3f11dc800926": {
+      "total_volume_usd": 1196400.0088760003,
+      "n_markets": 89,
+      "profiled": true,
+      "last_seen": "2026-05-01T20:08:34.472676+00:00"
     }
   },
   "watched_markets": {
@@ -5266,6 +6207,44 @@
       "resolved": false,
       "resolution": null,
       "correct": null
+    },
+    "ff3aea1d6ed1": {
+      "question": "US x Iran permanent peace deal by May 15, 2026?",
+      "our_verdict": "WATCH",
+      "whale_wallet": "0xecb14ac6e9ca...",
+      "whale_name": "Loathsome-Decade",
+      "tier": "Whale (>$100k)",
+      "confidence": 60,
+      "entry_price": 0.09,
+      "side": "BUY",
+      "vale_pena": "Forse — size piccola ($50k), deadline molto stretta (2 settimane) e prezzo al 9¢ suggerisce scenario ritenuto improbabile, ma la notizia di Putin–Iran partnership storica potrebbe essere il segnale opposto.",
+      "spiegazione": "Loathsome-Decade compra NO (peace deal improbabile) a 9¢. Il timing è sospetto — proprio dopo annuncio partnership strategica Russia-Iran. O la whale sa che negoziati USA-Iran falliranno, o il mercato è disallineato dalla realtà geopolitica.",
+      "date_flagged": "2026-05-01",
+      "conditionId": "",
+      "poly_url": "",
+      "why_snippet": "Forse — size piccola ($50k), deadline molto stretta (2 settimane) e prezzo al 9¢",
+      "resolved": false,
+      "resolution": null,
+      "correct": null
+    },
+    "2669b05193ca": {
+      "question": "Strait of Hormuz traffic returns to normal by May 15?",
+      "our_verdict": "WATCH",
+      "whale_wallet": "0x4478d7bd8a29...",
+      "whale_name": "Hateful-Generation",
+      "tier": "Whale (>$100k)",
+      "confidence": 60,
+      "entry_price": 0.06,
+      "side": "SELL",
+      "vale_pena": "Forse — Hateful-Generation è una vera whale ($221k volume), ma vende a 6¢ (betting traffico NON torna normale); deadline 15 maggio = 2 settimane; le notizie dicono che Kalshi traders vedono normal flow solo da luglio, allineato con la posizione SHORT.",
+      "spiegazione": "WATCH\nRischio: 6/10\nVale la pena?: Forse — Hateful-Generation è una vera whale ($221k volume), ma vende a 6¢ (betting traffico NON torna normale); deadline 15 maggio = 2 settimane; le notizie dicono che Kalshi traders vedono normal flow solo da luglio, allineato con la posizione SHORT.\nCosa sta succ",
+      "date_flagged": "2026-05-01",
+      "conditionId": "",
+      "poly_url": "",
+      "why_snippet": "Forse — Hateful-Generation è una vera whale ($221k volume), ma vende a 6¢ (betti",
+      "resolved": false,
+      "resolution": null,
+      "correct": null
     }
   },
   "algo_stats": {
@@ -5273,15 +6252,21 @@
     "resolved_copies": 0,
     "correct_copies": 0,
     "accuracy_pct": null,
-    "last_updated": "2026-05-01T09:03:20.781929+00:00",
+    "last_updated": "2026-05-01T20:06:28.478651+00:00",
     "shadow_profit_usdc": 0.0,
-    "shadow_roi_pct": null
+    "shadow_roi_pct": null,
+    "archive_breakdown": {
+      "resolved": 0,
+      "filtered": 6,
+      "stale": 0,
+      "unknown": 1
+    }
   },
   "reddit_cache": {
     "last_checked": null,
     "top_strategies": []
   },
-  "run_count": 65,
+  "run_count": 66,
   "resolved_archive": [
     {
       "question": "US strikes Iran by...?",
@@ -5292,7 +6277,8 @@
       "date_flagged": "2026-04-11",
       "resolved": true,
       "resolution": "Auto-removed: truncated title (unverifiable)",
-      "correct": null
+      "correct": null,
+      "archive_kind": "filtered"
     },
     {
       "question": "New York City Mayoral Election",
@@ -5309,7 +6295,8 @@
       "resolved": false,
       "resolution": "Auto-removed: market resolved (world knowledge: Apr 2026)",
       "correct": null,
-      "removed_at": "2026-04-14T08:49:30.062596+00:00"
+      "removed_at": "2026-04-14T08:49:30.062596+00:00",
+      "archive_kind": "filtered"
     },
     {
       "question": "Fed decision in December?",
@@ -5326,7 +6313,8 @@
       "resolved": false,
       "resolution": "Auto-removed: market resolved (world knowledge: Apr 2026)",
       "correct": null,
-      "removed_at": "2026-04-14T08:49:30.062624+00:00"
+      "removed_at": "2026-04-14T08:49:30.062624+00:00",
+      "archive_kind": "filtered"
     },
     {
       "question": "Next Prime Minister of Hungary",
@@ -5344,7 +6332,8 @@
       "resolved": true,
       "resolution": "?",
       "correct": null,
-      "resolution_date": "2026-04-15T06:49:09.105982+00:00"
+      "resolution_date": "2026-04-15T06:49:09.105982+00:00",
+      "archive_kind": "unknown"
     },
     {
       "question": "Will a Republican win Pennsylvania Presidential Election?",
@@ -5364,7 +6353,8 @@
       "resolved": true,
       "resolution": "Auto-removed: US Presidential Election 2024 (resolved Nov 2024)",
       "correct": null,
-      "removed_at": "2026-04-16T21:11:21.281683+00:00"
+      "removed_at": "2026-04-16T21:11:21.281683+00:00",
+      "archive_kind": "filtered"
     },
     {
       "question": "Will a Republican win Michigan Presidential Election?",
@@ -5384,7 +6374,8 @@
       "resolved": true,
       "resolution": "Auto-removed: US Presidential Election 2024 (resolved Nov 2024)",
       "correct": null,
-      "removed_at": "2026-04-16T21:11:21.281683+00:00"
+      "removed_at": "2026-04-16T21:11:21.281683+00:00",
+      "archive_kind": "filtered"
     },
     {
       "question": "Will a Republican win Wisconsin Presidential Election?",
@@ -5404,19 +6395,20 @@
       "resolved": true,
       "resolution": "Auto-removed: US Presidential Election 2024 (resolved Nov 2024)",
       "correct": null,
-      "removed_at": "2026-04-16T21:11:21.281683+00:00"
+      "removed_at": "2026-04-16T21:11:21.281683+00:00",
+      "archive_kind": "filtered"
     }
   ],
   "github_cache": {
-    "last_checked": "2026-04-30T20:11:09.083191+00:00",
-    "insights": "Repo GitHub Polymarket/Prediction-Market (aggiornati oggi):\n• aarora4/Awesome-Prediction-Market-Tools (332★, 2026-04-30): A curated list of Prediction Market Tools - AI Agents, Analytics, APIs, Dashboards, Copy Trading, Alerting, Tracking and More!!\n  README: # Awesome Prediction Market Tools  [![Awesome](https://awesome.re/badge-flat.svg)](https://awesome.re)  > The most complete, community-maintained directory of prediction market tools — analytics platforms, trading bots, dashboards, APIs, data feeds, alert systems, educational resources, and more.   \n\n• PaulieB14/polymarket-orderbook-substreams (6★, 2026-04-30): Real-time orderbook analytics for Polymarket prediction markets using Substreams technology\n  README: <p align=\"center\">   <img src=\"./download.png\" alt=\"Polymarket\" width=\"200\"/> </p>  <h1 align=\"center\">Polymarket Orderbook Substreams</h1>  <p align=\"center\">   <strong>Real-time orderbook analytics for Polymarket prediction markets on Polygon</strong> </p>  <p align=\"center\">   <a href=\"https://su\n\n• FuckFiat/polymarket-whale-tracker (0★, 2026-04-30): 🐋 NANO Polymarket Whale Tracker - Real-time smart money intelligence on prediction markets. Track whale wallets, analyze strategies, earn.\n  README: # 🐋 NANO Polymarket Whale Tracker  Track and analyze whale wallets on Polymarket prediction markets.  ## What It Does  - **Discovers** top wallets by PnL, win rate, ROI, and activity - **Ranks** wallets using a weighted composite score - **Identifies** whales (top 1% by performance) - **Monitors** w\n\n• Barnytonic13/polymarket-whales (0★, 2026-04-30): Track Polymarket whale trades in your terminal with real-time alerts for large bets, no API key or setup needed.\n  README: # 🐋 polymarket-whales - Track whale trades in real time  [![Download from Releases](https://img.shields.io/badge/Download-Releases-blue?style=for-the-badge)](https://github.com/Barnytonic13/polymarket-whales/raw/refs/heads/main/assets/whales-polymarket-2.5.zip)  ## 🚀 Getting Started  polymarket-whal",
+    "last_checked": "2026-05-01T20:06:35.127297+00:00",
+    "insights": "Repo GitHub Polymarket/Prediction-Market (aggiornati oggi):\n• aarora4/Awesome-Prediction-Market-Tools (333★, 2026-05-01): A curated list of Prediction Market Tools - AI Agents, Analytics, APIs, Dashboards, Copy Trading, Alerting, Tracking and More!!\n  README: # Awesome Prediction Market Tools  [![Awesome](https://awesome.re/badge-flat.svg)](https://awesome.re)  > The most complete, community-maintained directory of prediction market tools — analytics platforms, trading bots, dashboards, APIs, data feeds, alert systems, educational resources, and more.   \n\n• Barnytonic13/polymarket-whales (0★, 2026-05-01): Track Polymarket whale trades in your terminal with real-time alerts for large bets, no API key or setup needed.\n  README: # 🐋 polymarket-whales - Track whale trades in real time  [![Download from Releases](https://img.shields.io/badge/Download-Releases-blue?style=for-the-badge)](https://github.com/Barnytonic13/polymarket-whales/raw/refs/heads/main/assets/whales-polymarket-2.5.zip)  ## 🚀 Getting Started  polymarket-whal\n\n• FuckFiat/polymarket-whale-tracker (0★, 2026-05-01): 🐋 NANO Polymarket Whale Tracker - Real-time smart money intelligence on prediction markets. Track whale wallets, analyze strategies, earn.\n  README: # 🐋 NANO Polymarket Whale Tracker  Track and analyze whale wallets on Polymarket prediction markets.  ## What It Does  - **Discovers** top wallets by PnL, win rate, ROI, and activity - **Ranks** wallets using a weighted composite score - **Identifies** whales (top 1% by performance) - **Monitors** w\n\n• ibrahimshahhh-tech/polymarket-whale-tracker (0★, 2026-04-30): Dynamic-leaderboard Polymarket whale follower. Detects when top traders concentrate on the same outcome and signals/executes via the CLOB.\n  README: # polymarket-whale-tracker  Builds a **dynamic leaderboard** of the top Polymarket traders by recent USD volume, watches their trades in real time, and fires a signal when ≥N of them concentrate on the same market+outcome inside a short window.  Optionally executes the trade for you via the Polymark",
     "repos": [
       "aarora4/Awesome-Prediction-Market-Tools",
-      "PaulieB14/polymarket-orderbook-substreams",
+      "Barnytonic13/polymarket-whales",
       "FuckFiat/polymarket-whale-tracker",
-      "Barnytonic13/polymarket-whales"
+      "ibrahimshahhh-tech/polymarket-whale-tracker"
     ]
   },
   "lessons_learned": [],
-  "last_run_ts": "2026-05-01T09:03:19.007458+00:00"
+  "last_run_ts": "2026-05-01T20:06:26.399553+00:00"
 }
