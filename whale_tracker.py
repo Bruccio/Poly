@@ -776,6 +776,147 @@ def fetch_breaking_leaderboard(state: dict):
         log(f"Leaderboard: {len(state['leaderboard'])} whale totali in cache", "OK")
 
 
+# ── MARKET-FIRST SCAN ───────────────────────────────────────────────────────────
+def fetch_top_markets_with_whales(state: dict,
+                                  n_markets: int = 25,
+                                  min_trade_size: float = 10_000,
+                                  per_market: int = 2) -> list:
+    """
+    Approccio MARKET-FIRST: parte dai mercati top per volume 24h e cerca
+    i trade whale-level dentro. Inverte la logica di fetch_whale_trades
+    (whale-first), che dipende dalla freschezza della leaderboard cache.
+
+    Vantaggi:
+    - cattura mercati emergenti dove le top whale storiche non hanno ancora messo soldi
+    - non soffre del problema 'whale dormienti' (top trust=100 inattive dal 2024)
+    - usa la stessa Gamma API + nuovo endpoint /trades?market=<condId>
+
+    Restituisce trade in formato compatibile con analyze_with_claude:
+    [{'usdcSize', 'price', 'side', 'title', 'userAddress',
+      'whale_trust_score', 'whale_username', 'conditionId', '_source'}]
+    """
+    log("Market-first: scarico top mercati per volume 24h...")
+    try:
+        r = _http_get(
+            "https://gamma-api.polymarket.com/markets"
+            f"?limit={n_markets * 3}"   # x3 perché molti saranno filtrati come sport
+            "&order=volume24hr&ascending=false"
+            "&active=true&closed=false",
+            timeout=15,
+        )
+        if not r or r.status_code != 200:
+            log(f"Market-first: gamma /markets {r.status_code if r else 'no-response'}", "WARN")
+            return []
+        markets = r.json()
+        if isinstance(markets, dict):
+            markets = markets.get("data", [])
+    except Exception as e:
+        log(f"Market-first: errore gamma /markets: {e}", "WARN")
+        return []
+
+    log(f"Market-first: {len(markets)} mercati ricevuti, filtro sport/past/resolved...")
+    eligible: list = []
+    seen_titles: set = set()
+    for m in markets:
+        title = (m.get("question") or m.get("title") or "").strip()
+        if not title or title.startswith("0x"):
+            continue
+        cond_id = (m.get("conditionId") or m.get("condition_id") or m.get("id") or "")
+        if _is_sport(title):
+            continue
+        if _is_past_market(title):
+            continue
+        if _is_known_resolved_event(title):
+            continue
+        # Verifica resolution (Gamma cache è popolata da build_gamma_resolution_cache)
+        if is_market_resolved(title, condition_id=cond_id):
+            continue
+        # Volume 24h minimo: 50k USDC (mercato ha attività concreta oggi)
+        try:
+            v24 = float(m.get("volume24hr") or m.get("volume_24hr") or 0)
+        except (TypeError, ValueError):
+            v24 = 0
+        if v24 < 50_000:
+            continue
+        title_key = title.lower()
+        if title_key in seen_titles:
+            continue
+        seen_titles.add(title_key)
+        eligible.append((m, cond_id, v24, title))
+        if len(eligible) >= n_markets:
+            break
+
+    log(f"Market-first: {len(eligible)} mercati eligible (non sport, attivi, vol24h ≥ $50k)")
+
+    # Per ogni mercato eligible scarica i trade e prende top whale trade
+    out: list = []
+    for m, cond_id, v24, title in eligible:
+        if not cond_id:
+            continue
+        try:
+            tr = _http_get(
+                f"https://data-api.polymarket.com/trades?market={cond_id}&limit=100",
+                timeout=10,
+            )
+            if not tr or tr.status_code != 200:
+                continue
+            trades = tr.json()
+            if isinstance(trades, dict):
+                trades = trades.get("data", [])
+        except Exception as e:
+            log(f"  trades({cond_id[:10]}): {e}", "WARN")
+            continue
+
+        # Filtra trade >= min_trade_size, dedup per wallet (1-2 top trade)
+        big_trades: list = []
+        seen_wallets: set = set()
+        # ordina per size decrescente
+        trades_sorted = sorted(
+            trades,
+            key=lambda t: float(t.get("size") or t.get("usdcSize") or 0),
+            reverse=True,
+        )
+        for t in trades_sorted:
+            try:
+                size = float(t.get("size") or t.get("usdcSize") or 0)
+            except (TypeError, ValueError):
+                size = 0
+            if size < min_trade_size:
+                break  # ordinati desc, sotto soglia → fine
+            wallet = (t.get("proxyWallet") or t.get("user") or
+                      t.get("userAddress") or t.get("wallet") or "")
+            if not wallet or wallet in seen_wallets:
+                continue
+            seen_wallets.add(wallet)
+            # Trust score: lookup in leaderboard, default 50
+            lb_entry = state.get("leaderboard", {}).get(wallet, {})
+            trust = lb_entry.get("trust_score", 50)
+            username = (lb_entry.get("username") or t.get("pseudonym") or
+                        t.get("name") or wallet[:10])
+            big_trades.append({
+                "usdcSize":          str(size),
+                "price":             str(t.get("price") or 0.5),
+                "side":              t.get("side") or t.get("type") or "YES",
+                "title":             title,
+                "userAddress":       wallet,
+                "whale_trust_score": trust,
+                "whale_username":    username,
+                "conditionId":       cond_id,
+                "_source":           "market-first",
+                "_v24h":             v24,
+            })
+            if len(big_trades) >= per_market:
+                break
+        out.extend(big_trades)
+        time.sleep(0.3)  # rate-limit cortesia
+
+    # Ordina globalmente per (trust_score × size) come fetch_whale_trades
+    out.sort(key=lambda x: x["whale_trust_score"] * float(x["usdcSize"]), reverse=True)
+    log(f"Market-first: {len(out)} trade whale-level (≥${min_trade_size:,.0f}) "
+        f"da {len(eligible)} mercati", "OK")
+    return out
+
+
 # ── WHALE-FIRST AUTO DETECTION ───────────────────────────────────────────────────
 def fetch_whale_trades(state: dict) -> list:
     """
@@ -2637,11 +2778,32 @@ def run():
 
     # 4. Whale-first: prendi i trade recenti dei top wallet
     log("Scarico trade recenti delle top whale...")
-    whales = fetch_whale_trades(state)
+    # 4a. MARKET-FIRST scan: parte dai top mercati per volume 24h e cerca
+    #     le whale dentro. Indipendente dalla freschezza della leaderboard.
+    market_first = fetch_top_markets_with_whales(
+        state, n_markets=20, min_trade_size=10_000, per_market=2,
+    )
 
-    # 4b. Fallback: se nessun trade da wallet, usa mercati per volume
+    # 4b. WHALE-FIRST: trade recenti dei wallet con trust più alto.
+    whale_first = fetch_whale_trades(state)
+
+    # 4c. Merge dedup su (conditionId, wallet) — market-first ha priorità
+    seen_keys: set = set()
+    whales: list = []
+    for src in (market_first, whale_first):
+        for tr in src:
+            key = (tr.get("conditionId") or tr.get("title", ""),
+                   tr.get("userAddress", ""))
+            if key in seen_keys:
+                continue
+            seen_keys.add(key)
+            whales.append(tr)
+    log(f"Pool finale: {len(whales)} trade ({len(market_first)} market-first + "
+        f"{len(whale_first)} whale-first, dedup applicato)", "OK")
+
+    # 4d. Fallback finale: se ancora vuoto, usa il vecchio multi-source crawler
     if not whales:
-        log("Nessun trade da wallet — fallback su volume mercati", "WARN")
+        log("Pool vuoto — fallback su fetch_polymarket_whales", "WARN")
         ok, whales, total = fetch_polymarket_whales(MIN_SIZE_USDC, state)
     else:
         ok = True
