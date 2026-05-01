@@ -12,6 +12,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from whale_tracker import (
     _is_sport, _parse_claude, compute_confidence, _is_past_market,
     is_market_resolved, _GAMMA_RESOLUTION_CACHE, _is_known_resolved_event,
+    _activity_score, effective_trust,
 )
 
 
@@ -451,3 +452,71 @@ def test_known_resolved_does_not_block_future():
     assert not _is_known_resolved_event("Fed rate cut June 2026")
     assert not _is_known_resolved_event("Will BTC reach $200k?")
     assert not _is_known_resolved_event("Trump tariffs on EU goods")
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Active whale ranking — _activity_score / effective_trust
+# ─────────────────────────────────────────────────────────────────────────────
+from datetime import datetime, timedelta, timezone
+
+
+def _ts_days_ago(n: float) -> str:
+    return (datetime.now(timezone.utc) - timedelta(days=n)).isoformat()
+
+
+def test_activity_score_decay():
+    """Decay piecewise verificato: oggi=100, 7g=50, 30g=20, mai=50, 60g=10."""
+    assert _activity_score(_ts_days_ago(0))   == 100
+    assert _activity_score(_ts_days_ago(0.5)) == 100
+    assert _activity_score(_ts_days_ago(1))   == 100
+    assert 50 <= _activity_score(_ts_days_ago(7))  <= 51
+    assert 18 <= _activity_score(_ts_days_ago(30)) <= 22
+    assert _activity_score(_ts_days_ago(60))  == 10
+    assert _activity_score(_ts_days_ago(365)) == 10
+    assert _activity_score(None) == 50  # mai visto → neutro
+
+
+def test_activity_score_robust_to_garbage():
+    """Stringhe ISO malformate non devono crashare → fallback 50."""
+    assert _activity_score("") == 50
+    assert _activity_score("not-a-date") == 50
+    assert _activity_score("2026-13-99") == 50  # mese 13 invalido
+
+
+def test_effective_trust_active_beats_dormant():
+    """Whale attiva con static=70 batte whale dormiente con static=100."""
+    active = effective_trust({"trust_score": 70, "last_non_sport_trade": _ts_days_ago(0)})
+    dormant = effective_trust({"trust_score": 100, "last_non_sport_trade": _ts_days_ago(60)})
+    assert active > dormant, f"active={active} should beat dormant={dormant}"
+
+
+def test_effective_trust_unknown_whale():
+    """Whale con last_non_sport_trade=None (mai vista) → neutral baseline."""
+    assert effective_trust({"trust_score": 100}) == 75   # 50% × 100 + 50% × 50 = 75
+    assert effective_trust({"trust_score": 50})  == 50   # 50% × 50  + 50% × 50 = 50
+    assert effective_trust({})                   == 50   # default static=50
+
+
+def test_effective_trust_today_top():
+    """Whale top con trade oggi → trust massimo (≈100)."""
+    eff = effective_trust({"trust_score": 100, "last_non_sport_trade": _ts_days_ago(0)})
+    assert eff == 100
+
+
+def test_effective_trust_silent_demoting():
+    """Whale pingata oggi (last_seen<24h) ma zero trade non-sport → demoted.
+    Senza demoting silenzioso resterebbe a static/2 + 50 = 75.
+    Con demoting → static/2 + 25 = 62 (per static=100). Le 'whale 2024'
+    dormienti emergono entro 1 giorno invece di 30."""
+    today = _ts_days_ago(0.5)
+    # Caso A: last_seen oggi MA mai trade non-sport → demoted
+    demoted = effective_trust({"trust_score": 100, "last_seen": today,
+                                "last_non_sport_trade": None})
+    assert demoted == 62, f"got {demoted}"
+    # Caso B: mai pingata né visto → resta neutro
+    neutral = effective_trust({"trust_score": 100, "last_non_sport_trade": None})
+    assert neutral == 75
+    # Caso C: pingata ma con trade non-sport recente → resta alta
+    fresh = effective_trust({"trust_score": 100, "last_seen": today,
+                              "last_non_sport_trade": today})
+    assert fresh == 100

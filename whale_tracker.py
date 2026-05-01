@@ -776,6 +776,68 @@ def fetch_breaking_leaderboard(state: dict):
         log(f"Leaderboard: {len(state['leaderboard'])} whale totali in cache", "OK")
 
 
+# ── ACTIVE WHALE RANKING ────────────────────────────────────────────────────────
+def _activity_score(last_iso: str | None) -> int:
+    """
+    Score 0-100 basato su quando la whale ha fatto l'ultimo trade non-sport
+    secondo i nostri filtri. Decay piecewise:
+
+      0-1 giorno    → 100   (whale attiva ORA)
+      1-7 giorni    → 50-100 lineare
+      7-30 giorni   → 20-50  lineare
+      30+ giorni    → 10     (dormiente)
+      mai visto     → 50     (default neutro)
+
+    Robusto a stringhe ISO malformate o invalid → fallback 50.
+    """
+    if not last_iso:
+        return 50
+    try:
+        last = datetime.fromisoformat(last_iso.replace("Z", "+00:00"))
+        days = (datetime.now(timezone.utc) - last).total_seconds() / 86400
+    except (ValueError, AttributeError, TypeError):
+        return 50
+    if days <= 1:
+        return 100
+    if days <= 7:
+        return int(100 - (days - 1) * (50 / 6))
+    if days <= 30:
+        return int(50 - (days - 7) * (30 / 23))
+    return 10
+
+
+def effective_trust(lb_entry: dict) -> int:
+    """
+    Trust effettivo usato per il ranking delle whale nei pool di pre-Claude.
+    Mix 50/50 tra:
+      - static_trust = trust storico (profit+volume da fetch_breaking_leaderboard)
+      - active_score = freschezza (decay su last_non_sport_trade)
+
+    Una whale con $7M profit ma dormiente da 60gg si ritrova con trust ~55.
+    Una whale con $1M profit ma trade non-sport oggi si ritrova con trust ~85.
+    Le whale dormienti scendono in classifica naturalmente.
+
+    DEMOTING SILENZIOSO: se la whale è stata 'pingata' di recente
+    (last_seen ≤ 24h) ma non ha mai prodotto un trade non-sport
+    (last_non_sport_trade=None) → la sappiamo dormiente. active_score
+    scende a 25 invece di 50 di default, così emerge il problema entro
+    1 giorno invece di aspettare 30 giorni di decay implicito.
+    """
+    static = lb_entry.get("trust_score", 50)
+    last_non_sport = lb_entry.get("last_non_sport_trade")
+    active = _activity_score(last_non_sport)
+    if active == 50 and not last_non_sport:
+        last_seen = lb_entry.get("last_seen")
+        if last_seen:
+            try:
+                ls = datetime.fromisoformat(last_seen.replace("Z", "+00:00"))
+                if (datetime.now(timezone.utc) - ls).total_seconds() / 86400 <= 1:
+                    active = 25  # pingata oggi, zero produzione → dormiente
+            except (ValueError, AttributeError, TypeError):
+                pass
+    return int(0.5 * static + 0.5 * active)
+
+
 # ── MARKET-FIRST SCAN ───────────────────────────────────────────────────────────
 def fetch_top_markets_with_whales(state: dict,
                                   n_markets: int = 25,
@@ -888,11 +950,24 @@ def fetch_top_markets_with_whales(state: dict,
             if not wallet or wallet in seen_wallets:
                 continue
             seen_wallets.add(wallet)
-            # Trust score: lookup in leaderboard, default 50
+            # Trust effettivo: lookup in leaderboard (mix storico + freschezza),
+            # default 50 se whale sconosciuta. Aggiorna last_non_sport_trade.
             lb_entry = state.get("leaderboard", {}).get(wallet, {})
-            trust = lb_entry.get("trust_score", 50)
+            trust = effective_trust(lb_entry) if lb_entry else 50
             username = (lb_entry.get("username") or t.get("pseudonym") or
                         t.get("name") or wallet[:10])
+            if lb_entry:
+                trade_ts = t.get("timestamp")
+                if trade_ts:
+                    try:
+                        iso = datetime.fromtimestamp(int(trade_ts), tz=timezone.utc).isoformat()
+                    except (ValueError, TypeError):
+                        iso = datetime.now(timezone.utc).isoformat()
+                else:
+                    iso = datetime.now(timezone.utc).isoformat()
+                prev = lb_entry.get("last_non_sport_trade")
+                if not prev or iso > prev:
+                    state["leaderboard"][wallet]["last_non_sport_trade"] = iso
             big_trades.append({
                 "usdcSize":          str(size),
                 "price":             str(t.get("price") or 0.5),
@@ -929,13 +1004,12 @@ def fetch_whale_trades(state: dict) -> list:
         log("fetch_whale_trades: leaderboard vuota, skip", "WARN")
         return []
 
-    # Prendi top 40 wallet ordinati per trust_score.
-    # Le top 10-20 storiche sono spesso "dormienti" (whale dell'elezione 2024
-    # che ora tradano solo sport): allargare il pool dà ossigeno alle whale
-    # ancora attive su mercati politici/macro/crypto.
+    # Prendi top 40 wallet ordinati per EFFECTIVE_TRUST (50% storico +
+    # 50% freschezza). Le whale dormienti dal 2024 scendono in classifica;
+    # quelle attive (anche con profit storico minore) emergono.
     sorted_wallets = sorted(
         leaderboard.items(),
-        key=lambda kv: kv[1].get("trust_score", 0),
+        key=lambda kv: effective_trust(kv[1]),
         reverse=True,
     )[:40]
 
@@ -948,8 +1022,9 @@ def fetch_whale_trades(state: dict) -> list:
         if wallet.startswith("0x") and len(wallet) < 15:
             continue
         username = lb_entry.get("username", wallet[:10])
-        trust_score = lb_entry.get("trust_score", 50)
-        log(f"  Scarico trade da wallet {username} (trust {trust_score})...")
+        # Usa effective_trust nel pool inviato a Claude (mix storico + freschezza)
+        trust_score = effective_trust(lb_entry)
+        log(f"  Scarico trade da wallet {username} (trust eff={trust_score})...")
         try:
             trades = _cached_activity(wallet, limit=20)
             added = 0
@@ -1016,6 +1091,21 @@ def fetch_whale_trades(state: dict) -> list:
                 # Risparmia API call Claude e tiene il pool focalizzato.
                 if size < 1000:
                     continue
+                # ATTIVITÀ: questa whale ha appena fatto un trade non-sport
+                # whale-level → aggiorna last_non_sport_trade per il ranking.
+                if wallet_key in state.get("leaderboard", {}):
+                    trade_ts = t.get("timestamp")
+                    if trade_ts:
+                        try:
+                            iso = datetime.fromtimestamp(int(trade_ts), tz=timezone.utc).isoformat()
+                        except (ValueError, TypeError):
+                            iso = datetime.now(timezone.utc).isoformat()
+                    else:
+                        iso = datetime.now(timezone.utc).isoformat()
+                    # Tieni il più recente fra quello già salvato e questo
+                    prev = state["leaderboard"][wallet_key].get("last_non_sport_trade")
+                    if not prev or iso > prev:
+                        state["leaderboard"][wallet_key]["last_non_sport_trade"] = iso
                 seen_titles.add(title_key)
                 all_trades.append({
                     "usdcSize":         str(size),
