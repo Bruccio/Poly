@@ -1,13 +1,14 @@
 name: 🐋 Whale Tracker v3
 
 on:
-  # 09:00 e 21:00 ora italiana (UTC+2 estate)
-  # 07:00 e 19:00 UTC in estate | 08:00 e 20:00 UTC in inverno
+  # 09:00 e 19:00 ora italiana (UTC+2 estate / UTC+1 inverno)
+  # CEST estate: 07:00 e 17:00 UTC | CET inverno: 08:00 e 18:00 UTC
+  # In inverno il run mattutino sarà alle 08:00 italiane invece che 09:00.
   # Doppio cron per ridondanza: GitHub Actions scheduler può saltare singoli run.
-  # Il secondo scatta 15 min dopo; dedup gestito da whale_tracker.py (last_run_ts)
+  # Il secondo scatta 15 min dopo; dedup gestito da whale_tracker.py (last_run_ts).
   schedule:
-    - cron: "0 7,19 * * *"
-    - cron: "15 7,19 * * *"
+    - cron: "0 7,17 * * *"
+    - cron: "15 7,17 * * *"
 
   # Lancio manuale dal tab "Actions" — nessun parametro richiesto
   workflow_dispatch:
@@ -28,6 +29,7 @@ jobs:
       GMAIL_APP_PASSWORD:  ${{ secrets.GMAIL_APP_PASSWORD }}
       ONLY_NOTIFY_ON_COPY: "false"
       SEND_HEARTBEAT:      "true"
+      SEND_EMAIL:          "false"  # canale email disabilitato (solo Telegram)
       GITHUB_EVENT_NAME:   ${{ github.event_name }}
 
     steps:

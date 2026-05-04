@@ -36,6 +36,10 @@ MAX_WHALES             = int(os.environ.get("MAX_WHALES", "10"))
 CHECK_INTERVAL_MINUTES = int(os.environ.get("CHECK_INTERVAL_MINUTES", "30"))
 ONLY_NOTIFY_ON_COPY    = os.environ.get("ONLY_NOTIFY_ON_COPY", "true").lower() != "false"
 SEND_HEARTBEAT         = os.environ.get("SEND_HEARTBEAT", "true").lower() != "false"
+# Email è OPT-IN: scelta dell'utente di disabilitare il canale email
+# (workflow imposta SEND_EMAIL=false). Il codice email resta intatto:
+# basta SEND_EMAIL=true per riaccenderlo senza altri cambi.
+SEND_EMAIL             = os.environ.get("SEND_EMAIL", "false").lower() == "true"
 MAX_TRADE_AGE_HOURS    = 24   # scarta trade/mercati più vecchi di 24h
 
 # ── STATO PERSISTENTE ────────────────────────────────────────────────────────────
@@ -3078,7 +3082,12 @@ def run():
                     log("Telegram WATCH inviato (silenzioso).", "OK")
         except Exception as e:
             log(f"Telegram: {e}", "ERR")
-        send_email(actionable, state, is_demo)
+        # Email è opt-in via SEND_EMAIL=true. Disabilitata di default
+        # per scelta utente (Telegram è il canale primario).
+        if SEND_EMAIL:
+            send_email(actionable, state, is_demo)
+        else:
+            log("Email canale OFF (SEND_EMAIL=false) — solo Telegram.", "OK")
     else:
         log(f"Nessun COPY/WATCH — notifiche dei segnali soppresse (tutti SKIP).", "OK")
         # ── HEARTBEAT: conferma che il bot sta girando anche senza segnali ───
