@@ -36,7 +36,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.375058+00:00",
+      "last_seen": "2026-05-05T18:17:46.294991+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -50,7 +50,7 @@
       "times_seen": 1,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375104+00:00",
+      "last_seen": "2026-05-05T18:17:46.295027+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -64,7 +64,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639428+00:00",
+      "last_seen": "2026-05-05T18:17:46.333287+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -79,7 +79,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375134+00:00",
+      "last_seen": "2026-05-05T18:17:46.295050+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -93,7 +93,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375160+00:00",
+      "last_seen": "2026-05-05T18:17:46.295066+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -107,7 +107,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375182+00:00",
+      "last_seen": "2026-05-05T18:17:46.295080+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -116,12 +116,12 @@
       "username": "RN1",
       "wallet": "0x2005d16a84ceefa912d4e380cd32e7ff827875ea",
       "total_profit_usd": 8379064.874962986,
-      "total_volume_usd": 503478477.71277475,
+      "total_volume_usd": 505169789.07522815,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915079+00:00",
+      "last_seen": "2026-05-05T18:17:46.530532+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -137,7 +137,7 @@
       "times_seen": 1,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375189+00:00",
+      "last_seen": "2026-05-05T18:17:46.295086+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -151,7 +151,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375202+00:00",
+      "last_seen": "2026-05-05T18:17:46.295091+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -159,13 +159,13 @@
     "0x204f72f35326db932158cba6adff0b9a1da95e14": {
       "username": "swisstony",
       "wallet": "0x204f72f35326db932158cba6adff0b9a1da95e14",
-      "total_profit_usd": 7697497.526295511,
-      "total_volume_usd": 726526171.807893,
+      "total_profit_usd": 7701328.738453151,
+      "total_volume_usd": 727495120.410376,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915119+00:00",
+      "last_seen": "2026-05-05T18:17:46.530568+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -181,7 +181,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375212+00:00",
+      "last_seen": "2026-05-05T18:17:46.295097+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -195,7 +195,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375225+00:00",
+      "last_seen": "2026-05-05T18:17:46.295103+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -209,7 +209,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375236+00:00",
+      "last_seen": "2026-05-05T18:17:46.295109+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -223,7 +223,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375249+00:00",
+      "last_seen": "2026-05-05T18:17:46.295122+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -232,12 +232,12 @@
       "username": "GamblingIsAllYouNeed",
       "wallet": "0x507e52ef684ca2dd91f90a9d26d149dd3288beae",
       "total_profit_usd": 5029435.9101198865,
-      "total_volume_usd": 400107292.669209,
+      "total_volume_usd": 401537686.291085,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915216+00:00",
+      "last_seen": "2026-05-05T18:17:46.530631+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -253,7 +253,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375255+00:00",
+      "last_seen": "2026-05-05T18:17:46.295128+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -267,7 +267,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375328+00:00",
+      "last_seen": "2026-05-05T18:17:46.295178+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -349,7 +349,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.375264+00:00",
+      "last_seen": "2026-05-05T18:17:46.295133+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -363,7 +363,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375275+00:00",
+      "last_seen": "2026-05-05T18:17:46.295140+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -378,7 +378,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375289+00:00",
+      "last_seen": "2026-05-05T18:17:46.295146+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -392,7 +392,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375300+00:00",
+      "last_seen": "2026-05-05T18:17:46.295152+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -407,7 +407,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375309+00:00",
+      "last_seen": "2026-05-05T18:17:46.295158+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -421,7 +421,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375315+00:00",
+      "last_seen": "2026-05-05T18:17:46.295164+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -501,7 +501,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.375358+00:00",
+      "last_seen": "2026-05-05T18:17:46.295198+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -515,7 +515,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375337+00:00",
+      "last_seen": "2026-05-05T18:17:46.295185+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -529,7 +529,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375321+00:00",
+      "last_seen": "2026-05-05T18:17:46.295171+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -545,7 +545,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375364+00:00",
+      "last_seen": "2026-05-05T18:17:46.295204+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -559,7 +559,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375370+00:00",
+      "last_seen": "2026-05-05T18:17:46.295211+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -573,7 +573,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375376+00:00",
+      "last_seen": "2026-05-05T18:17:46.295217+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -587,7 +587,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375349+00:00",
+      "last_seen": "2026-05-05T18:17:46.295191+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -668,7 +668,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.375390+00:00",
+      "last_seen": "2026-05-05T18:17:46.295230+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -682,7 +682,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375423+00:00",
+      "last_seen": "2026-05-05T18:17:46.295251+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -696,7 +696,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375437+00:00",
+      "last_seen": "2026-05-05T18:17:46.295264+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -776,7 +776,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.375450+00:00",
+      "last_seen": "2026-05-05T18:17:46.295276+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -786,7 +786,7 @@
       "username": "geniusMC",
       "wallet": "0x0b9cae2b0dfe7a71c413e0604eaac1c352f87e44",
       "total_profit_usd": 2401020.1816090574,
-      "total_volume_usd": 98394245.75157599,
+      "total_volume_usd": 98394245.75157604,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
@@ -805,7 +805,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.375483+00:00",
+      "last_seen": "2026-05-05T18:17:46.295309+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -819,7 +819,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375464+00:00",
+      "last_seen": "2026-05-05T18:17:46.295290+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -833,7 +833,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375470+00:00",
+      "last_seen": "2026-05-05T18:17:46.295297+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -861,7 +861,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.375476+00:00",
+      "last_seen": "2026-05-05T18:17:46.295302+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -941,7 +941,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.375501+00:00",
+      "last_seen": "2026-05-05T18:17:46.295314+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -982,7 +982,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.375507+00:00",
+      "last_seen": "2026-05-05T18:17:46.295321+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -996,7 +996,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915191+00:00",
+      "last_seen": "2026-05-05T18:17:46.530612+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -1012,7 +1012,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375513+00:00",
+      "last_seen": "2026-05-05T18:17:46.295327+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -1026,7 +1026,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375519+00:00",
+      "last_seen": "2026-05-05T18:17:46.295333+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -1040,7 +1040,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-04T09:24:01.566629+00:00",
+      "last_seen": "2026-05-05T18:18:43.492627+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -1055,7 +1055,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375444+00:00",
+      "last_seen": "2026-05-05T18:17:46.295270+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -1071,7 +1071,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375524+00:00",
+      "last_seen": "2026-05-05T18:17:46.295339+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -1086,7 +1086,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-04T09:24:02.246717+00:00",
+      "last_seen": "2026-05-05T18:18:44.167118+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -1101,64 +1101,64 @@
       "copy_accuracy": null,
       "recent_bets": [
         {
-          "title": "Epstein suicide note released by May 8?",
-          "side": "BUY",
-          "size": 117.81568999999999,
-          "price": 0.98,
-          "conditionId": "0x5e5482b1e2afa7bed0b9a0c3c8ad33a83dd6cc6d649666cdf1977be64c42c82a",
-          "poly_url": "https://polymarket.com/search?q=Epstein%20suicide%20note%20released%20by%20May%208%3F",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Epstein suicide note released by May 31?",
-          "side": "BUY",
-          "size": 26.1725,
-          "price": 0.95,
-          "conditionId": "0x6bf3aa7d5186804e967e1e4737c896778f688e6dafdd0a1b659a4a07bf27d663",
-          "poly_url": "https://polymarket.com/search?q=Epstein%20suicide%20note%20released%20by%20May%2031%3F",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Epstein suicide note released by May 31?",
-          "side": "BUY",
-          "size": 10251.27307,
-          "price": 0.9290385229284956,
-          "conditionId": "0x6bf3aa7d5186804e967e1e4737c896778f688e6dafdd0a1b659a4a07bf27d663",
-          "poly_url": "https://polymarket.com/search?q=Epstein%20suicide%20note%20released%20by%20May%2031%3F",
-          "copy_advice": {
-            "verdict": "WATCH",
-            "reason": "prezzo 92¢: upside molto limitato",
-            "color": "#fcee0c"
-          }
-        },
-        {
-          "title": "Epstein suicide note released by May 31?",
-          "side": "BUY",
-          "size": 924.1595,
-          "price": 0.55,
-          "conditionId": "0x6bf3aa7d5186804e967e1e4737c896778f688e6dafdd0a1b659a4a07bf27d663",
-          "poly_url": "https://polymarket.com/search?q=Epstein%20suicide%20note%20released%20by%20May%2031%3F",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Epstein suicide note released by May 31?",
-          "side": "BUY",
-          "size": 55.616,
+          "title": "Billionaire one-time wealth tax passes in California election 2026?",
+          "side": "SELL",
+          "size": 7.92,
           "price": 0.44,
-          "conditionId": "0x6bf3aa7d5186804e967e1e4737c896778f688e6dafdd0a1b659a4a07bf27d663",
-          "poly_url": "https://polymarket.com/search?q=Epstein%20suicide%20note%20released%20by%20May%2031%3F",
+          "conditionId": "0x9345d5142a67f5541264c96515496affee02580f1c572680759eac9fd2a1588a",
+          "poly_url": "https://polymarket.com/search?q=Billionaire%20one-time%20wealth%20tax%20passes%20in%20California%20election%202026%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Billionaire one-time wealth tax passes in California election 2026?",
+          "side": "SELL",
+          "size": 5.28,
+          "price": 0.44,
+          "conditionId": "0x9345d5142a67f5541264c96515496affee02580f1c572680759eac9fd2a1588a",
+          "poly_url": "https://polymarket.com/search?q=Billionaire%20one-time%20wealth%20tax%20passes%20in%20California%20election%202026%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Billionaire one-time wealth tax passes in California election 2026?",
+          "side": "SELL",
+          "size": 45.0076,
+          "price": 0.44,
+          "conditionId": "0x9345d5142a67f5541264c96515496affee02580f1c572680759eac9fd2a1588a",
+          "poly_url": "https://polymarket.com/search?q=Billionaire%20one-time%20wealth%20tax%20passes%20in%20California%20election%202026%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Billionaire one-time wealth tax passes in California election 2026?",
+          "side": "SELL",
+          "size": 3.08,
+          "price": 0.44,
+          "conditionId": "0x9345d5142a67f5541264c96515496affee02580f1c572680759eac9fd2a1588a",
+          "poly_url": "https://polymarket.com/search?q=Billionaire%20one-time%20wealth%20tax%20passes%20in%20California%20election%202026%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Billionaire one-time wealth tax passes in California election 2026?",
+          "side": "SELL",
+          "size": 3.9248,
+          "price": 0.44,
+          "conditionId": "0x9345d5142a67f5541264c96515496affee02580f1c572680759eac9fd2a1588a",
+          "poly_url": "https://polymarket.com/search?q=Billionaire%20one-time%20wealth%20tax%20passes%20in%20California%20election%202026%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -1166,7 +1166,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:54.165408+00:00",
+      "last_seen": "2026-05-05T18:18:04.643668+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
@@ -1198,12 +1198,12 @@
       "copy_accuracy": null,
       "recent_bets": [
         {
-          "title": "Will XRP dip to $0.80 in May?",
-          "side": "SELL",
-          "size": 17.97269,
-          "price": 0.024750320102432777,
-          "conditionId": "0x42588e23f6ee4b6dbf5bcb44623ef73004a69bc63ef000fe5b2f25d871bce566",
-          "poly_url": "https://polymarket.com/search?q=Will%20XRP%20dip%20to%20%240.80%20in%20May%3F",
+          "title": "Will Ethereum reach $2,400 in May?",
+          "side": "BUY",
+          "size": 206.64526999999998,
+          "price": 0.885,
+          "conditionId": "0xa24ab699db0ef04c103f21426efbf8be968a509dd4b11b7cc50e766ea0ef59eb",
+          "poly_url": "https://polymarket.com/search?q=Will%20Ethereum%20reach%20%242%2C400%20in%20May%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -1211,12 +1211,12 @@
           }
         },
         {
-          "title": "Will Bitcoin reach $90,000 by December 31, 2026?",
+          "title": "Will XRP reach $1.60 in May?",
           "side": "BUY",
-          "size": 1280.4788,
-          "price": 0.69,
-          "conditionId": "0xbb379a14cd03f68c35c279ddbd928a6326f4fd2e21827f8cdaaf59715d6df50e",
-          "poly_url": "https://polymarket.com/search?q=Will%20Bitcoin%20reach%20%2490%2C000%20by%20December%2031%2C%202026%3F",
+          "size": 23.43647,
+          "price": 0.29086877119749543,
+          "conditionId": "0xc781696fa5311698f3fcb1a00137ea887a6b8410a4b5225dade3937dc5af4611",
+          "poly_url": "https://polymarket.com/search?q=Will%20XRP%20reach%20%241.60%20in%20May%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -1224,12 +1224,12 @@
           }
         },
         {
-          "title": "Will Ethereum reach $3,000 in May?",
+          "title": "Will the price of Bitcoin be above $84,000 on May 8?",
           "side": "BUY",
-          "size": 754.08331,
-          "price": 0.08,
-          "conditionId": "0xf61c22712328d3422718545c663375cdca9310425fa67dabac2757bf53a11eec",
-          "poly_url": "https://polymarket.com/search?q=Will%20Ethereum%20reach%20%243%2C000%20in%20May%3F",
+          "size": 48.26334,
+          "price": 0.16403617757278754,
+          "conditionId": "0xbbf6aa3ebaf00df2c1163ac7a884fedf37d39c1066e9e3a4ff76978b6d548d7c",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20price%20of%20Bitcoin%20be%20above%20%2484%2C000%20on%20May%208%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -1237,12 +1237,12 @@
           }
         },
         {
-          "title": "Will Ethereum dip to $2,000 in May?",
+          "title": "Will the price of Bitcoin be above $84,000 on May 8?",
           "side": "BUY",
-          "size": 1463.7184,
-          "price": 0.2,
-          "conditionId": "0xd0ad962d3d86c54c209199ed9602088d09993117dfb7ce09fa7275d66cbaa055",
-          "poly_url": "https://polymarket.com/search?q=Will%20Ethereum%20dip%20to%20%242%2C000%20in%20May%3F",
+          "size": 26.608710000000002,
+          "price": 0.16,
+          "conditionId": "0xbbf6aa3ebaf00df2c1163ac7a884fedf37d39c1066e9e3a4ff76978b6d548d7c",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20price%20of%20Bitcoin%20be%20above%20%2484%2C000%20on%20May%208%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -1250,12 +1250,12 @@
           }
         },
         {
-          "title": "Will Ethereum dip to $2,000 in May?",
+          "title": "Will the price of Bitcoin be above $78,000 on May 8?",
           "side": "BUY",
-          "size": 703.8053,
-          "price": 0.2,
-          "conditionId": "0xd0ad962d3d86c54c209199ed9602088d09993117dfb7ce09fa7275d66cbaa055",
-          "poly_url": "https://polymarket.com/search?q=Will%20Ethereum%20dip%20to%20%242%2C000%20in%20May%3F",
+          "size": 33.91175,
+          "price": 0.1,
+          "conditionId": "0x5bbab0467d105a067720948bb31dd17c7e60086a709b222770df90a6ad00ba6a",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20price%20of%20Bitcoin%20be%20above%20%2478%2C000%20on%20May%208%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -1263,11 +1263,11 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:03.317448+00:00",
+      "last_seen": "2026-05-05T18:18:08.032192+00:00",
       "source_windows": [
         "PNL/ALL"
       ],
-      "last_non_sport_trade": "2026-05-05T07:36:12+00:00"
+      "last_non_sport_trade": "2026-05-05T14:15:52+00:00"
     },
     "0x492442eab586f242b53bda933fd5de859c8a3782": {
       "username": "0x492442EaB586F242B53bDa933fD5dE859c8A3782-1766317541188",
@@ -1278,7 +1278,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915375+00:00",
+      "last_seen": "2026-05-05T18:17:46.530789+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1293,7 +1293,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915164+00:00",
+      "last_seen": "2026-05-05T18:17:46.530619+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -1309,7 +1309,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915177+00:00",
+      "last_seen": "2026-05-05T18:17:46.530644+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1366,7 +1366,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-04T09:24:02.926602+00:00",
+      "last_seen": "2026-05-05T18:18:44.911212+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1396,7 +1396,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639467+00:00",
+      "last_seen": "2026-05-05T18:17:46.333320+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1425,7 +1425,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-04T09:24:03.570466+00:00",
+      "last_seen": "2026-05-05T18:18:45.606013+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1454,7 +1454,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639532+00:00",
+      "last_seen": "2026-05-05T18:17:46.333370+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1470,12 +1470,12 @@
       "copy_accuracy": null,
       "recent_bets": [
         {
-          "title": "Israel x Hamas Ceasefire Phase II by June 30?",
+          "title": "Foreign intervention in Gaza by June 30?",
           "side": "SELL",
-          "size": 48.0,
-          "price": 0.12,
-          "conditionId": "0xdff611d904b9e981ed95cf5962de3057cb15c7b793c695820cfee7a631a806dd",
-          "poly_url": "https://polymarket.com/search?q=Israel%20x%20Hamas%20Ceasefire%20Phase%20II%20by%20June%2030%3F",
+          "size": 0.3421,
+          "price": 0.11,
+          "conditionId": "0x17a33720ef8cad0c92d5cb1ac859241c6fed4974854f20408266e1820062b822",
+          "poly_url": "https://polymarket.com/search?q=Foreign%20intervention%20in%20Gaza%20by%20June%2030%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -1483,12 +1483,12 @@
           }
         },
         {
-          "title": "Will another country leave OPEC in 2026?",
+          "title": "Iran closes its airspace by May 8?",
           "side": "SELL",
-          "size": 12.24,
-          "price": 0.72,
-          "conditionId": "0x3d4a1a3e0581eb60fdd03cc85b8190a9a1cfbda42f1aa9771e39197f8a21f441",
-          "poly_url": "https://polymarket.com/search?q=Will%20another%20country%20leave%20OPEC%20in%202026%3F",
+          "size": 11.1775,
+          "price": 0.85,
+          "conditionId": "0x2135ffcb43ba9103bb6acf7116d2d5aa98bef6d9eb3dc9c85ea00cb79513f3ec",
+          "poly_url": "https://polymarket.com/search?q=Iran%20closes%20its%20airspace%20by%20May%208%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -1496,12 +1496,12 @@
           }
         },
         {
-          "title": "Will another country leave OPEC in 2026?",
+          "title": "Iran closes its airspace by May 8?",
           "side": "SELL",
-          "size": 2.439998,
-          "price": 0.7199998111474357,
-          "conditionId": "0x3d4a1a3e0581eb60fdd03cc85b8190a9a1cfbda42f1aa9771e39197f8a21f441",
-          "poly_url": "https://polymarket.com/search?q=Will%20another%20country%20leave%20OPEC%20in%202026%3F",
+          "size": 1832.7105,
+          "price": 0.85,
+          "conditionId": "0x2135ffcb43ba9103bb6acf7116d2d5aa98bef6d9eb3dc9c85ea00cb79513f3ec",
+          "poly_url": "https://polymarket.com/search?q=Iran%20closes%20its%20airspace%20by%20May%208%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -1509,12 +1509,12 @@
           }
         },
         {
-          "title": "Will another country leave OPEC in 2026?",
+          "title": "Iran closes its airspace by May 8?",
           "side": "SELL",
-          "size": 2.439998,
-          "price": 0.7199998111474357,
-          "conditionId": "0x3d4a1a3e0581eb60fdd03cc85b8190a9a1cfbda42f1aa9771e39197f8a21f441",
-          "poly_url": "https://polymarket.com/search?q=Will%20another%20country%20leave%20OPEC%20in%202026%3F",
+          "size": 749.999999,
+          "price": 0.85,
+          "conditionId": "0x2135ffcb43ba9103bb6acf7116d2d5aa98bef6d9eb3dc9c85ea00cb79513f3ec",
+          "poly_url": "https://polymarket.com/search?q=Iran%20closes%20its%20airspace%20by%20May%208%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -1522,24 +1522,27 @@
           }
         },
         {
-          "title": "Will another country leave OPEC in 2026?",
+          "title": "Iran closes its airspace by May 8?",
           "side": "SELL",
-          "size": 2.439998,
-          "price": 0.7199998111474357,
-          "conditionId": "0x3d4a1a3e0581eb60fdd03cc85b8190a9a1cfbda42f1aa9771e39197f8a21f441",
-          "poly_url": "https://polymarket.com/search?q=Will%20another%20country%20leave%20OPEC%20in%202026%3F",
+          "size": 6199.186,
+          "price": 0.85,
+          "conditionId": "0x2135ffcb43ba9103bb6acf7116d2d5aa98bef6d9eb3dc9c85ea00cb79513f3ec",
+          "poly_url": "https://polymarket.com/search?q=Iran%20closes%20its%20airspace%20by%20May%208%3F",
           "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
+            "verdict": "WATCH",
+            "reason": "size $6k su mercato attivo",
+            "color": "#fcee0c"
           }
         }
       ],
-      "last_seen": "2026-05-04T09:24:04.201076+00:00",
+      "last_seen": "2026-05-05T18:19:12.029481+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK"
-      ]
+      ],
+      "last_non_sport_trade": "2026-05-05T18:16:20+00:00",
+      "n_markets": 29,
+      "profiled": true
     },
     "0x2b3ff45c91540e46fae1e0c72f61f4b049453446": {
       "username": "Mentallyillgambld",
@@ -1564,7 +1567,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-04T09:24:17.412803+00:00",
+      "last_seen": "2026-05-05T18:19:06.901745+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1579,7 +1582,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-04T09:24:07.398555+00:00",
+      "last_seen": "2026-05-05T18:18:46.285222+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1650,7 +1653,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915461+00:00",
+      "last_seen": "2026-05-05T18:17:46.530871+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -1679,7 +1682,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639336+00:00",
+      "last_seen": "2026-05-05T18:17:46.333203+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1693,7 +1696,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-04T09:23:08.343627+00:00",
+      "last_seen": "2026-05-05T18:18:58.715429+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -1765,22 +1768,9 @@
       "copy_accuracy": null,
       "recent_bets": [
         {
-          "title": "Will Pete Hegseth win the 2028 US Presidential Election?",
-          "side": "SELL",
-          "size": 0.92953,
-          "price": 0.007,
-          "conditionId": "0xea649be6ea3447f3c145a173883c68a89faf4edda1f85109b76baa93b3ee7a87",
-          "poly_url": "https://polymarket.com/event/will-pete-hegseth-win-the-2028-us-presidential-election",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
           "title": "Will Rand Paul win the 2028 Republican presidential nomination?",
           "side": "SELL",
-          "size": 0.825,
+          "size": 0.02412,
           "price": 0.012,
           "conditionId": "0xd10bc768ede58b53ed400594240b0a0603134a32dab89ec823a18759cbc180ca",
           "poly_url": "https://polymarket.com/event/will-rand-paul-win-the-2028-republican-presidential-nomination",
@@ -1793,7 +1783,20 @@
         {
           "title": "Will Rand Paul win the 2028 Republican presidential nomination?",
           "side": "SELL",
-          "size": 2.47512,
+          "size": 1.219999,
+          "price": 0.011999990242622887,
+          "conditionId": "0xd10bc768ede58b53ed400594240b0a0603134a32dab89ec823a18759cbc180ca",
+          "poly_url": "https://polymarket.com/event/will-rand-paul-win-the-2028-republican-presidential-nomination",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will Rand Paul win the 2028 Republican presidential nomination?",
+          "side": "SELL",
+          "size": 1.29,
           "price": 0.012,
           "conditionId": "0xd10bc768ede58b53ed400594240b0a0603134a32dab89ec823a18759cbc180ca",
           "poly_url": "https://polymarket.com/event/will-rand-paul-win-the-2028-republican-presidential-nomination",
@@ -1804,12 +1807,12 @@
           }
         },
         {
-          "title": "Will Greg Abbott win the 2028 US Presidential Election?",
+          "title": "Will Rand Paul win the 2028 Republican presidential nomination?",
           "side": "SELL",
-          "size": 0.8173,
-          "price": 0.01,
-          "conditionId": "0x01dffa7abae7e5d9b7fb44b06d537c5ac932e2ca422ab4b53366672f5e2dc7d6",
-          "poly_url": "https://polymarket.com/event/will-greg-abbott-win-the-2028-us-presidential-election",
+          "size": 0.02136,
+          "price": 0.012,
+          "conditionId": "0xd10bc768ede58b53ed400594240b0a0603134a32dab89ec823a18759cbc180ca",
+          "poly_url": "https://polymarket.com/event/will-rand-paul-win-the-2028-republican-presidential-nomination",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -1817,12 +1820,12 @@
           }
         },
         {
-          "title": "Will Pete Hegseth win the 2028 US Presidential Election?",
+          "title": "Will Rand Paul win the 2028 Republican presidential nomination?",
           "side": "SELL",
-          "size": 1.80278,
-          "price": 0.007,
-          "conditionId": "0xea649be6ea3447f3c145a173883c68a89faf4edda1f85109b76baa93b3ee7a87",
-          "poly_url": "https://polymarket.com/event/will-pete-hegseth-win-the-2028-us-presidential-election",
+          "size": 0.01488,
+          "price": 0.012,
+          "conditionId": "0xd10bc768ede58b53ed400594240b0a0603134a32dab89ec823a18759cbc180ca",
+          "poly_url": "https://polymarket.com/event/will-rand-paul-win-the-2028-republican-presidential-nomination",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -1830,7 +1833,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:36.134460+00:00",
+      "last_seen": "2026-05-05T18:18:29.741181+00:00",
       "source_windows": [
         "PNL/WEEK"
       ],
@@ -1845,7 +1848,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915307+00:00",
+      "last_seen": "2026-05-05T18:17:46.530759+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -2006,7 +2009,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:17.478917+00:00",
+      "last_seen": "2026-05-05T18:18:14.132957+00:00",
       "source_windows": [
         "PNL/WEEK"
       ],
@@ -2022,12 +2025,12 @@
       "copy_accuracy": null,
       "recent_bets": [
         {
-          "title": "Bitcoin Up or Down - May 4, 3:05AM-3:10AM ET",
+          "title": "Bitcoin Up or Down - May 5, 2:15PM-2:20PM ET",
           "side": "BUY",
-          "size": 6.0,
-          "price": 0.2,
-          "conditionId": "0x49ac2b9c1730d01e1473243ad2034b948d4f3ca416c37a4c6cc0ed53f8617377",
-          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%204%2C%203%3A05AM-3%3A10AM%20ET",
+          "size": 1.45,
+          "price": 0.29,
+          "conditionId": "0x27e1a2900e8ca28ea67a743491690534e27b22c864838a404fb88c30c7b0b45e",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%205%2C%202%3A15PM-2%3A20PM%20ET",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -2035,12 +2038,12 @@
           }
         },
         {
-          "title": "Bitcoin Up or Down - May 4, 3:05AM-3:10AM ET",
+          "title": "Bitcoin Up or Down - May 5, 2:15PM-2:20PM ET",
           "side": "BUY",
-          "size": 6.0,
-          "price": 0.2,
-          "conditionId": "0x49ac2b9c1730d01e1473243ad2034b948d4f3ca416c37a4c6cc0ed53f8617377",
-          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%204%2C%203%3A05AM-3%3A10AM%20ET",
+          "size": 1.45,
+          "price": 0.29,
+          "conditionId": "0x27e1a2900e8ca28ea67a743491690534e27b22c864838a404fb88c30c7b0b45e",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%205%2C%202%3A15PM-2%3A20PM%20ET",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -2048,12 +2051,12 @@
           }
         },
         {
-          "title": "Bitcoin Up or Down - May 4, 3:05AM-3:10AM ET",
+          "title": "Bitcoin Up or Down - May 5, 2:15PM-2:20PM ET",
           "side": "BUY",
-          "size": 6.048,
-          "price": 0.32,
-          "conditionId": "0x49ac2b9c1730d01e1473243ad2034b948d4f3ca416c37a4c6cc0ed53f8617377",
-          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%204%2C%203%3A05AM-3%3A10AM%20ET",
+          "size": 0.5365,
+          "price": 0.29,
+          "conditionId": "0x27e1a2900e8ca28ea67a743491690534e27b22c864838a404fb88c30c7b0b45e",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%205%2C%202%3A15PM-2%3A20PM%20ET",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -2061,12 +2064,12 @@
           }
         },
         {
-          "title": "Bitcoin Up or Down - May 4, 3:05AM-3:10AM ET",
+          "title": "Bitcoin Up or Down - May 5, 2:15PM-2:20PM ET",
           "side": "BUY",
-          "size": 0.95,
-          "price": 0.19,
-          "conditionId": "0x49ac2b9c1730d01e1473243ad2034b948d4f3ca416c37a4c6cc0ed53f8617377",
-          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%204%2C%203%3A05AM-3%3A10AM%20ET",
+          "size": 0.9135,
+          "price": 0.29,
+          "conditionId": "0x27e1a2900e8ca28ea67a743491690534e27b22c864838a404fb88c30c7b0b45e",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%205%2C%202%3A15PM-2%3A20PM%20ET",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -2074,12 +2077,12 @@
           }
         },
         {
-          "title": "Bitcoin Up or Down - May 4, 3:05AM-3:10AM ET",
+          "title": "Bitcoin Up or Down - May 5, 2:15PM-2:20PM ET",
           "side": "BUY",
-          "size": 0.6,
-          "price": 0.12,
-          "conditionId": "0x49ac2b9c1730d01e1473243ad2034b948d4f3ca416c37a4c6cc0ed53f8617377",
-          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%204%2C%203%3A05AM-3%3A10AM%20ET",
+          "size": 3.8,
+          "price": 0.76,
+          "conditionId": "0x27e1a2900e8ca28ea67a743491690534e27b22c864838a404fb88c30c7b0b45e",
+          "poly_url": "https://polymarket.com/search?q=Bitcoin%20Up%20or%20Down%20-%20May%205%2C%202%3A15PM-2%3A20PM%20ET",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -2087,7 +2090,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-04T09:24:12.065762+00:00",
+      "last_seen": "2026-05-05T18:18:59.434339+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -2262,7 +2265,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.639545+00:00",
+      "last_seen": "2026-05-05T18:17:46.333376+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -2342,7 +2345,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.915184+00:00",
+      "last_seen": "2026-05-05T18:17:46.530651+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2370,7 +2373,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915134+00:00",
+      "last_seen": "2026-05-05T18:17:46.530583+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2384,7 +2387,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915197+00:00",
+      "last_seen": "2026-05-05T18:17:46.530625+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2492,7 +2495,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915127+00:00",
+      "last_seen": "2026-05-05T18:17:46.530576+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -2587,7 +2590,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.915204+00:00",
+      "last_seen": "2026-05-05T18:17:46.530662+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2615,7 +2618,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375531+00:00",
+      "last_seen": "2026-05-05T18:17:46.295346+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -2697,7 +2700,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.915157+00:00",
+      "last_seen": "2026-05-05T18:17:46.530605+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -2793,7 +2796,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:46.112685+00:00",
+      "last_seen": "2026-05-05T18:18:36.547735+00:00",
       "source_windows": [
         "VOL/WEEK"
       ],
@@ -2808,7 +2811,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915408+00:00",
+      "last_seen": "2026-05-05T18:17:46.530784+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -2836,7 +2839,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915223+00:00",
+      "last_seen": "2026-05-05T18:17:46.530669+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -2851,7 +2854,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915398+00:00",
+      "last_seen": "2026-05-05T18:17:46.530838+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -2946,7 +2949,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-04T09:23:08.343548+00:00",
+      "last_seen": "2026-05-05T18:18:46.973779+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -3057,7 +3060,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915298+00:00",
+      "last_seen": "2026-05-05T18:17:46.530708+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -3071,7 +3074,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915235+00:00",
+      "last_seen": "2026-05-05T18:17:46.530689+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -3138,7 +3141,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.915340+00:00",
+      "last_seen": "2026-05-05T18:17:46.530726+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -3205,7 +3208,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.639552+00:00",
+      "last_seen": "2026-05-05T18:17:46.333382+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -3260,7 +3263,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.915318+00:00",
+      "last_seen": "2026-05-05T18:17:46.530714+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -3369,7 +3372,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915435+00:00",
+      "last_seen": "2026-05-05T18:17:46.530909+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -3559,7 +3562,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915349+00:00",
+      "last_seen": "2026-05-05T18:17:46.530695+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -3573,7 +3576,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915329+00:00",
+      "last_seen": "2026-05-05T18:17:46.530720+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -3582,13 +3585,13 @@
     "0x9f2fe025f84839ca81dd8e0338892605702d2ca8": {
       "username": "surfandturf",
       "wallet": "0x9f2fe025f84839ca81dd8e0338892605702d2ca8",
-      "total_profit_usd": 2354098.92486299,
-      "total_volume_usd": 33664177.46771599,
+      "total_profit_usd": 2355300.6779927304,
+      "total_volume_usd": 33890948.087253004,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915448+00:00",
+      "last_seen": "2026-05-05T18:17:46.530845+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -3632,7 +3635,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-04T09:24:14.754404+00:00",
+      "last_seen": "2026-05-05T18:19:01.939741+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -3756,7 +3759,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.915369+00:00",
+      "last_seen": "2026-05-05T18:17:46.530753+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -3771,9 +3774,48 @@
       "copy_accuracy": null,
       "recent_bets": [
         {
+          "title": "Will Geraldo Alckmin finish in second place in the first round of the 2026 Brazilian presidential election?",
+          "side": "SELL",
+          "size": 2.0734,
+          "price": 0.007,
+          "conditionId": "0xce4c63006ae8c2690d9da01aff225c4ff9258a9722a86ffad4bb7964d20d0bc3",
+          "poly_url": "https://polymarket.com/search?q=Will%20Geraldo%20Alckmin%20finish%20in%20second%20place%20in%20the%20first%20round%20of%20the%202026%20Brazi",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will there be no change in Fed interest rates after the June 2026 meeting?",
+          "side": "SELL",
+          "size": 16.9536,
+          "price": 0.96,
+          "conditionId": "0xde04b189b3f19eaccda02529a3ea67abfc46bff5c0c8fc42d8a2d0ed7b8f0d41",
+          "poly_url": "https://polymarket.com/search?q=Will%20there%20be%20no%20change%20in%20Fed%20interest%20rates%20after%20the%20June%202026%20meeting%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the Iranian regime fall by May 31?",
+          "side": "BUY",
+          "size": 1449.0,
+          "price": 0.966,
+          "conditionId": "0x789c947a9415600d30d56a4aae88d4111996679b0caed166d0c96242fdce92a2",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20May%2031%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
           "title": "Will Kamala Harris win the California Governor Election in 2026?",
           "side": "SELL",
-          "size": 0.0117,
+          "size": 0.8937,
           "price": 0.003,
           "conditionId": "0x6d6b9d5f81726194e8e5969bc5fd9ad5aefcf9ebe836f44d734e3fe18c15a805",
           "poly_url": "https://polymarket.com/event/will-kamala-harris-win-the-california-governor-election-in-2026",
@@ -3786,49 +3828,10 @@
         {
           "title": "Will Kamala Harris win the California Governor Election in 2026?",
           "side": "SELL",
-          "size": 0.26277,
+          "size": 0.27069,
           "price": 0.003,
           "conditionId": "0x6d6b9d5f81726194e8e5969bc5fd9ad5aefcf9ebe836f44d734e3fe18c15a805",
           "poly_url": "https://polymarket.com/event/will-kamala-harris-win-the-california-governor-election-in-2026",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Will Moonshot have the best AI model at the end of June 2026?",
-          "side": "SELL",
-          "size": 0.45255,
-          "price": 0.003,
-          "conditionId": "0x32b8fa5904645a7d096a559783121eb6c0db71487c47db0bcab99a92d5abb0dd",
-          "poly_url": "https://polymarket.com/event/will-moonshot-have-the-best-ai-model-at-the-end-of-june-2026",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Will Butch Ware win the California Governor Election in 2026?",
-          "side": "SELL",
-          "size": 0.0009000000000000001,
-          "price": 0.001,
-          "conditionId": "0xad80f8a007ce2dad75754998cc72f162b2b2eef2c6b1017b47add4f01974a5e8",
-          "poly_url": "https://polymarket.com/event/will-butch-ware-win-the-california-governor-election-in-2026",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Will Antonio Villaraigosa win the California Governor Election in 2026?",
-          "side": "SELL",
-          "size": 0.0006,
-          "price": 0.001,
-          "conditionId": "0x555d4228698fed95802ef627c79ca8a16ff13680a7eef759311827f2c355fcf0",
-          "poly_url": "https://polymarket.com/event/will-antonio-villaraigosa-win-the-california-governor-election-in-2026",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -3836,11 +3839,11 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:25.637348+00:00",
+      "last_seen": "2026-05-05T18:18:24.894344+00:00",
       "source_windows": [
         "VOL/WEEK"
       ],
-      "last_non_sport_trade": "2026-05-04T10:18:16+00:00"
+      "last_non_sport_trade": "2026-05-05T12:08:36+00:00"
     },
     "0x7058c8a7cec79010b1927d05837dcf25f1a53505": {
       "username": "deetown",
@@ -3851,7 +3854,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-04T09:24:08.078426+00:00",
+      "last_seen": "2026-05-05T18:18:47.674717+00:00",
       "source_windows": [
         "PNL/ALL"
       ]
@@ -3961,7 +3964,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-04T09:24:15.444212+00:00",
+      "last_seen": "2026-05-05T18:19:02.666569+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -4208,12 +4211,12 @@
       "username": "cigarettes",
       "wallet": "0xd218e474776403a330142299f7796e8ba32eb5c9",
       "total_profit_usd": 39007.45859947579,
-      "total_volume_usd": 1439280.6407080002,
+      "total_volume_usd": 1612459.1684720002,
       "trust_score": 90,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915475+00:00",
+      "last_seen": "2026-05-05T18:17:46.530897+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -4368,7 +4371,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.375383+00:00",
+      "last_seen": "2026-05-05T18:17:46.295223+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -4472,6 +4475,58 @@
         {
           "title": "Will the Iranian regime fall by May 31?",
           "side": "BUY",
+          "size": 4387.50439,
+          "price": 0.032620125322121094,
+          "conditionId": "0x789c947a9415600d30d56a4aae88d4111996679b0caed166d0c96242fdce92a2",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20May%2031%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the Iranian regime fall by May 31?",
+          "side": "BUY",
+          "size": 1130.78869,
+          "price": 0.026091868153065825,
+          "conditionId": "0x789c947a9415600d30d56a4aae88d4111996679b0caed166d0c96242fdce92a2",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20May%2031%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the Iranian regime fall by May 31?",
+          "side": "BUY",
+          "size": 1156.21173,
+          "price": 0.028215205747819824,
+          "conditionId": "0x789c947a9415600d30d56a4aae88d4111996679b0caed166d0c96242fdce92a2",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20May%2031%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the Iranian regime fall by May 31?",
+          "side": "BUY",
+          "size": 726.4782,
+          "price": 0.036,
+          "conditionId": "0x789c947a9415600d30d56a4aae88d4111996679b0caed166d0c96242fdce92a2",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20May%2031%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the Iranian regime fall by May 31?",
+          "side": "BUY",
           "size": 915.33066,
           "price": 0.037589335991070214,
           "conditionId": "0x789c947a9415600d30d56a4aae88d4111996679b0caed166d0c96242fdce92a2",
@@ -4481,61 +4536,9 @@
             "reason": "size troppo bassa (<$5k)",
             "color": "#777"
           }
-        },
-        {
-          "title": "Will the Iranian regime fall by May 31?",
-          "side": "BUY",
-          "size": 4084.66934,
-          "price": 0.03274222886257916,
-          "conditionId": "0x789c947a9415600d30d56a4aae88d4111996679b0caed166d0c96242fdce92a2",
-          "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20May%2031%3F",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Will the Iranian regime fall by May 31?",
-          "side": "BUY",
-          "size": 3998.80286,
-          "price": 0.037990499531769424,
-          "conditionId": "0x789c947a9415600d30d56a4aae88d4111996679b0caed166d0c96242fdce92a2",
-          "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20May%2031%3F",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Will the Iranian regime fall by May 31?",
-          "side": "BUY",
-          "size": 3489.85833,
-          "price": 0.03343066615078532,
-          "conditionId": "0x789c947a9415600d30d56a4aae88d4111996679b0caed166d0c96242fdce92a2",
-          "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20May%2031%3F",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Will the Iranian regime fall by May 31?",
-          "side": "BUY",
-          "size": 1698.29769,
-          "price": 0.04006111922884209,
-          "conditionId": "0x789c947a9415600d30d56a4aae88d4111996679b0caed166d0c96242fdce92a2",
-          "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20May%2031%3F",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
         }
       ],
-      "last_seen": "2026-05-05T09:13:53.050067+00:00",
+      "last_seen": "2026-05-05T18:18:42.784605+00:00",
       "source_windows": [
         "VOL/WEEK"
       ],
@@ -4678,7 +4681,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-04T09:24:16.092473+00:00",
+      "last_seen": "2026-05-05T18:19:03.356056+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -5159,35 +5162,9 @@
       "copy_accuracy": null,
       "recent_bets": [
         {
-          "title": "Tesla and SpaceX merger officially announced by June 30?",
-          "side": "BUY",
-          "size": 164.9,
-          "price": 0.97,
-          "conditionId": "0xa8e3a62f9261f3f12287d41bea9ca4efea4d221aae79bc0cec695bb1882bb7b3",
-          "poly_url": "https://polymarket.com/search?q=Tesla%20and%20SpaceX%20merger%20officially%20announced%20by%20June%2030%3F",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Will Base launch a token by June 30, 2026?",
-          "side": "BUY",
-          "size": 151.353626,
-          "price": 0.9700000060883907,
-          "conditionId": "0x9873d0448faebb53d0040a958b40bfd17960f57a164f69a36f2f400e945c36c1",
-          "poly_url": "https://polymarket.com/search?q=Will%20Base%20launch%20a%20token%20by%20June%2030%2C%202026%3F",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
           "title": "Will the next Prime Minister of Hungary be Péter Magyar?",
           "side": "BUY",
-          "size": 67.37726,
+          "size": 666.61414,
           "price": 0.997,
           "conditionId": "0x1480b819d03d4b6388d70e848b0384adf38c38d955cb783cdbcf6d4a436dee14",
           "poly_url": "https://polymarket.com/event/will-the-next-prime-minister-of-hungary-be-pter-magyar",
@@ -5198,12 +5175,38 @@
           }
         },
         {
-          "title": "Will the next Prime Minister of Hungary be Péter Magyar?",
+          "title": "Will Kanye West visit Israel by June 30?",
           "side": "BUY",
-          "size": 35.60287,
-          "price": 0.997,
-          "conditionId": "0x1480b819d03d4b6388d70e848b0384adf38c38d955cb783cdbcf6d4a436dee14",
-          "poly_url": "https://polymarket.com/event/will-the-next-prime-minister-of-hungary-be-pter-magyar",
+          "size": 166.176,
+          "price": 0.9,
+          "conditionId": "0xcb8a519f4d8c10c3e60c5c604cac30f38341e4b35f5bcce8356c0ea4698f8952",
+          "poly_url": "https://polymarket.com/search?q=Will%20Kanye%20West%20visit%20Israel%20by%20June%2030%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will Kanye West visit Israel by June 30?",
+          "side": "BUY",
+          "size": 52.2,
+          "price": 0.9,
+          "conditionId": "0xcb8a519f4d8c10c3e60c5c604cac30f38341e4b35f5bcce8356c0ea4698f8952",
+          "poly_url": "https://polymarket.com/search?q=Will%20Kanye%20West%20visit%20Israel%20by%20June%2030%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will SpaceX IPO by May 31, 2026?",
+          "side": "BUY",
+          "size": 2042.16012,
+          "price": 0.99,
+          "conditionId": "0xe05f83ed91d2dcf7e744f86bbda236525eb9441bbf039c858f5438d9dc3e7431",
+          "poly_url": "https://polymarket.com/search?q=Will%20SpaceX%20IPO%20by%20May%2031%2C%202026%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -5213,7 +5216,7 @@
         {
           "title": "Will the next Prime Minister of Hungary be Péter Magyar?",
           "side": "BUY",
-          "size": 1.994,
+          "size": 749.13583,
           "price": 0.997,
           "conditionId": "0x1480b819d03d4b6388d70e848b0384adf38c38d955cb783cdbcf6d4a436dee14",
           "poly_url": "https://polymarket.com/event/will-the-next-prime-minister-of-hungary-be-pter-magyar",
@@ -5224,11 +5227,11 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:11.974892+00:00",
+      "last_seen": "2026-05-05T18:18:16.949058+00:00",
       "source_windows": [
         "VOL/WEEK"
       ],
-      "last_non_sport_trade": "2026-05-05T05:29:24+00:00"
+      "last_non_sport_trade": "2026-05-05T17:14:04+00:00"
     },
     "0xfbf3d501e88815464642d0e913f15379c3eeb218": {
       "username": "VPenguin",
@@ -5239,7 +5242,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915422+00:00",
+      "last_seen": "2026-05-05T18:17:46.530853+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -5285,7 +5288,7 @@
         {
           "title": "US x Iran permanent peace deal by May 15, 2026?",
           "side": "SELL",
-          "size": 57.6,
+          "size": 2.87136,
           "price": 0.036,
           "conditionId": "0x1db02ba50e2312a62b4104de691cc7a76065d8d0da40decf93eb1b914a3217b7",
           "poly_url": "https://polymarket.com/search?q=US%20x%20Iran%20permanent%20peace%20deal%20by%20May%2015%2C%202026%3F",
@@ -5297,9 +5300,9 @@
         },
         {
           "title": "US x Iran permanent peace deal by May 15, 2026?",
-          "side": "BUY",
-          "size": 29.6786,
-          "price": 0.035,
+          "side": "SELL",
+          "size": 1.152,
+          "price": 0.036,
           "conditionId": "0x1db02ba50e2312a62b4104de691cc7a76065d8d0da40decf93eb1b914a3217b7",
           "poly_url": "https://polymarket.com/search?q=US%20x%20Iran%20permanent%20peace%20deal%20by%20May%2015%2C%202026%3F",
           "copy_advice": {
@@ -5310,9 +5313,9 @@
         },
         {
           "title": "US x Iran permanent peace deal by May 15, 2026?",
-          "side": "BUY",
-          "size": 2.31,
-          "price": 0.035,
+          "side": "SELL",
+          "size": 0.37368,
+          "price": 0.036,
           "conditionId": "0x1db02ba50e2312a62b4104de691cc7a76065d8d0da40decf93eb1b914a3217b7",
           "poly_url": "https://polymarket.com/search?q=US%20x%20Iran%20permanent%20peace%20deal%20by%20May%2015%2C%202026%3F",
           "copy_advice": {
@@ -5323,9 +5326,9 @@
         },
         {
           "title": "US x Iran permanent peace deal by May 15, 2026?",
-          "side": "BUY",
-          "size": 0.036269,
-          "price": 0.03500000482505788,
+          "side": "SELL",
+          "size": 0.72,
+          "price": 0.036,
           "conditionId": "0x1db02ba50e2312a62b4104de691cc7a76065d8d0da40decf93eb1b914a3217b7",
           "poly_url": "https://polymarket.com/search?q=US%20x%20Iran%20permanent%20peace%20deal%20by%20May%2015%2C%202026%3F",
           "copy_advice": {
@@ -5336,9 +5339,9 @@
         },
         {
           "title": "US x Iran permanent peace deal by May 15, 2026?",
-          "side": "BUY",
-          "size": 2.275,
-          "price": 0.035,
+          "side": "SELL",
+          "size": 1.188,
+          "price": 0.036,
           "conditionId": "0x1db02ba50e2312a62b4104de691cc7a76065d8d0da40decf93eb1b914a3217b7",
           "poly_url": "https://polymarket.com/search?q=US%20x%20Iran%20permanent%20peace%20deal%20by%20May%2015%2C%202026%3F",
           "copy_advice": {
@@ -5348,7 +5351,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:38.613469+00:00",
+      "last_seen": "2026-05-05T18:18:32.800646+00:00",
       "source_windows": [
         "VOL/WEEK"
       ],
@@ -5363,7 +5366,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915170+00:00",
+      "last_seen": "2026-05-05T18:17:46.530638+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -5372,13 +5375,13 @@
     "0x9495425feeb0c250accb89275c97587011b19a27": {
       "username": "LaBradfordSmith22",
       "wallet": "0x9495425feeb0c250accb89275c97587011b19a27",
-      "total_profit_usd": 2620813.2145148786,
-      "total_volume_usd": 35529966.35042,
+      "total_profit_usd": 2622643.4305475582,
+      "total_volume_usd": 35728338.470157,
       "trust_score": 100,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915142+00:00",
+      "last_seen": "2026-05-05T18:17:46.530591+00:00",
       "source_windows": [
         "PNL/ALL",
         "PNL/WEEK",
@@ -5437,7 +5440,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915209+00:00",
+      "last_seen": "2026-05-05T18:17:46.530656+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -5500,7 +5503,7 @@
           "poly_url": "https://polymarket.com/search?q=Strait%20of%20Hormuz%20traffic%20returns%20to%20normal%20by%20end%20of%20May%3F",
           "copy_advice": {
             "verdict": "WATCH",
-            "reason": "trust 92, size medio — tieni d'occhio",
+            "reason": "trust 90, size medio — tieni d'occhio",
             "color": "#fcee0c"
           }
         },
@@ -5518,7 +5521,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:33.439638+00:00",
+      "last_seen": "2026-05-05T18:18:30.458012+00:00",
       "source_windows": [
         "VOL/WEEK"
       ],
@@ -5549,7 +5552,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.915288+00:00",
+      "last_seen": "2026-05-05T18:17:46.530739+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -5812,7 +5815,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-02T19:56:19.087699+00:00",
+      "last_seen": "2026-05-05T18:17:46.530890+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -5841,7 +5844,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915388+00:00",
+      "last_seen": "2026-05-05T18:17:46.530825+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -5884,7 +5887,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915230+00:00",
+      "last_seen": "2026-05-05T18:17:46.530682+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -5944,20 +5947,7 @@
         {
           "title": "Will the U.S. invade Iran before 2027?",
           "side": "BUY",
-          "size": 2.571428,
-          "price": 0.30000002333334036,
-          "conditionId": "0x5db999fad322cea2914535aae5517060c3f80ad6d8c0231cde2124a434d16846",
-          "poly_url": "https://polymarket.com/search?q=Will%20the%20U.S.%20invade%20Iran%20before%202027%3F",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Will the U.S. invade Iran before 2027?",
-          "side": "BUY",
-          "size": 4.272,
+          "size": 2.349,
           "price": 0.3,
           "conditionId": "0x5db999fad322cea2914535aae5517060c3f80ad6d8c0231cde2124a434d16846",
           "poly_url": "https://polymarket.com/search?q=Will%20the%20U.S.%20invade%20Iran%20before%202027%3F",
@@ -5970,20 +5960,7 @@
         {
           "title": "Will the U.S. invade Iran before 2027?",
           "side": "BUY",
-          "size": 4.285714,
-          "price": 0.3000000070000006,
-          "conditionId": "0x5db999fad322cea2914535aae5517060c3f80ad6d8c0231cde2124a434d16846",
-          "poly_url": "https://polymarket.com/search?q=Will%20the%20U.S.%20invade%20Iran%20before%202027%3F",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Will the U.S. invade Iran before 2027?",
-          "side": "BUY",
-          "size": 35.898,
+          "size": 0.428571,
           "price": 0.3,
           "conditionId": "0x5db999fad322cea2914535aae5517060c3f80ad6d8c0231cde2124a434d16846",
           "poly_url": "https://polymarket.com/search?q=Will%20the%20U.S.%20invade%20Iran%20before%202027%3F",
@@ -5996,8 +5973,34 @@
         {
           "title": "Will the U.S. invade Iran before 2027?",
           "side": "BUY",
-          "size": 2.142857,
-          "price": 0.30000002800000447,
+          "size": 0.471428,
+          "price": 0.3000001272729355,
+          "conditionId": "0x5db999fad322cea2914535aae5517060c3f80ad6d8c0231cde2124a434d16846",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20U.S.%20invade%20Iran%20before%202027%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the U.S. invade Iran before 2027?",
+          "side": "BUY",
+          "size": 0.432857,
+          "price": 0.3000001386139712,
+          "conditionId": "0x5db999fad322cea2914535aae5517060c3f80ad6d8c0231cde2124a434d16846",
+          "poly_url": "https://polymarket.com/search?q=Will%20the%20U.S.%20invade%20Iran%20before%202027%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will the U.S. invade Iran before 2027?",
+          "side": "BUY",
+          "size": 1.5,
+          "price": 0.3,
           "conditionId": "0x5db999fad322cea2914535aae5517060c3f80ad6d8c0231cde2124a434d16846",
           "poly_url": "https://polymarket.com/search?q=Will%20the%20U.S.%20invade%20Iran%20before%202027%3F",
           "copy_advice": {
@@ -6007,7 +6010,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:21.259344+00:00",
+      "last_seen": "2026-05-05T18:18:22.477454+00:00",
       "source_windows": [
         "VOL/WEEK"
       ],
@@ -6274,12 +6277,12 @@
       "copy_accuracy": null,
       "recent_bets": [
         {
-          "title": "Will Kevin Hassett be confirmed as Fed Chair?",
-          "side": "SELL",
-          "size": 0.854,
-          "price": 0.001,
-          "conditionId": "0xa8ff8edde7ae952227d2dfa0378d8dd83bcff4b4385919fc39bbf9fdbd3bda7a",
-          "poly_url": "https://polymarket.com/search?q=Will%20Kevin%20Hassett%20be%20confirmed%20as%20Fed%20Chair%3F",
+          "title": "Will Donald Trump announce that the United States blockade of the Strait of Hormuz has been lifted by May 15, 2026?",
+          "side": "BUY",
+          "size": 0.0014,
+          "price": 0.07,
+          "conditionId": "0x36f665053a7ca5c102f2db15cfc49b1b9f38fa820a5f2bb4bde87bf9fbd9a2ab",
+          "poly_url": "https://polymarket.com/search?q=Will%20Donald%20Trump%20announce%20that%20the%20United%20States%20blockade%20of%20the%20Strait%20of%20Horm",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -6287,12 +6290,12 @@
           }
         },
         {
-          "title": "Will Kevin Hassett be confirmed as Fed Chair?",
-          "side": "SELL",
-          "size": 0.479,
-          "price": 0.001,
-          "conditionId": "0xa8ff8edde7ae952227d2dfa0378d8dd83bcff4b4385919fc39bbf9fdbd3bda7a",
-          "poly_url": "https://polymarket.com/search?q=Will%20Kevin%20Hassett%20be%20confirmed%20as%20Fed%20Chair%3F",
+          "title": "Will Donald Trump announce that the United States blockade of the Strait of Hormuz has been lifted by May 15, 2026?",
+          "side": "BUY",
+          "size": 0.3787,
+          "price": 0.07,
+          "conditionId": "0x36f665053a7ca5c102f2db15cfc49b1b9f38fa820a5f2bb4bde87bf9fbd9a2ab",
+          "poly_url": "https://polymarket.com/search?q=Will%20Donald%20Trump%20announce%20that%20the%20United%20States%20blockade%20of%20the%20Strait%20of%20Horm",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -6300,12 +6303,12 @@
           }
         },
         {
-          "title": "Iran closes its airspace by May 8?",
-          "side": "SELL",
-          "size": 371.8226,
-          "price": 0.71772111338455,
-          "conditionId": "0x2135ffcb43ba9103bb6acf7116d2d5aa98bef6d9eb3dc9c85ea00cb79513f3ec",
-          "poly_url": "https://polymarket.com/search?q=Iran%20closes%20its%20airspace%20by%20May%208%3F",
+          "title": "Will Donald Trump announce that the United States blockade of the Strait of Hormuz has been lifted by May 15, 2026?",
+          "side": "BUY",
+          "size": 1.05,
+          "price": 0.07,
+          "conditionId": "0x36f665053a7ca5c102f2db15cfc49b1b9f38fa820a5f2bb4bde87bf9fbd9a2ab",
+          "poly_url": "https://polymarket.com/search?q=Will%20Donald%20Trump%20announce%20that%20the%20United%20States%20blockade%20of%20the%20Strait%20of%20Horm",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -6313,12 +6316,12 @@
           }
         },
         {
-          "title": "Iran closes its airspace by May 8?",
-          "side": "SELL",
-          "size": 2876.0183,
-          "price": 0.71,
-          "conditionId": "0x2135ffcb43ba9103bb6acf7116d2d5aa98bef6d9eb3dc9c85ea00cb79513f3ec",
-          "poly_url": "https://polymarket.com/search?q=Iran%20closes%20its%20airspace%20by%20May%208%3F",
+          "title": "Will Donald Trump announce that the United States blockade of the Strait of Hormuz has been lifted by May 15, 2026?",
+          "side": "BUY",
+          "size": 0.0007,
+          "price": 0.07,
+          "conditionId": "0x36f665053a7ca5c102f2db15cfc49b1b9f38fa820a5f2bb4bde87bf9fbd9a2ab",
+          "poly_url": "https://polymarket.com/search?q=Will%20Donald%20Trump%20announce%20that%20the%20United%20States%20blockade%20of%20the%20Strait%20of%20Horm",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -6326,12 +6329,12 @@
           }
         },
         {
-          "title": "Iran closes its airspace by May 8?",
-          "side": "SELL",
-          "size": 24.7648,
-          "price": 0.71,
-          "conditionId": "0x2135ffcb43ba9103bb6acf7116d2d5aa98bef6d9eb3dc9c85ea00cb79513f3ec",
-          "poly_url": "https://polymarket.com/search?q=Iran%20closes%20its%20airspace%20by%20May%208%3F",
+          "title": "Will Donald Trump announce that the United States blockade of the Strait of Hormuz has been lifted by May 15, 2026?",
+          "side": "BUY",
+          "size": 0.021,
+          "price": 0.07,
+          "conditionId": "0x36f665053a7ca5c102f2db15cfc49b1b9f38fa820a5f2bb4bde87bf9fbd9a2ab",
+          "poly_url": "https://polymarket.com/search?q=Will%20Donald%20Trump%20announce%20that%20the%20United%20States%20blockade%20of%20the%20Strait%20of%20Horm",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -6339,7 +6342,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:14.470533+00:00",
+      "last_seen": "2026-05-05T18:18:19.464678+00:00",
       "source_windows": [
         "VOL/WEEK"
       ],
@@ -6438,7 +6441,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915108+00:00",
+      "last_seen": "2026-05-05T18:17:46.530558+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -6640,7 +6643,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:14:00.876812+00:00",
+      "last_seen": "2026-05-05T18:19:04.108208+00:00",
       "source_windows": [
         "PNL/WEEK"
       ],
@@ -6829,7 +6832,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:43.451230+00:00",
+      "last_seen": "2026-05-05T18:18:37.237330+00:00",
       "source_windows": [
         "PNL/WEEK"
       ],
@@ -6912,7 +6915,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:46.875374+00:00",
+      "last_seen": "2026-05-05T18:18:38.656757+00:00",
       "source_windows": [
         "PNL/WEEK"
       ],
@@ -7577,7 +7580,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915243+00:00",
+      "last_seen": "2026-05-05T18:17:46.530675+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -7821,13 +7824,13 @@
     "0x9770ca178764cdca1271934ad613ad7ab4a10ff5": {
       "username": "SombrLIl",
       "wallet": "0x9770ca178764cdca1271934ad613ad7ab4a10ff5",
-      "total_profit_usd": 59684.994202770686,
+      "total_profit_usd": 62304.88569839568,
       "total_volume_usd": 1242511.648838,
       "trust_score": 90,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639585+00:00",
+      "last_seen": "2026-05-05T18:17:46.333408+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -7836,12 +7839,12 @@
       "username": "everydaymortgage",
       "wallet": "0x91eee6b7cea1916214daebec3b92b7513079c5b8",
       "total_profit_usd": 20695.521723636746,
-      "total_volume_usd": 7117119.183699001,
+      "total_volume_usd": 7412997.973699001,
       "trust_score": 89,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915150+00:00",
+      "last_seen": "2026-05-05T18:17:46.530599+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -8014,7 +8017,7 @@
         {
           "title": "Will Judy Shelton be confirmed as Fed Chair?",
           "side": "BUY",
-          "size": 1530.04605,
+          "size": 102.88043,
           "price": 0.997,
           "conditionId": "0x14fd8ab261d14215058b77a9541a5013ccc3d3eb677276a9de54445a31acd194",
           "poly_url": "https://polymarket.com/search?q=Will%20Judy%20Shelton%20be%20confirmed%20as%20Fed%20Chair%3F",
@@ -8027,7 +8030,7 @@
         {
           "title": "Will Judy Shelton be confirmed as Fed Chair?",
           "side": "BUY",
-          "size": 217.21639,
+          "size": 90.90646,
           "price": 0.997,
           "conditionId": "0x14fd8ab261d14215058b77a9541a5013ccc3d3eb677276a9de54445a31acd194",
           "poly_url": "https://polymarket.com/search?q=Will%20Judy%20Shelton%20be%20confirmed%20as%20Fed%20Chair%3F",
@@ -8040,7 +8043,7 @@
         {
           "title": "Will Judy Shelton be confirmed as Fed Chair?",
           "side": "BUY",
-          "size": 268.88093,
+          "size": 87.90549,
           "price": 0.997,
           "conditionId": "0x14fd8ab261d14215058b77a9541a5013ccc3d3eb677276a9de54445a31acd194",
           "poly_url": "https://polymarket.com/search?q=Will%20Judy%20Shelton%20be%20confirmed%20as%20Fed%20Chair%3F",
@@ -8053,7 +8056,7 @@
         {
           "title": "Will Judy Shelton be confirmed as Fed Chair?",
           "side": "BUY",
-          "size": 82.77094,
+          "size": 76.06113,
           "price": 0.997,
           "conditionId": "0x14fd8ab261d14215058b77a9541a5013ccc3d3eb677276a9de54445a31acd194",
           "poly_url": "https://polymarket.com/search?q=Will%20Judy%20Shelton%20be%20confirmed%20as%20Fed%20Chair%3F",
@@ -8066,7 +8069,7 @@
         {
           "title": "Will Judy Shelton be confirmed as Fed Chair?",
           "side": "BUY",
-          "size": 247.70465,
+          "size": 102.88043,
           "price": 0.997,
           "conditionId": "0x14fd8ab261d14215058b77a9541a5013ccc3d3eb677276a9de54445a31acd194",
           "poly_url": "https://polymarket.com/search?q=Will%20Judy%20Shelton%20be%20confirmed%20as%20Fed%20Chair%3F",
@@ -8077,11 +8080,11 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:30.386735+00:00",
+      "last_seen": "2026-05-05T18:18:27.330172+00:00",
       "source_windows": [
         "VOL/WEEK"
       ],
-      "last_non_sport_trade": "2026-05-05T09:03:50+00:00",
+      "last_non_sport_trade": "2026-05-05T14:20:02+00:00",
       "n_markets": 24,
       "profiled": true
     },
@@ -8108,7 +8111,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-01T20:06:29.444117+00:00",
+      "last_seen": "2026-05-05T18:17:46.530859+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -8122,7 +8125,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915277+00:00",
+      "last_seen": "2026-05-05T18:17:46.530733+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -8241,12 +8244,12 @@
       "username": "norrisfan",
       "wallet": "0xe72bb501df5306c75c89383d48a1e81073fbb0a0",
       "total_profit_usd": 198686.9920319444,
-      "total_volume_usd": 1035567.5698810001,
+      "total_volume_usd": 1035615.0992870001,
       "trust_score": 93,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639435+00:00",
+      "last_seen": "2026-05-05T18:17:46.333301+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -8316,7 +8319,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639377+00:00",
+      "last_seen": "2026-05-05T18:17:46.333236+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -8410,13 +8413,13 @@
       "total_volume_usd": 1273092.8501780021,
       "n_markets": 13,
       "profiled": true,
-      "last_seen": "2026-05-05T09:14:02.863918+00:00",
+      "last_seen": "2026-05-05T18:19:05.694463+00:00",
       "last_non_sport_trade": "2026-05-04T15:01:58+00:00",
       "recent_bets": [
         {
           "title": "Will the Iranian regime fall by June 30?",
           "side": "BUY",
-          "size": 47.0,
+          "size": 4.3146,
           "price": 0.94,
           "conditionId": "0x9352c559e9648ab4cab236087b64ca85c5b7123a4c7d9d7d4efde4a39c18056f",
           "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20June%2030%3F",
@@ -8429,7 +8432,7 @@
         {
           "title": "Will the Iranian regime fall by June 30?",
           "side": "BUY",
-          "size": 7.2568,
+          "size": 470.0,
           "price": 0.94,
           "conditionId": "0x9352c559e9648ab4cab236087b64ca85c5b7123a4c7d9d7d4efde4a39c18056f",
           "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20June%2030%3F",
@@ -8442,8 +8445,8 @@
         {
           "title": "Will the Iranian regime fall by June 30?",
           "side": "BUY",
-          "size": 44.18,
-          "price": 0.94,
+          "size": 1249.473066,
+          "price": 0.9400000006770854,
           "conditionId": "0x9352c559e9648ab4cab236087b64ca85c5b7123a4c7d9d7d4efde4a39c18056f",
           "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20June%2030%3F",
           "copy_advice": {
@@ -8455,21 +8458,21 @@
         {
           "title": "Will the Iranian regime fall by June 30?",
           "side": "BUY",
-          "size": 15.666666,
-          "price": 0.9400000540000054,
+          "size": 5176.9936,
+          "price": 0.94,
           "conditionId": "0x9352c559e9648ab4cab236087b64ca85c5b7123a4c7d9d7d4efde4a39c18056f",
           "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20June%2030%3F",
           "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
+            "verdict": "WATCH",
+            "reason": "prezzo 94¢: upside molto limitato",
+            "color": "#fcee0c"
           }
         },
         {
           "title": "Will the Iranian regime fall by June 30?",
           "side": "BUY",
-          "size": 4.3334,
-          "price": 0.94,
+          "size": 78.333333,
+          "price": 0.9400000110400002,
           "conditionId": "0x9352c559e9648ab4cab236087b64ca85c5b7123a4c7d9d7d4efde4a39c18056f",
           "poly_url": "https://polymarket.com/search?q=Will%20the%20Iranian%20regime%20fall%20by%20June%2030%3F",
           "copy_advice": {
@@ -8502,16 +8505,16 @@
       "total_volume_usd": 221290.80896400008,
       "n_markets": 45,
       "profiled": true,
-      "last_seen": "2026-05-05T09:14:07.179752+00:00",
-      "last_non_sport_trade": "2026-05-04T17:26:28+00:00",
+      "last_seen": "2026-05-05T18:18:48.422850+00:00",
+      "last_non_sport_trade": "2026-05-05T17:44:46+00:00",
       "recent_bets": [
         {
-          "title": "US x Iran permanent peace deal by May 15, 2026?",
+          "title": "Strait of Hormuz traffic returns to normal by May 15?",
           "side": "BUY",
-          "size": 104.6178,
-          "price": 0.038,
-          "conditionId": "0x1db02ba50e2312a62b4104de691cc7a76065d8d0da40decf93eb1b914a3217b7",
-          "poly_url": "https://polymarket.com/search?q=US%20x%20Iran%20permanent%20peace%20deal%20by%20May%2015%2C%202026%3F",
+          "size": 11.53278,
+          "price": 0.021,
+          "conditionId": "0xffe381a80c1e36f9e0b03a542aa8fe56e74a67d2566a4e29396d4427aa4244c9",
+          "poly_url": "https://polymarket.com/search?q=Strait%20of%20Hormuz%20traffic%20returns%20to%20normal%20by%20May%2015%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -8519,12 +8522,12 @@
           }
         },
         {
-          "title": "US x Iran permanent peace deal by May 15, 2026?",
+          "title": "Strait of Hormuz traffic returns to normal by May 15?",
           "side": "BUY",
-          "size": 3.8,
-          "price": 0.038,
-          "conditionId": "0x1db02ba50e2312a62b4104de691cc7a76065d8d0da40decf93eb1b914a3217b7",
-          "poly_url": "https://polymarket.com/search?q=US%20x%20Iran%20permanent%20peace%20deal%20by%20May%2015%2C%202026%3F",
+          "size": 0.143718,
+          "price": 0.02100000087671694,
+          "conditionId": "0xffe381a80c1e36f9e0b03a542aa8fe56e74a67d2566a4e29396d4427aa4244c9",
+          "poly_url": "https://polymarket.com/search?q=Strait%20of%20Hormuz%20traffic%20returns%20to%20normal%20by%20May%2015%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -8532,12 +8535,12 @@
           }
         },
         {
-          "title": "US x Iran permanent peace deal by May 15, 2026?",
+          "title": "Strait of Hormuz traffic returns to normal by May 15?",
           "side": "BUY",
-          "size": 1.08148,
-          "price": 0.038,
-          "conditionId": "0x1db02ba50e2312a62b4104de691cc7a76065d8d0da40decf93eb1b914a3217b7",
-          "poly_url": "https://polymarket.com/search?q=US%20x%20Iran%20permanent%20peace%20deal%20by%20May%2015%2C%202026%3F",
+          "size": 0.52206,
+          "price": 0.021,
+          "conditionId": "0xffe381a80c1e36f9e0b03a542aa8fe56e74a67d2566a4e29396d4427aa4244c9",
+          "poly_url": "https://polymarket.com/search?q=Strait%20of%20Hormuz%20traffic%20returns%20to%20normal%20by%20May%2015%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -8545,12 +8548,12 @@
           }
         },
         {
-          "title": "US x Iran permanent peace deal by May 15, 2026?",
+          "title": "Strait of Hormuz traffic returns to normal by May 15?",
           "side": "BUY",
-          "size": 1.97676,
-          "price": 0.038,
-          "conditionId": "0x1db02ba50e2312a62b4104de691cc7a76065d8d0da40decf93eb1b914a3217b7",
-          "poly_url": "https://polymarket.com/search?q=US%20x%20Iran%20permanent%20peace%20deal%20by%20May%2015%2C%202026%3F",
+          "size": 3.64182,
+          "price": 0.021,
+          "conditionId": "0xffe381a80c1e36f9e0b03a542aa8fe56e74a67d2566a4e29396d4427aa4244c9",
+          "poly_url": "https://polymarket.com/search?q=Strait%20of%20Hormuz%20traffic%20returns%20to%20normal%20by%20May%2015%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -8558,12 +8561,12 @@
           }
         },
         {
-          "title": "US x Iran permanent peace deal by May 15, 2026?",
-          "side": "BUY",
-          "size": 0.76,
-          "price": 0.038,
-          "conditionId": "0x1db02ba50e2312a62b4104de691cc7a76065d8d0da40decf93eb1b914a3217b7",
-          "poly_url": "https://polymarket.com/search?q=US%20x%20Iran%20permanent%20peace%20deal%20by%20May%2015%2C%202026%3F",
+          "title": "Iran closes its airspace by May 31?",
+          "side": "SELL",
+          "size": 73.1264,
+          "price": 0.58,
+          "conditionId": "0xb7dd41c16cd5b59e543ffcdab6a0d876f5ccef5329ea42ef1798d80c9a2b8499",
+          "poly_url": "https://polymarket.com/search?q=Iran%20closes%20its%20airspace%20by%20May%2031%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -8676,7 +8679,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639454+00:00",
+      "last_seen": "2026-05-05T18:17:46.333326+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -8771,7 +8774,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:31.719170+00:00",
+      "last_seen": "2026-05-05T18:18:28.604853+00:00",
       "source_windows": [
         "PNL/WEEK"
       ],
@@ -8992,7 +8995,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639397+00:00",
+      "last_seen": "2026-05-05T18:17:46.333257+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -9020,7 +9023,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639298+00:00",
+      "last_seen": "2026-05-05T18:17:46.333175+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -9042,13 +9045,13 @@
     "0x0d16999d6ba24c2c2c8bff93f91014cc43fad24d": {
       "username": "4gibg4i3o",
       "wallet": "0x0d16999d6ba24c2c2c8bff93f91014cc43fad24d",
-      "total_profit_usd": 102826.31268124668,
+      "total_profit_usd": 103122.8165016929,
       "total_volume_usd": 165.91,
       "trust_score": 81,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639441+00:00",
+      "last_seen": "2026-05-05T18:17:46.333307+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -9154,13 +9157,13 @@
     "0xe48109602719f95c247fec255ffb71bab3f985a3": {
       "username": "trade-via-Gravia",
       "wallet": "0xe48109602719f95c247fec255ffb71bab3f985a3",
-      "total_profit_usd": 508001.5005099997,
-      "total_volume_usd": 1868.234827,
-      "trust_score": 87,
+      "total_profit_usd": 712001.2506080002,
+      "total_volume_usd": 2383.225027,
+      "trust_score": 89,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639272+00:00",
+      "last_seen": "2026-05-05T18:17:46.333135+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -9183,12 +9186,12 @@
       "username": "nbacup",
       "wallet": "0xac2519c4e68c4b58326eadd26d7373a4f7fb433f",
       "total_profit_usd": 186869.87044342028,
-      "total_volume_usd": 873090.0067399999,
+      "total_volume_usd": 943090.00674,
       "trust_score": 92,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639422+00:00",
+      "last_seen": "2026-05-05T18:17:46.333281+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -9254,7 +9257,7 @@
       "username": ".sorry",
       "wallet": "0x4a650133a506a876352f8e8021ec3d220dab06bb",
       "total_profit_usd": 583.1444321989042,
-      "total_volume_usd": 1760632.9907619997,
+      "total_volume_usd": 2130446.963999,
       "trust_score": 81,
       "times_seen": 0,
       "copy_accuracy": null,
@@ -9325,7 +9328,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:12:38.915415+00:00",
+      "last_seen": "2026-05-05T18:17:46.530778+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -9354,10 +9357,49 @@
       "copy_accuracy": null,
       "recent_bets": [
         {
+          "title": "Will Donald Trump Jr. win the 2028 Republican presidential nomination?",
+          "side": "BUY",
+          "size": 0.725388,
+          "price": 0.03500000072375061,
+          "conditionId": "0x4a9d58d4da874e26708f5bdb014eb07a06aeebb927068d169d43831595386557",
+          "poly_url": "https://polymarket.com/event/will-donald-trump-jr-win-the-2028-republican-presidential-nomination",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
           "title": "Will James Talarico win the 2028 Democratic presidential nomination?",
-          "side": "SELL",
-          "size": 0.08789,
-          "price": 0.017,
+          "side": "BUY",
+          "size": 195.516,
+          "price": 0.018,
+          "conditionId": "0xb91be12388b3d4079c3ed9b5783cb42d8c33051d37746a49300227e0f45fc089",
+          "poly_url": "https://polymarket.com/event/will-james-talarico-win-the-2028-democratic-presidential-nomination",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Jerome Powell out as Fed Chair by May 15, 2026?",
+          "side": "BUY",
+          "size": 1839.44608,
+          "price": 0.3283647218841196,
+          "conditionId": "0x1bb8bd43ada27e828ce693a5dc2896cd918b64869570761a61048ec78471ce9a",
+          "poly_url": "https://polymarket.com/search?q=Jerome%20Powell%20out%20as%20Fed%20Chair%20by%20May%2015%2C%202026%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will James Talarico win the 2028 Democratic presidential nomination?",
+          "side": "BUY",
+          "size": 77.40973,
+          "price": 0.018,
           "conditionId": "0xb91be12388b3d4079c3ed9b5783cb42d8c33051d37746a49300227e0f45fc089",
           "poly_url": "https://polymarket.com/event/will-james-talarico-win-the-2028-democratic-presidential-nomination",
           "copy_advice": {
@@ -9368,48 +9410,9 @@
         },
         {
           "title": "Will James Talarico win the 2028 Democratic presidential nomination?",
-          "side": "SELL",
-          "size": 0.83164,
-          "price": 0.017,
-          "conditionId": "0xb91be12388b3d4079c3ed9b5783cb42d8c33051d37746a49300227e0f45fc089",
-          "poly_url": "https://polymarket.com/event/will-james-talarico-win-the-2028-democratic-presidential-nomination",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Will James Talarico win the 2028 Democratic presidential nomination?",
-          "side": "SELL",
-          "size": 1.12625,
-          "price": 0.017,
-          "conditionId": "0xb91be12388b3d4079c3ed9b5783cb42d8c33051d37746a49300227e0f45fc089",
-          "poly_url": "https://polymarket.com/event/will-james-talarico-win-the-2028-democratic-presidential-nomination",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Will James Talarico win the 2028 Democratic presidential nomination?",
-          "side": "SELL",
-          "size": 1.21295,
-          "price": 0.017,
-          "conditionId": "0xb91be12388b3d4079c3ed9b5783cb42d8c33051d37746a49300227e0f45fc089",
-          "poly_url": "https://polymarket.com/event/will-james-talarico-win-the-2028-democratic-presidential-nomination",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Will James Talarico win the 2028 Democratic presidential nomination?",
-          "side": "SELL",
-          "size": 0.17731,
-          "price": 0.017,
+          "side": "BUY",
+          "size": 607.6527299999999,
+          "price": 0.018,
           "conditionId": "0xb91be12388b3d4079c3ed9b5783cb42d8c33051d37746a49300227e0f45fc089",
           "poly_url": "https://polymarket.com/event/will-james-talarico-win-the-2028-democratic-presidential-nomination",
           "copy_advice": {
@@ -9419,11 +9422,11 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:42.098629+00:00",
+      "last_seen": "2026-05-05T18:18:34.445496+00:00",
       "source_windows": [
         "VOL/WEEK"
       ],
-      "last_non_sport_trade": "2026-05-03T04:09:42+00:00",
+      "last_non_sport_trade": "2026-05-05T13:11:04+00:00",
       "n_markets": 60,
       "profiled": true
     },
@@ -9445,12 +9448,12 @@
       "username": "0x652c9e1d3a71f42Ccd362D9976e117f9a2222AF0-1776192441729",
       "wallet": "0x652c9e1d3a71f42ccd362d9976e117f9a2222af0",
       "total_profit_usd": 12214.665918408213,
-      "total_volume_usd": 2278751.427285,
-      "trust_score": 86,
+      "total_volume_usd": 2506914.735762,
+      "trust_score": 88,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915355+00:00",
+      "last_seen": "2026-05-05T18:17:46.530746+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -9501,12 +9504,12 @@
       "username": "shy-blue-rock",
       "wallet": "0xba016b05c84c9f073e5c9059d247d37cea4b8535",
       "total_profit_usd": 10887.182250674865,
-      "total_volume_usd": 1484144.3788499993,
+      "total_volume_usd": 1691234.8172489991,
       "trust_score": 87,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915455+00:00",
+      "last_seen": "2026-05-05T18:17:46.530866+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -9543,12 +9546,12 @@
       "username": "asjabaasj",
       "wallet": "0xa7a8c1fd4bfff08ea30214efa7efaf75d7c6580c",
       "total_profit_usd": 699.5879323210003,
-      "total_volume_usd": 167298.7648,
-      "trust_score": 79,
+      "total_volume_usd": 2296092.0012950003,
+      "trust_score": 83,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-03T08:48:59.506278+00:00",
+      "last_seen": "2026-05-05T18:17:46.530766+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -9563,7 +9566,7 @@
       "total_volume_usd": 929880.4696619994,
       "n_markets": 90,
       "profiled": true,
-      "last_seen": "2026-05-05T09:14:09.719847+00:00",
+      "last_seen": "2026-05-05T18:18:50.116195+00:00",
       "last_non_sport_trade": "2026-05-04T19:48:38+00:00",
       "recent_bets": [
         {
@@ -9637,42 +9640,16 @@
       "total_volume_usd": 490738.84917299973,
       "n_markets": 46,
       "profiled": true,
-      "last_seen": "2026-05-05T09:14:10.902124+00:00",
-      "last_non_sport_trade": "2026-05-04T16:35:30+00:00",
+      "last_seen": "2026-05-05T18:18:51.173226+00:00",
+      "last_non_sport_trade": "2026-05-05T13:01:48+00:00",
       "recent_bets": [
         {
-          "title": "Will Elon Musk post 300-319 tweets from May 1 to May 8, 2026?",
-          "side": "BUY",
-          "size": 0.06,
-          "price": 0.003,
-          "conditionId": "0x7506d9094c353c7f5d8d07716c754269963633c3e923fa23bfb6d8d44bcf1b0e",
-          "poly_url": "https://polymarket.com/search?q=Will%20Elon%20Musk%20post%20300-319%20tweets%20from%20May%201%20to%20May%208%2C%202026%3F",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Will Elon Musk post 300-319 tweets from May 1 to May 8, 2026?",
-          "side": "BUY",
-          "size": 2.178,
-          "price": 0.003,
-          "conditionId": "0x7506d9094c353c7f5d8d07716c754269963633c3e923fa23bfb6d8d44bcf1b0e",
-          "poly_url": "https://polymarket.com/search?q=Will%20Elon%20Musk%20post%20300-319%20tweets%20from%20May%201%20to%20May%208%2C%202026%3F",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Will Elon Musk post 240-259 tweets from April 28 to May 5, 2026?",
+          "title": "Will Elon Musk post 220-239 tweets from April 28 to May 5, 2026?",
           "side": "SELL",
-          "size": 5.0,
+          "size": 0.01039,
           "price": 0.001,
-          "conditionId": "0xd43e0ccd024abad71ae75cb626f45c8a24d0b7e859c30b332ff4af36a52ef075",
-          "poly_url": "https://polymarket.com/search?q=Will%20Elon%20Musk%20post%20240-259%20tweets%20from%20April%2028%20to%20May%205%2C%202026%3F",
+          "conditionId": "0x77e9a762636b1ca81032a0e4132a21b824740259cd227edaaf5cb5fbfeeaf282",
+          "poly_url": "https://polymarket.com/search?q=Will%20Elon%20Musk%20post%20220-239%20tweets%20from%20April%2028%20to%20May%205%2C%202026%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -9680,25 +9657,51 @@
           }
         },
         {
-          "title": "Will Elon Musk post 65-89 tweets from May 4 to May 6, 2026?",
-          "side": "SELL",
-          "size": 50.05427,
-          "price": 0.09,
-          "conditionId": "0xd243a3ab46d128c8c46ddfc413e5a37e5f238791a1ded56a19ec559614058873",
-          "poly_url": "https://polymarket.com/search?q=Will%20Elon%20Musk%20post%2065-89%20tweets%20from%20May%204%20to%20May%206%2C%202026%3F",
-          "copy_advice": {
-            "verdict": "SKIP",
-            "reason": "size troppo bassa (<$5k)",
-            "color": "#777"
-          }
-        },
-        {
-          "title": "Will Elon Musk post <40 tweets from May 4 to May 6, 2026?",
+          "title": "Will Elon Musk post 500+ tweets from May 8 to May 15, 2026?",
           "side": "BUY",
-          "size": 24.361369999999997,
-          "price": 0.27,
-          "conditionId": "0x133031384e39838f3779ab472c088b4f51b8f97f14f6632ad77a325b84cd70ae",
-          "poly_url": "https://polymarket.com/search?q=Will%20Elon%20Musk%20post%20%3C40%20tweets%20from%20May%204%20to%20May%206%2C%202026%3F",
+          "size": 0.066,
+          "price": 0.002,
+          "conditionId": "0x75bbf9491772ef7b75de67faa29eee5dbfca9875b7988a5c6f6e0ece8624693b",
+          "poly_url": "https://polymarket.com/search?q=Will%20Elon%20Musk%20post%20500%2B%20tweets%20from%20May%208%20to%20May%2015%2C%202026%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will Elon Musk post 220-239 tweets from April 28 to May 5, 2026?",
+          "side": "SELL",
+          "size": 0.01471,
+          "price": 0.001,
+          "conditionId": "0x77e9a762636b1ca81032a0e4132a21b824740259cd227edaaf5cb5fbfeeaf282",
+          "poly_url": "https://polymarket.com/search?q=Will%20Elon%20Musk%20post%20220-239%20tweets%20from%20April%2028%20to%20May%205%2C%202026%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will Elon Musk post 100-119 tweets from May 1 to May 8, 2026?",
+          "side": "BUY",
+          "size": 649.38246,
+          "price": 0.999,
+          "conditionId": "0xcf9e4142cf865daaa041243188cc7197fa9bfc2bb67df9e124d9e0ee3fba8f65",
+          "poly_url": "https://polymarket.com/search?q=Will%20Elon%20Musk%20post%20100-119%20tweets%20from%20May%201%20to%20May%208%2C%202026%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will Elon Musk post 160-179 tweets from April 28 to May 5, 2026?",
+          "side": "SELL",
+          "size": 1.9001,
+          "price": 0.001,
+          "conditionId": "0x4245fa4925d9c7244d40c6dbdd7b55545ed4bd15f6659fbce48300b42d466fe6",
+          "poly_url": "https://polymarket.com/search?q=Will%20Elon%20Musk%20post%20160-179%20tweets%20from%20April%2028%20to%20May%205%2C%202026%3F",
           "copy_advice": {
             "verdict": "SKIP",
             "reason": "size troppo bassa (<$5k)",
@@ -9729,7 +9732,7 @@
       "total_volume_usd": 160781.30529500011,
       "n_markets": 42,
       "profiled": true,
-      "last_seen": "2026-05-05T09:14:19.163257+00:00",
+      "last_seen": "2026-05-05T18:18:55.602163+00:00",
       "last_non_sport_trade": "2026-05-05T03:06:46+00:00",
       "recent_bets": [
         {
@@ -9808,7 +9811,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639290+00:00",
+      "last_seen": "2026-05-05T18:17:46.333152+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -9817,12 +9820,12 @@
       "username": "matanovik",
       "wallet": "0x39d3c773be30fcc73161fc6768f46d563a779ef0",
       "total_profit_usd": 216972.32749057692,
-      "total_volume_usd": 944249.443794,
-      "trust_score": 93,
+      "total_volume_usd": 1007980.847727,
+      "trust_score": 94,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639329+00:00",
+      "last_seen": "2026-05-05T18:17:46.333196+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -9831,12 +9834,12 @@
       "username": "embarrassment",
       "wallet": "0x5c3a1a602848565bb16165fcd460b00c3d43020b",
       "total_profit_usd": 132699.5704999849,
-      "total_volume_usd": 1070807.419928,
+      "total_volume_usd": 1433666.07893,
       "trust_score": 93,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639416+00:00",
+      "last_seen": "2026-05-05T18:17:46.333268+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -9851,7 +9854,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639391+00:00",
+      "last_seen": "2026-05-05T18:17:46.333250+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -9879,7 +9882,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915429+00:00",
+      "last_seen": "2026-05-05T18:17:46.530903+00:00",
       "source_windows": [
         "PNL/WEEK",
         "VOL/WEEK"
@@ -9995,7 +9998,7 @@
         {
           "title": "Will Erika Kirk win the 2028 Republican presidential nomination?",
           "side": "SELL",
-          "size": 0.45773,
+          "size": 0.68306,
           "price": 0.007,
           "conditionId": "0x7abed80b88301210ee83b7b14ec41bc9a5161e1af07254fbb26c6e2bf7182766",
           "poly_url": "https://polymarket.com/event/will-erika-kirk-win-the-2028-republican-presidential-nomination",
@@ -10008,7 +10011,7 @@
         {
           "title": "Will Erika Kirk win the 2028 Republican presidential nomination?",
           "side": "SELL",
-          "size": 0.55629,
+          "size": 1.30984,
           "price": 0.007,
           "conditionId": "0x7abed80b88301210ee83b7b14ec41bc9a5161e1af07254fbb26c6e2bf7182766",
           "poly_url": "https://polymarket.com/event/will-erika-kirk-win-the-2028-republican-presidential-nomination",
@@ -10021,7 +10024,7 @@
         {
           "title": "Will Erika Kirk win the 2028 Republican presidential nomination?",
           "side": "SELL",
-          "size": 0.40138,
+          "size": 0.50001,
           "price": 0.007,
           "conditionId": "0x7abed80b88301210ee83b7b14ec41bc9a5161e1af07254fbb26c6e2bf7182766",
           "poly_url": "https://polymarket.com/event/will-erika-kirk-win-the-2028-republican-presidential-nomination",
@@ -10034,7 +10037,7 @@
         {
           "title": "Will Erika Kirk win the 2028 Republican presidential nomination?",
           "side": "SELL",
-          "size": 10.91839,
+          "size": 0.02506,
           "price": 0.007,
           "conditionId": "0x7abed80b88301210ee83b7b14ec41bc9a5161e1af07254fbb26c6e2bf7182766",
           "poly_url": "https://polymarket.com/event/will-erika-kirk-win-the-2028-republican-presidential-nomination",
@@ -10047,7 +10050,7 @@
         {
           "title": "Will Erika Kirk win the 2028 Republican presidential nomination?",
           "side": "SELL",
-          "size": 2.02811,
+          "size": 1.50703,
           "price": 0.007,
           "conditionId": "0x7abed80b88301210ee83b7b14ec41bc9a5161e1af07254fbb26c6e2bf7182766",
           "poly_url": "https://polymarket.com/event/will-erika-kirk-win-the-2028-republican-presidential-nomination",
@@ -10058,7 +10061,7 @@
           }
         }
       ],
-      "last_seen": "2026-05-05T09:13:45.322778+00:00",
+      "last_seen": "2026-05-05T18:18:35.840559+00:00",
       "source_windows": [
         "VOL/WEEK"
       ],
@@ -10142,8 +10145,76 @@
       "total_volume_usd": 63268.92216400001,
       "n_markets": 5,
       "profiled": true,
-      "last_seen": "2026-05-03T19:57:30.890292+00:00",
-      "times_seen": 1
+      "last_seen": "2026-05-05T18:18:56.804954+00:00",
+      "times_seen": 1,
+      "last_non_sport_trade": "2026-05-05T17:26:46+00:00",
+      "recent_bets": [
+        {
+          "title": "Will Donald Trump announce that the United States blockade of the Strait of Hormuz has been lifted by June 30, 2026?",
+          "side": "BUY",
+          "size": 10.0,
+          "price": 0.5,
+          "conditionId": "0x4d0c4865bdecc5f7971dbab47bb6c069d93909dec75bdff52fb766ae6094a6d6",
+          "poly_url": "https://polymarket.com/search?q=Will%20Donald%20Trump%20announce%20that%20the%20United%20States%20blockade%20of%20the%20Strait%20of%20Horm",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will Donald Trump announce that the United States blockade of the Strait of Hormuz has been lifted by June 30, 2026?",
+          "side": "BUY",
+          "size": 10.0,
+          "price": 0.5,
+          "conditionId": "0x4d0c4865bdecc5f7971dbab47bb6c069d93909dec75bdff52fb766ae6094a6d6",
+          "poly_url": "https://polymarket.com/search?q=Will%20Donald%20Trump%20announce%20that%20the%20United%20States%20blockade%20of%20the%20Strait%20of%20Horm",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will Donald Trump announce that the United States blockade of the Strait of Hormuz has been lifted by June 30, 2026?",
+          "side": "BUY",
+          "size": 15.715,
+          "price": 0.5,
+          "conditionId": "0x4d0c4865bdecc5f7971dbab47bb6c069d93909dec75bdff52fb766ae6094a6d6",
+          "poly_url": "https://polymarket.com/search?q=Will%20Donald%20Trump%20announce%20that%20the%20United%20States%20blockade%20of%20the%20Strait%20of%20Horm",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will Donald Trump announce that the United States blockade of the Strait of Hormuz has been lifted by May 31, 2026?",
+          "side": "BUY",
+          "size": 2060.9937,
+          "price": 0.27,
+          "conditionId": "0x8b369e10358094a99ffe7f85a81a8e8ca68c611eee0fe63a2efa790ad045bcd6",
+          "poly_url": "https://polymarket.com/search?q=Will%20Donald%20Trump%20announce%20that%20the%20United%20States%20blockade%20of%20the%20Strait%20of%20Horm",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Will Donald Trump announce that the United States blockade of the Strait of Hormuz has been lifted by May 31, 2026?",
+          "side": "BUY",
+          "size": 9.6417,
+          "price": 0.27,
+          "conditionId": "0x8b369e10358094a99ffe7f85a81a8e8ca68c611eee0fe63a2efa790ad045bcd6",
+          "poly_url": "https://polymarket.com/search?q=Will%20Donald%20Trump%20announce%20that%20the%20United%20States%20blockade%20of%20the%20Strait%20of%20Horm",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        }
+      ]
     },
     "0x9ac2536ed93f8fe8ce91d9662b03bcbb19ccbe3d": {
       "username": "ChloeT1",
@@ -10154,7 +10225,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639362+00:00",
+      "last_seen": "2026-05-05T18:17:46.333230+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10168,7 +10239,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639520+00:00",
+      "last_seen": "2026-05-05T18:17:46.333357+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10182,7 +10253,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639480+00:00",
+      "last_seen": "2026-05-05T18:17:46.333340+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10196,7 +10267,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639526+00:00",
+      "last_seen": "2026-05-05T18:17:46.333363+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10210,7 +10281,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639410+00:00",
+      "last_seen": "2026-05-05T18:17:46.333275+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10219,12 +10290,12 @@
       "username": "Latina",
       "wallet": "0x26437896ed9dfeb2f69765edcafe8fdceaab39ae",
       "total_profit_usd": 60954.50211080513,
-      "total_volume_usd": 380205.551458,
-      "trust_score": 89,
+      "total_volume_usd": 541296.535297,
+      "trust_score": 90,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639579+00:00",
+      "last_seen": "2026-05-05T18:17:46.333420+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10233,12 +10304,12 @@
       "username": "rustin",
       "wallet": "0xaa075924e1dc7cff3b9fab67401126338c4d2125",
       "total_profit_usd": 86574.12959443184,
-      "total_volume_usd": 117146.294474,
+      "total_volume_usd": 142152.87780599997,
       "trust_score": 89,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639486+00:00",
+      "last_seen": "2026-05-05T18:17:46.333346+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10252,7 +10323,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639604+00:00",
+      "last_seen": "2026-05-05T18:17:46.333445+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10344,13 +10415,13 @@
     "0x67bb64fac5252df3f61ee2d91a4b1350e40eb6ef": {
       "username": "Blueberry1337",
       "wallet": "0x67bb64fac5252df3f61ee2d91a4b1350e40eb6ef",
-      "total_profit_usd": 68715.72527340398,
-      "total_volume_usd": 488747.07541299996,
+      "total_profit_usd": 68874.0806858371,
+      "total_volume_usd": 599770.4134569999,
       "trust_score": 91,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639560+00:00",
+      "last_seen": "2026-05-05T18:17:46.333395+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10456,13 +10527,13 @@
     "0xe3c9c84c9917d21351902f3bfde3420543ea4b9c": {
       "username": "DimSumConnoisseur.",
       "wallet": "0xe3c9c84c9917d21351902f3bfde3420543ea4b9c",
-      "total_profit_usd": 98556.28735758553,
-      "total_volume_usd": 591218.9384870001,
+      "total_profit_usd": 99082.23709580296,
+      "total_volume_usd": 665408.293774,
       "trust_score": 91,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639473+00:00",
+      "last_seen": "2026-05-05T18:17:46.333333+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10560,7 +10631,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915267+00:00",
+      "last_seen": "2026-05-05T18:17:46.530701+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -10605,13 +10676,13 @@
     "0x5257aa84944804bbb0c718814ebebeeafaca3e2a": {
       "username": "NO-GOD-PLEASE-NO",
       "wallet": "0x5257aa84944804bbb0c718814ebebeeafaca3e2a",
-      "total_profit_usd": 263262.84762122494,
-      "total_volume_usd": 512021.606836,
+      "total_profit_usd": 263392.44550696504,
+      "total_volume_usd": 532028.904184,
       "trust_score": 94,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639315+00:00",
+      "last_seen": "2026-05-05T18:17:46.333190+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10619,13 +10690,13 @@
     "0x2759769cd371bee44ec5bfc5e72c7f1f092b2b38": {
       "username": "SharkbetX-com",
       "wallet": "0x2759769cd371bee44ec5bfc5e72c7f1f092b2b38",
-      "total_profit_usd": 133052.29080400022,
-      "total_volume_usd": 296764.222501,
+      "total_profit_usd": 133416.39164922526,
+      "total_volume_usd": 369584.39154599997,
       "trust_score": 91,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639404+00:00",
+      "last_seen": "2026-05-05T18:17:46.333263+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10634,12 +10705,12 @@
       "username": "olegio",
       "wallet": "0x12ec6d71325afac2b4d25b3de94185e2c48d41ae",
       "total_profit_usd": 81700.89456067179,
-      "total_volume_usd": 226023.691589,
+      "total_volume_usd": 226981.587214,
       "trust_score": 90,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639514+00:00",
+      "last_seen": "2026-05-05T18:17:46.333352+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10647,13 +10718,13 @@
     "0x23c8a4c266d10ba5846837eac391fea89ed6f293": {
       "username": "Netrol",
       "wallet": "0x23c8a4c266d10ba5846837eac391fea89ed6f293",
-      "total_profit_usd": 62105.39567605847,
+      "total_profit_usd": 62105.395676058484,
       "total_volume_usd": 538819.2722189999,
       "trust_score": 90,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639573+00:00",
+      "last_seen": "2026-05-05T18:17:46.333414+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10709,7 +10780,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639598+00:00",
+      "last_seen": "2026-05-05T18:17:46.333438+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10760,12 +10831,12 @@
       "username": "blueberryeggroll",
       "wallet": "0xa7af7b80928e5ac72f6ea96ed1488b38dc4f0158",
       "total_profit_usd": 0,
-      "total_volume_usd": 2211586.9452819997,
+      "total_volume_usd": 2224638.96823,
       "trust_score": 69,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.915362+00:00",
+      "last_seen": "2026-05-05T18:17:46.530772+00:00",
       "source_windows": [
         "VOL/WEEK"
       ]
@@ -10797,13 +10868,13 @@
     "0xd04d93be590ded67b99f053d4b6d29d3f8483312": {
       "username": "Shipoo",
       "wallet": "0xd04d93be590ded67b99f053d4b6d29d3f8483312",
-      "total_profit_usd": 218998.01598099995,
-      "total_volume_usd": 75.0,
-      "trust_score": 81,
+      "total_profit_usd": 266007.90865399956,
+      "total_volume_usd": 95.0,
+      "trust_score": 82,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639323+00:00",
+      "last_seen": "2026-05-05T18:17:46.333183+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10811,13 +10882,13 @@
     "0xce5bec63b40392845a9a504915f607c8e03a047a": {
       "username": "Nexuus",
       "wallet": "0xce5bec63b40392845a9a504915f607c8e03a047a",
-      "total_profit_usd": 204346.56250813906,
-      "total_volume_usd": 75.0,
-      "trust_score": 81,
+      "total_profit_usd": 284346.362517583,
+      "total_volume_usd": 95.0,
+      "trust_score": 82,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639343+00:00",
+      "last_seen": "2026-05-05T18:17:46.333167+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10831,7 +10902,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639356+00:00",
+      "last_seen": "2026-05-05T18:17:46.333216+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10845,7 +10916,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639447+00:00",
+      "last_seen": "2026-05-05T18:17:46.333313+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10859,7 +10930,7 @@
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639539+00:00",
+      "last_seen": "2026-05-05T18:17:46.333389+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10868,12 +10939,12 @@
       "username": "XingZeng",
       "wallet": "0xe3aa8375255a77e1738667060115f4ceab394830",
       "total_profit_usd": 62536.70520092604,
-      "total_volume_usd": 906386.6803509999,
+      "total_volume_usd": 906386.680351,
       "trust_score": 90,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639566+00:00",
+      "last_seen": "2026-05-05T18:17:46.333401+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10881,13 +10952,13 @@
     "0x8b3234f9027f4e994e949df4b48b90ab79015950": {
       "username": "Gametheory-394",
       "wallet": "0x8b3234f9027f4e994e949df4b48b90ab79015950",
-      "total_profit_usd": 58003.55891612759,
-      "total_volume_usd": 136117.627767,
+      "total_profit_usd": 58238.31995274765,
+      "total_volume_usd": 154762.627767,
       "trust_score": 88,
       "times_seen": 0,
       "copy_accuracy": null,
       "recent_bets": [],
-      "last_seen": "2026-05-05T09:12:38.639591+00:00",
+      "last_seen": "2026-05-05T18:17:46.333426+00:00",
       "source_windows": [
         "PNL/WEEK"
       ]
@@ -10926,8 +10997,76 @@
       "total_volume_usd": 931677.4185939988,
       "n_markets": 44,
       "profiled": true,
-      "last_seen": "2026-05-05T09:15:11.821835+00:00",
-      "times_seen": 1
+      "last_seen": "2026-05-05T18:18:58.009376+00:00",
+      "times_seen": 1,
+      "last_non_sport_trade": "2026-05-05T17:40:44+00:00",
+      "recent_bets": [
+        {
+          "title": "Iran closes its airspace by May 8?",
+          "side": "SELL",
+          "size": 1764.3875,
+          "price": 0.85,
+          "conditionId": "0x2135ffcb43ba9103bb6acf7116d2d5aa98bef6d9eb3dc9c85ea00cb79513f3ec",
+          "poly_url": "https://polymarket.com/search?q=Iran%20closes%20its%20airspace%20by%20May%208%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Iran closes its airspace by May 8?",
+          "side": "SELL",
+          "size": 1.7,
+          "price": 0.85,
+          "conditionId": "0x2135ffcb43ba9103bb6acf7116d2d5aa98bef6d9eb3dc9c85ea00cb79513f3ec",
+          "poly_url": "https://polymarket.com/search?q=Iran%20closes%20its%20airspace%20by%20May%208%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Iran closes its airspace by May 8?",
+          "side": "SELL",
+          "size": 4250.0,
+          "price": 0.85,
+          "conditionId": "0x2135ffcb43ba9103bb6acf7116d2d5aa98bef6d9eb3dc9c85ea00cb79513f3ec",
+          "poly_url": "https://polymarket.com/search?q=Iran%20closes%20its%20airspace%20by%20May%208%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Iran closes its airspace by May 8?",
+          "side": "SELL",
+          "size": 783.9295,
+          "price": 0.85,
+          "conditionId": "0x2135ffcb43ba9103bb6acf7116d2d5aa98bef6d9eb3dc9c85ea00cb79513f3ec",
+          "poly_url": "https://polymarket.com/search?q=Iran%20closes%20its%20airspace%20by%20May%208%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        },
+        {
+          "title": "Iran closes its airspace by May 8?",
+          "side": "SELL",
+          "size": 674.0916,
+          "price": 0.84,
+          "conditionId": "0x2135ffcb43ba9103bb6acf7116d2d5aa98bef6d9eb3dc9c85ea00cb79513f3ec",
+          "poly_url": "https://polymarket.com/search?q=Iran%20closes%20its%20airspace%20by%20May%208%3F",
+          "copy_advice": {
+            "verdict": "SKIP",
+            "reason": "size troppo bassa (<$5k)",
+            "color": "#777"
+          }
+        }
+      ]
     },
     "0x5a79e83ccb6b3c58b4730eeabb9115101f0f6296": {
       "total_volume_usd": 1095959.8843699985,
@@ -10952,6 +11091,85 @@
       "n_markets": 39,
       "profiled": true,
       "last_seen": "2026-05-05T09:15:49.599843+00:00"
+    },
+    "0xd88871e6dfd85946a38f1015d8174604bcc93c9f": {
+      "username": "xianmu",
+      "wallet": "0xd88871e6dfd85946a38f1015d8174604bcc93c9f",
+      "total_profit_usd": 57735.14146929153,
+      "total_volume_usd": 443065.9822089999,
+      "trust_score": 89,
+      "times_seen": 0,
+      "copy_accuracy": null,
+      "recent_bets": [],
+      "last_seen": "2026-05-05T18:17:46.333432+00:00",
+      "source_windows": [
+        "PNL/WEEK"
+      ]
+    },
+    "0xb55fa1296e6ec55d0ce53d93b9237389f11764d4": {
+      "username": "0xb55fa1296E6ec55D0cE53d93B9237389f11764d4-1777575277609",
+      "wallet": "0xb55fa1296e6ec55d0ce53d93b9237389f11764d4",
+      "total_profit_usd": 25874.339779431328,
+      "total_volume_usd": 1651292.6296660001,
+      "trust_score": 90,
+      "times_seen": 0,
+      "copy_accuracy": null,
+      "recent_bets": [],
+      "last_seen": "2026-05-05T18:17:46.530878+00:00",
+      "source_windows": [
+        "VOL/WEEK"
+      ]
+    },
+    "0x76d4d4703add6e94cfdb1107f3d991d85ff2c512": {
+      "username": "0x76d4d4703add6e94cfdb1107f3d991d85ff2c512",
+      "wallet": "0x76d4d4703add6e94cfdb1107f3d991d85ff2c512",
+      "total_profit_usd": 0,
+      "total_volume_usd": 1642578.7828130003,
+      "trust_score": 68,
+      "times_seen": 0,
+      "copy_accuracy": null,
+      "recent_bets": [],
+      "last_seen": "2026-05-05T18:17:46.530883+00:00",
+      "source_windows": [
+        "VOL/WEEK"
+      ]
+    },
+    "0xf769c6390f6d564fe4859effbddb682c62660114": {
+      "total_volume_usd": 94561.58288099998,
+      "n_markets": 96,
+      "profiled": true,
+      "last_seen": "2026-05-05T18:19:09.529185+00:00"
+    },
+    "0x33d41dc0a5e652c60d177fc33fae4b655883c167": {
+      "total_volume_usd": 123696.87767599993,
+      "n_markets": 70,
+      "profiled": true,
+      "last_seen": "2026-05-05T18:19:13.850626+00:00"
+    },
+    "0x6161740411c079f743470d678ade504d610f8ad9": {
+      "total_volume_usd": 1702.2304800000006,
+      "n_markets": 9,
+      "profiled": true,
+      "last_seen": "2026-05-05T18:19:15.765498+00:00"
+    },
+    "0x103aed97809b2861822d9f100da10d731feb3e8c": {
+      "total_volume_usd": 6064.237231999981,
+      "n_markets": 465,
+      "profiled": true,
+      "last_seen": "2026-05-05T18:19:42.291878+00:00",
+      "times_seen": 1
+    },
+    "0xca6e9879b0a83eb471f974e159f2483c08b546f2": {
+      "total_volume_usd": 9278.794842000008,
+      "n_markets": 27,
+      "profiled": true,
+      "last_seen": "2026-05-05T18:19:51.569918+00:00"
+    },
+    "0x4adc08a20ff02f2ccbdfb1f9648a911164f3eb3a": {
+      "total_volume_usd": 10385.922376000002,
+      "n_markets": 13,
+      "profiled": true,
+      "last_seen": "2026-05-05T18:19:57.731666+00:00"
     }
   },
   "watched_markets": {
@@ -11030,6 +11248,25 @@
       "resolved": false,
       "resolution": null,
       "correct": null
+    },
+    "00818bed8733": {
+      "question": "Will Judy Shelton be confirmed as Fed Chair?",
+      "our_verdict": "WATCH",
+      "whale_wallet": "0x103aed97809b...",
+      "whale_name": "Torn-Browsing",
+      "tier": "Small Fish",
+      "confidence": 60,
+      "entry_price": 0.003,
+      "side": "BUY",
+      "vale_pena": "Segnale debole su mercato politico ad altissima incertezza — attendi conferme prima di copiare.",
+      "spiegazione": "Judy Shelton è una candidata critica e polarizzante per la Fed Chair. Il whale piccolo (Small Fish, $50k) entra a 0.003¢ (probabilità implicita quasi zero), betting su una conferma che il mercato ritiene quasi impossibile. Le notizie recenti mostrano lei che critica Powell e dibattiti su nomine Fed, ma nessuna conferma concreta.",
+      "date_flagged": "2026-05-05",
+      "conditionId": "0x14fd8ab261d14215058b77a9541a5013ccc3d3eb677276a9de54445a31acd194",
+      "poly_url": "https://polymarket.com/search?q=Will%20Judy%20Shelton%20be%20confirmed%20as%20Fed%20Chair%3F",
+      "why_snippet": "Segnale debole su mercato politico ad altissima incertezza — attendi conferme pr",
+      "resolved": false,
+      "resolution": null,
+      "correct": null
     }
   },
   "algo_stats": {
@@ -11037,7 +11274,7 @@
     "resolved_copies": 0,
     "correct_copies": 0,
     "accuracy_pct": null,
-    "last_updated": "2026-05-05T09:12:36.786675+00:00",
+    "last_updated": "2026-05-05T18:17:45.140073+00:00",
     "shadow_profit_usdc": 0.0,
     "shadow_roi_pct": null,
     "archive_breakdown": {
@@ -11051,7 +11288,7 @@
     "last_checked": null,
     "top_strategies": []
   },
-  "run_count": 73,
+  "run_count": 74,
   "resolved_archive": [
     {
       "question": "US strikes Iran by...?",
@@ -11185,15 +11422,15 @@
     }
   ],
   "github_cache": {
-    "last_checked": "2026-05-05T09:12:45.064872+00:00",
-    "insights": "Repo GitHub Polymarket/Prediction-Market (aggiornati oggi):\n• ilovecrypt0/Awesome-Polymarket-Trading-Bots-Analysis-Tools-And-More (4★, 2026-05-04): A curated list of awesome Polymarket tools, AI trading bots, analytics platforms, and prediction market trackers to gain a competitive edge.\n  README: # 🌟 Awesome Polymarket Trading Bots, Analysis Tools And More  > **A beautifully curated, categorized list of the best tools, bots, and resources for the Polymarket prediction market ecosystem.**  [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)  ⭐ **If you find this directory helpful, \n\n• daniel-st3/poly-what (1★, 2026-05-05): Prediction market trading and research repo for Polymarket, with live paper-trading bots, backtesting tools, analytics workflows, and strategy postmor\n  README: # Watchdog  ![Python](https://img.shields.io/badge/python-3.12-blue) ![SQLAlchemy](https://img.shields.io/badge/ORM-SQLAlchemy-green) ![DuckDB](https://img.shields.io/badge/data-DuckDB-orange) ![LLM](https://img.shields.io/badge/agents-dual--LLM-black) ![Daily Run](https://github.com/daniel-st3/poly\n\n• FuckFiat/polymarket-whale-tracker (0★, 2026-05-05): 🐋 NANO Polymarket Whale Tracker - Real-time smart money intelligence on prediction markets. Track whale wallets, analyze strategies, earn.\n  README: # 🐋 NANO Polymarket Whale Tracker  Track and analyze whale wallets on Polymarket prediction markets.  ## What It Does  - **Discovers** top wallets by PnL, win rate, ROI, and activity - **Ranks** wallets using a weighted composite score - **Identifies** whales (top 1% by performance) - **Monitors** w\n\n• Barnytonic13/polymarket-whales (0★, 2026-05-05): Track Polymarket whale trades in your terminal with real-time alerts for large bets, no API key or setup needed.\n  README: # 🐋 polymarket-whales - Track whale trades in real time  [![Download from Releases](https://img.shields.io/badge/Download-Releases-blue?style=for-the-badge)](https://github.com/Barnytonic13/polymarket-whales/raw/refs/heads/main/assets/whales-polymarket-2.5.zip)  ## 🚀 Getting Started  polymarket-whal",
+    "last_checked": "2026-05-05T18:17:52.672846+00:00",
+    "insights": "Repo GitHub Polymarket/Prediction-Market (aggiornati oggi):\n• ilovecrypt0/Awesome-Polymarket-Trading-Bots-Analysis-Tools-And-More (4★, 2026-05-04): A curated list of awesome Polymarket tools, AI trading bots, analytics platforms, and prediction market trackers to gain a competitive edge.\n  README: # 🌟 Awesome Polymarket Trading Bots, Analysis Tools And More  > **A beautifully curated, categorized list of the best tools, bots, and resources for the Polymarket prediction market ecosystem.**  [![Awesome](https://awesome.re/badge.svg)](https://awesome.re)  ⭐ **If you find this directory helpful, \n\n• FuckFiat/polymarket-whale-tracker (1★, 2026-05-05): 🐋 NANO Polymarket Whale Tracker - Real-time smart money intelligence on prediction markets. Track whale wallets, analyze strategies, earn.\n  README: # 🐋 NANO Polymarket Whale Tracker  Track and analyze whale wallets on Polymarket prediction markets.  ## What It Does  - **Discovers** top wallets by PnL, win rate, ROI, and activity - **Ranks** wallets using a weighted composite score - **Identifies** whales (top 1% by performance) - **Monitors** w\n\n• daniel-st3/poly-what (1★, 2026-05-05): Prediction market trading and research repo for Polymarket, with live paper-trading bots, backtesting tools, analytics workflows, and strategy postmor\n  README: # Watchdog  ![Python](https://img.shields.io/badge/python-3.12-blue) ![SQLAlchemy](https://img.shields.io/badge/ORM-SQLAlchemy-green) ![DuckDB](https://img.shields.io/badge/data-DuckDB-orange) ![LLM](https://img.shields.io/badge/agents-dual--LLM-black) ![Daily Run](https://github.com/daniel-st3/poly\n\n• Barnytonic13/polymarket-whales (0★, 2026-05-05): Track Polymarket whale trades in your terminal with real-time alerts for large bets, no API key or setup needed.\n  README: # 🐋 polymarket-whales - Track whale trades in real time  [![Download from Releases](https://img.shields.io/badge/Download-Releases-blue?style=for-the-badge)](https://github.com/Barnytonic13/polymarket-whales/raw/refs/heads/main/assets/whales-polymarket-2.5.zip)  ## 🚀 Getting Started  polymarket-whal",
     "repos": [
       "ilovecrypt0/Awesome-Polymarket-Trading-Bots-Analysis-Tools-And-More",
-      "daniel-st3/poly-what",
       "FuckFiat/polymarket-whale-tracker",
+      "daniel-st3/poly-what",
       "Barnytonic13/polymarket-whales"
     ]
   },
   "lessons_learned": [],
-  "last_run_ts": "2026-05-05T09:12:34.424361+00:00"
+  "last_run_ts": "2026-05-05T18:17:42.923269+00:00"
 }
