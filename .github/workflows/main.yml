@@ -1,16 +1,19 @@
 name: 🐋 Whale Tracker v3
 
 on:
-  # 09:00 e 19:00 ora italiana (UTC+2 estate / UTC+1 inverno)
-  # CEST estate: 07:00 e 17:00 UTC | CET inverno: 08:00 e 18:00 UTC
-  # In inverno il run mattutino sarà alle 08:00 italiane invece che 09:00.
-  # Doppio cron per ridondanza: GitHub Actions scheduler può saltare singoli run.
-  # Il secondo scatta 15 min dopo; dedup gestito da whale_tracker.py (last_run_ts).
-  schedule:
-    - cron: "0 7,17 * * *"
-    - cron: "15 7,17 * * *"
+  # ⏸️ SOSPESO su richiesta utente (15/05/2026) — scheduler disattivato.
+  # Il bot NON parte più automaticamente. Per RIATTIVARLO: scommentare
+  # il blocco `schedule` sottostante e fare push.
+  #
+  # Orari originali: 09:00 e 19:00 italiani
+  #   CEST estate: 07:00 e 17:00 UTC | CET inverno: 08:00 e 18:00 UTC
+  #   Doppio cron per ridondanza (il secondo +15 min, dedup via last_run_ts).
+  #
+  # schedule:
+  #   - cron: "0 7,17 * * *"
+  #   - cron: "15 7,17 * * *"
 
-  # Lancio manuale dal tab "Actions" — nessun parametro richiesto
+  # Lancio manuale dal tab "Actions" resta disponibile (non parte da solo).
   workflow_dispatch:
 
 permissions:
